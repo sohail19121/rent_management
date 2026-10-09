@@ -1,0 +1,164 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="rent_property_view_list" model="ir.ui.view">
+        <field name="name">rent.property.view.list</field>
+        <field name="model">rent.property</field>
+        <field name="arch" type="xml">
+            <list>
+                <field name="code"/>
+                <field name="name"/>
+                <field name="property_type"/>
+                <field name="city"/>
+                <field name="owner_id"/>
+                <field name="manager_id" widget="many2one_avatar_user"/>
+                <field name="unit_count"/>
+                <field name="occupied_count"/>
+                <field name="vacant_count"/>
+                <field name="occupancy_rate" widget="progressbar"/>
+                <field name="company_id" groups="base.group_multi_company" optional="hide"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="rent_property_view_form" model="ir.ui.view">
+        <field name="name">rent.property.view.form</field>
+        <field name="model">rent.property</field>
+        <field name="arch" type="xml">
+            <form>
+                <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button name="action_view_units" type="object" class="oe_stat_button" icon="home">
+                            <field name="unit_count" widget="statinfo" string="Units"/>
+                        </button>
+                        <button name="action_view_leases" type="object" class="oe_stat_button" icon="contract">
+                            <div class="o_stat_info">
+                                <span class="o_stat_text">Leases</span>
+                            </div>
+                        </button>
+                    </div>
+                    <widget name="web_ribbon" title="Archived" bg_color="text-bg-danger" invisible="active"/>
+                    <field name="image" widget="image" class="oe_avatar" options="{'preview_image': 'image'}"/>
+                    <div class="oe_title">
+                        <field name="code" class="text-muted"/>
+                        <h1><field name="name" placeholder="e.g. Green Park Residency"/></h1>
+                    </div>
+                    <group>
+                        <group name="address" string="Address">
+                            <field name="street" placeholder="Street..."/>
+                            <field name="street2" placeholder="Street 2..."/>
+                            <field name="city"/>
+                            <field name="state_id" options="{'no_create': True}"/>
+                            <field name="zip"/>
+                            <field name="country_id" options="{'no_create': True}"/>
+                        </group>
+                        <group name="management" string="Management">
+                            <field name="property_type"/>
+                            <field name="owner_id" context="{'default_is_owner': True}"/>
+                            <field name="manager_id" widget="many2one_avatar_user"/>
+                            <field name="company_id" groups="base.group_multi_company"/>
+                            <field name="amenity_ids" widget="many2many_tags"/>
+                            <field name="active" invisible="1"/>
+                        </group>
+                    </group>
+                    <group name="occupancy" string="Occupancy">
+                        <group>
+                            <field name="occupied_count"/>
+                            <field name="vacant_count"/>
+                        </group>
+                        <group>
+                            <field name="occupancy_rate" widget="progressbar"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page name="units" string="Units">
+                            <field name="unit_ids" context="{'default_property_id': id}">
+                                <list>
+                                    <field name="name"/>
+                                    <field name="floor"/>
+                                    <field name="unit_type"/>
+                                    <field name="area_sqft"/>
+                                    <field name="base_rent"/>
+                                    <field name="current_tenant_id"/>
+                                    <field name="state" widget="badge"
+                                           decoration-success="state == 'vacant'" decoration-info="state == 'occupied'"
+                                           decoration-warning="state == 'reserved'" decoration-danger="state == 'under_maintenance'"/>
+                                    <field name="currency_id" column_invisible="1"/>
+                                </list>
+                            </field>
+                        </page>
+                        <page name="notes" string="Notes">
+                            <field name="notes"/>
+                        </page>
+                    </notebook>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <record id="rent_property_view_kanban" model="ir.ui.view">
+        <field name="name">rent.property.view.kanban</field>
+        <field name="model">rent.property</field>
+        <field name="arch" type="xml">
+            <kanban>
+                <templates>
+                    <t t-name="card" class="flex-row">
+                        <aside class="o_kanban_aside_full">
+                            <field name="image" widget="image" options="{'size': [96, 96], 'img_class': 'object-fit-cover'}"/>
+                        </aside>
+                        <main class="ms-2">
+                            <field name="name" class="fw-bold fs-5"/>
+                            <div class="text-muted">
+                                <field name="code"/> - <field name="city"/>
+                            </div>
+                            <field name="property_type"/>
+                            <div class="mt-1">
+                                <field name="occupied_count"/> / <field name="unit_count"/> units occupied
+                            </div>
+                            <field name="occupancy_rate" widget="progressbar"/>
+                            <footer>
+                                <field name="amenity_ids" widget="many2many_tags"/>
+                                <field name="manager_id" widget="many2one_avatar_user" class="ms-auto"/>
+                            </footer>
+                        </main>
+                    </t>
+                </templates>
+            </kanban>
+        </field>
+    </record>
+
+    <record id="rent_property_view_search" model="ir.ui.view">
+        <field name="name">rent.property.view.search</field>
+        <field name="model">rent.property</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="name" filter_domain="['|', ('name', 'ilike', self), ('code', 'ilike', self)]"/>
+                <field name="city"/>
+                <field name="owner_id"/>
+                <field name="manager_id"/>
+                <filter name="my_properties" string="My Properties" domain="[('manager_id', '=', uid)]"/>
+                <separator/>
+                <filter name="residential" string="Residential" domain="[('property_type', '=', 'residential')]"/>
+                <filter name="commercial" string="Commercial" domain="[('property_type', '=', 'commercial')]"/>
+                <separator/>
+                <filter name="archived" string="Archived" domain="[('active', '=', False)]"/>
+                <group>
+                    <filter name="group_type" string="Type" context="{'group_by': 'property_type'}"/>
+                    <filter name="group_city" string="City" context="{'group_by': 'city'}"/>
+                    <filter name="group_owner" string="Owner" context="{'group_by': 'owner_id'}"/>
+                    <filter name="group_manager" string="Manager" context="{'group_by': 'manager_id'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="rent_property_action" model="ir.actions.act_window">
+        <field name="name">Properties</field>
+        <field name="res_model">rent.property</field>
+        <field name="view_mode">kanban,list,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">Add your first property</p>
+            <p>A property groups the units you rent out: flats, shops, offices...</p>
+        </field>
+    </record>
+</odoo>

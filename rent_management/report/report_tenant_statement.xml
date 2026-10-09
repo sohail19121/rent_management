@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <template id="report_tenant_statement_document">
+        <t t-set="o" t-value="partner"/>
+        <t t-call="web.external_layout">
+            <t t-set="address">
+                <div t-field="partner.self" t-options="{'widget': 'contact', 'fields': ['address', 'name'], 'no_marker': True}"/>
+            </t>
+            <div class="page">
+                <h2>Tenant Statement</h2>
+                <p>Statement date: <span t-out="context_timestamp(datetime.datetime.now()).date()" t-options="{'widget': 'date'}"/></p>
+                <t t-set="lines" t-value="statement_lines[partner.id]"/>
+                <p t-if="not lines">No transactions.</p>
+                <table t-else="" class="table table-sm">
+                    <thead>
+                        <tr>
+                            <th>Date</th><th>Reference</th><th>Description</th>
+                            <th class="text-end">Debit</th><th class="text-end">Credit</th><th class="text-end">Balance</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr t-foreach="lines" t-as="line">
+                            <td><span t-out="line['date']" t-options="{'widget': 'date'}"/></td>
+                            <td><span t-out="line['reference']"/></td>
+                            <td><span t-out="line['label']"/></td>
+                            <td class="text-end"><span t-out="line['debit']" t-options="{'widget': 'monetary', 'display_currency': company.currency_id}"/></td>
+                            <td class="text-end"><span t-out="line['credit']" t-options="{'widget': 'monetary', 'display_currency': company.currency_id}"/></td>
+                            <td class="text-end"><span t-out="line['balance']" t-options="{'widget': 'monetary', 'display_currency': company.currency_id}"/></td>
+                        </tr>
+                    </tbody>
+                    <tfoot>
+                        <tr class="fw-bold">
+                            <td colspan="5">Balance due</td>
+                            <td class="text-end"><span t-out="lines[-1]['balance']" t-options="{'widget': 'monetary', 'display_currency': company.currency_id}"/></td>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+        </t>
+    </template>
+
+    <template id="report_tenant_statement">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="partner">
+                <t t-call="rent_management.report_tenant_statement_document" t-lang="partner.lang"/>
+            </t>
+        </t>
+    </template>
+</odoo>

@@ -1,0 +1,434 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+    <t t-name="rent_management.RentChartCard">
+        <div class="o_rent_card h-100">
+            <div class="o_rent_card_header">
+                <div class="me-auto">
+                    <h5 class="o_rent_card_title" t-out="this.props.chart.title"/>
+                    <div class="o_rent_card_subtitle" t-out="this.props.chart.subtitle"/>
+                </div>
+                <button type="button" class="o_rent_icon_btn" t-on-click="() => this.toggleTable()"
+                        t-att-title="this.state.showTable ? 'Show chart' : 'Show as table'"
+                        t-att-aria-label="this.state.showTable ? 'Show chart' : 'Show as table'">
+                    <i class="oi" t-att-data-icon="this.state.showTable ? 'bar_chart' : 'table_chart'"/>
+                </button>
+            </div>
+            <t t-if="!this.props.chart.labels.length">
+                <div class="o_rent_empty"><i class="oi" data-icon="bar_chart"/><span>No data for this period</span></div>
+            </t>
+            <t t-elif="this.state.showTable">
+                <div class="o_rent_chart_table table-responsive">
+                    <table class="table table-sm mb-0 o_rent_table">
+                        <thead>
+                            <tr>
+                                <th/>
+                                <th t-foreach="this.props.chart.series" t-as="serie" t-key="serie_index" class="text-end" t-out="serie.label"/>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr t-foreach="this.props.chart.labels" t-as="label" t-key="label_index">
+                                <td t-out="label"/>
+                                <td t-foreach="this.props.chart.series" t-as="serie" t-key="serie_index" class="text-end o_rent_num"
+                                    t-out="this.formatValue(serie.values[label_index])"/>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </t>
+            <div t-else="" class="o_rent_chart_canvas">
+                <canvas t-ref="this.chart.ref"/>
+            </div>
+        </div>
+    </t>
+
+    <!-- Delta pill: icon + signed text, colored by whether the direction is good -->
+    <t t-name="rent_management.RentDelta">
+        <t t-set="delta" t-value="this.delta(kpi)"/>
+        <span t-if="delta" t-attf-class="o_rent_delta {{ delta.good === null ? 'o_rent_delta_flat' : delta.good ? 'o_rent_delta_good' : 'o_rent_delta_bad' }}">
+            <i class="oi" t-att-data-icon="this.deltaIcon(delta)"/>
+            <span t-out="delta.text"/>
+        </span>
+        <span t-if="delta" class="o_rent_delta_label" t-out="this.previousLabel()"/>
+    </t>
+
+    <t t-name="rent_management.RentSparkline">
+        <t t-set="spark" t-value="this.geometry()"/>
+        <svg t-if="spark" class="o_rent_sparkline" t-att-viewBox="spark.viewBox" preserveAspectRatio="none"
+             role="img" t-att-aria-label="this.props.label">
+            <title t-out="this.props.label"/>
+            <path class="o_rent_sparkline_area" t-att-d="spark.area"/>
+            <path class="o_rent_sparkline_line" t-att-d="spark.line" vector-effect="non-scaling-stroke"/>
+            <circle class="o_rent_sparkline_dot" t-att-cx="spark.x" t-att-cy="spark.y" r="3"/>
+        </svg>
+    </t>
+
+    <t t-name="rent_management.RentHighlight">
+        <button type="button" t-attf-class="o_rent_highlight o_rent_variant_{{ kpi.variant }}"
+                t-att-disabled="!kpi.action" t-att-data-kpi="kpi.key" t-on-click="() => this.openAction(kpi.action)">
+            <span class="o_rent_tile_head">
+                <span class="o_rent_badge_icon"><i class="oi" t-att-data-icon="kpi.icon"/></span>
+                <span class="o_rent_tile_label" t-out="kpi.label"/>
+            </span>
+            <span class="o_rent_highlight_value" t-att-title="this.kpiValue(kpi)" t-out="this.kpiCompact(kpi)"/>
+            <span class="o_rent_tile_meta">
+                <t t-if="kpi.previous !== null and kpi.previous !== undefined">
+                    <t t-call="rent_management.RentDelta"/>
+                </t>
+                <span t-elif="kpi.hint" class="o_rent_tile_hint" t-out="kpi.hint"/>
+            </span>
+            <t t-if="kpi.trend">
+                <RentSparkline values="kpi.trend" label="kpi.label" width="160" height="36"/>
+            </t>
+            <div t-elif="kpi.format === 'percent'" class="o_rent_meter mt-auto" role="meter"
+                 t-att-aria-valuenow="kpi.value" aria-valuemin="0" aria-valuemax="100" t-att-aria-label="kpi.label">
+                <div class="o_rent_meter_fill" t-attf-style="width: {{ this.clampPct(kpi.value) }}%"/>
+            </div>
+        </button>
+    </t>
+
+    <t t-name="rent_management.RentTile">
+        <button type="button" t-attf-class="o_rent_tile o_rent_variant_{{ kpi.variant }}"
+                t-att-disabled="!kpi.action" t-att-data-kpi="kpi.key" t-on-click="() => this.openAction(kpi.action)">
+            <span class="o_rent_badge_icon o_rent_badge_icon_sm"><i class="oi" t-att-data-icon="kpi.icon"/></span>
+            <span class="o_rent_tile_body">
+                <span class="o_rent_tile_label" t-out="kpi.label"/>
+                <span class="o_rent_tile_value" t-att-title="this.kpiValue(kpi)" t-out="this.kpiCompact(kpi)"/>
+                <span t-if="kpi.hint" class="o_rent_tile_hint" t-out="kpi.hint"/>
+            </span>
+            <i t-if="kpi.action" class="oi o_rent_tile_chevron" data-icon="chevron_right"/>
+        </button>
+    </t>
+
+    <t t-name="rent_management.RentCardHeader">
+        <div class="o_rent_card_header">
+            <span t-attf-class="o_rent_badge_icon o_rent_badge_icon_sm o_rent_variant_{{ this.props.variant }} me-2">
+                <i class="oi" t-att-data-icon="this.props.icon"/>
+            </span>
+            <div class="me-auto">
+                <h5 class="o_rent_card_title" t-out="this.props.title"/>
+                <div t-if="this.props.subtitle" class="o_rent_card_subtitle" t-out="this.props.subtitle"/>
+            </div>
+            <button t-if="this.props.action" type="button" class="o_rent_link" t-on-click="() => this.viewAll()">
+                View all <i class="oi" data-icon="arrow_forward"/>
+            </button>
+        </div>
+    </t>
+
+    <t t-name="rent_management.RentSkeleton">
+        <div class="o_rent_skeleton" aria-busy="true" aria-label="Loading">
+            <div class="o_rent_overview">
+                <div class="o_rent_skel o_rent_hero"/>
+                <div class="o_rent_skel o_rent_skel_tile"/>
+                <div class="o_rent_skel o_rent_skel_tile"/>
+                <div class="o_rent_skel o_rent_skel_tile"/>
+                <div class="o_rent_skel o_rent_skel_tile"/>
+            </div>
+            <div class="o_rent_skel o_rent_skel_chart mt-3"/>
+        </div>
+    </t>
+
+    <t t-name="rent_management.RentDashboard">
+        <div class="o_action o_rent_dashboard h-100 overflow-auto">
+            <div class="o_rent_container">
+                <!-- Header and filters -->
+                <header class="o_rent_header">
+                    <div class="o_rent_header_text">
+                        <h1 class="o_rent_greeting" t-out="this.greeting()"/>
+                        <p class="o_rent_header_sub">
+                            Your rental business at a glance
+                            <t t-if="this.state.data">
+                                <span class="o_rent_dot">·</span>
+                                <i class="oi" data-icon="calendar_today"/> <t t-out="this.periodLabel()"/>
+                            </t>
+                        </p>
+                    </div>
+                    <div class="o_rent_filters">
+                        <label class="o_rent_select" t-if="this.state.data">
+                            <i class="oi" data-icon="business"/>
+                            <select class="o_rent_property_filter" aria-label="Property" t-on-change="(ev) => this.onPropertyChange(ev)">
+                                <option value="">All properties</option>
+                                <t t-foreach="this.state.data.properties" t-as="prop" t-key="prop.id">
+                                    <option t-att-value="prop.id" t-att-selected="prop.id === this.state.propertyId" t-out="prop.name"/>
+                                </t>
+                            </select>
+                        </label>
+                        <div class="o_rent_segmented o_rent_period_filter" role="group" aria-label="Period">
+                            <t t-foreach="this.periods" t-as="period" t-key="period[0]">
+                                <button type="button" t-att-class="{'active': period[0] === this.state.period}"
+                                        t-att-aria-pressed="period[0] === this.state.period ? 'true' : 'false'"
+                                        t-on-click="() => this.setPeriod(period[0])" t-out="period[1]"/>
+                            </t>
+                        </div>
+                        <button type="button" class="o_rent_icon_btn o_rent_icon_btn_lg" t-on-click="() => this.load()"
+                                title="Refresh" aria-label="Refresh">
+                            <i t-attf-class="oi {{ this.state.loading ? 'o_rent_spin' : '' }}" data-icon="refresh"/>
+                        </button>
+                    </div>
+                </header>
+
+                <t t-if="!this.state.data">
+                    <t t-call="rent_management.RentSkeleton"/>
+                </t>
+                <t t-else="">
+                    <t t-set="data" t-value="this.state.data"/>
+                    <div t-att-class="{'o_rent_loading': this.state.loading}">
+
+                        <!-- Overview: one hero figure + four highlights -->
+                        <section class="o_rent_overview mb-4">
+                            <t t-set="hero" t-value="this.hero()"/>
+                            <button type="button" class="o_rent_hero" t-att-disabled="!hero.action" data-kpi="collected"
+                                    t-on-click="() => this.openAction(hero.action)">
+                                <span class="o_rent_tile_head">
+                                    <span class="o_rent_badge_icon o_rent_variant_success"><i class="oi" t-att-data-icon="hero.icon"/></span>
+                                    <span class="o_rent_tile_label">Rent collected</span>
+                                </span>
+                                <span class="o_rent_hero_value" t-att-title="this.kpiValue(hero)" t-out="this.kpiCompact(hero)"/>
+                                <span class="o_rent_tile_meta">
+                                    <t t-set="kpi" t-value="hero"/>
+                                    <t t-call="rent_management.RentDelta"/>
+                                </span>
+                                <span class="o_rent_hero_progress">
+                                    <span class="d-flex justify-content-between">
+                                        <span>
+                                            <strong t-out="this.number(this.collectionRate(), 1) + ' %'"/> of
+                                            <t t-out="this.money(data.billed)"/> billed
+                                        </span>
+                                    </span>
+                                    <span class="o_rent_meter o_rent_meter_lg" role="meter" aria-label="Collection rate"
+                                          t-att-aria-valuenow="this.collectionRate()" aria-valuemin="0" aria-valuemax="100">
+                                        <span class="o_rent_meter_fill" t-attf-style="width: {{ this.clampPct(this.collectionRate()) }}%"/>
+                                    </span>
+                                </span>
+                                <span class="o_rent_hero_trend">
+                                    <span class="o_rent_trend_caption">Last 12 months</span>
+                                    <RentSparkline values="hero.trend" label="hero.label" width="320" height="56"/>
+                                </span>
+                            </button>
+                            <t t-foreach="this.highlights()" t-as="kpi" t-key="kpi.key">
+                                <t t-call="rent_management.RentHighlight"/>
+                            </t>
+                        </section>
+
+                        <!-- Everything else -->
+                        <section class="mb-4">
+                            <h6 class="o_rent_section_title">At a glance</h6>
+                            <div class="o_rent_tile_grid">
+                                <t t-foreach="this.tiles()" t-as="kpi" t-key="kpi.key">
+                                    <t t-call="rent_management.RentTile"/>
+                                </t>
+                            </div>
+                        </section>
+
+                        <!-- Charts -->
+                        <section class="row g-3 mb-4">
+                            <div class="col-12 col-xl-6">
+                                <RentChartCard chart="this.collectionChart()"/>
+                            </div>
+                            <div class="col-12 col-md-6 col-xl-3">
+                                <RentChartCard chart="this.incomeChart()"/>
+                            </div>
+                            <div class="col-12 col-md-6 col-xl-3">
+                                <RentChartCard chart="this.electricityChart()"/>
+                            </div>
+                        </section>
+
+                        <!-- Property performance -->
+                        <section class="o_rent_card mb-4">
+                            <RentCardHeader title.translate="Property performance" icon="'business'"
+                                            subtitle="'Billed and collected: ' + this.periodLabel()"
+                                            action="this.kpi('properties').action"/>
+                            <div class="table-responsive">
+                                <table class="table align-middle mb-0 o_rent_table">
+                                    <thead>
+                                        <tr>
+                                            <th>Property</th>
+                                            <th class="text-end">Units</th>
+                                            <th class="o_rent_col_occupancy">Occupancy</th>
+                                            <th class="text-end">Rent roll / month</th>
+                                            <th class="text-end">Billed</th>
+                                            <th class="text-end">Collected</th>
+                                            <th class="text-end">Outstanding</th>
+                                            <th class="text-end">Open repairs</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr t-foreach="data.property_rows" t-as="row" t-key="row.id" class="o_rent_row"
+                                            t-on-click="() => this.openRecord('rent.property', row.id)">
+                                            <td>
+                                                <div class="d-flex align-items-center gap-2">
+                                                    <span class="o_rent_avatar o_rent_avatar_square" t-out="this.initials(row.name)"/>
+                                                    <div>
+                                                        <div class="fw-semibold" t-out="row.name"/>
+                                                        <div class="o_rent_muted_sm" t-out="row.city"/>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td class="text-end o_rent_num"><t t-out="row.occupied"/> / <t t-out="row.units"/></td>
+                                            <td>
+                                                <div class="d-flex align-items-center gap-2">
+                                                    <div class="o_rent_meter flex-grow-1" role="meter" t-att-aria-valuenow="row.occupancy"
+                                                         aria-valuemin="0" aria-valuemax="100" aria-label="Occupancy">
+                                                        <div class="o_rent_meter_fill" t-attf-style="width: {{ row.occupancy }}%"/>
+                                                    </div>
+                                                    <span class="o_rent_meter_value o_rent_num" t-out="this.number(row.occupancy) + ' %'"/>
+                                                </div>
+                                            </td>
+                                            <td class="text-end o_rent_num" t-out="this.money(row.rent_roll)"/>
+                                            <td class="text-end o_rent_num" t-out="this.money(row.billed)"/>
+                                            <td class="text-end o_rent_num" t-out="this.money(row.collected)"/>
+                                            <td t-attf-class="text-end o_rent_num {{ row.outstanding > 0 ? 'fw-semibold' : 'o_rent_muted' }}"
+                                                t-out="this.money(row.outstanding)"/>
+                                            <td class="text-end">
+                                                <span t-if="row.maintenance" class="o_rent_pill o_rent_pill_warning">
+                                                    <i class="oi" data-icon="build"/> <t t-out="row.maintenance"/>
+                                                </span>
+                                                <span t-else="" class="o_rent_muted">-</span>
+                                            </td>
+                                        </tr>
+                                        <tr t-if="!data.property_rows.length">
+                                            <td colspan="8"><div class="o_rent_empty"><i class="oi" data-icon="business"/><span>No property yet</span></div></td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </section>
+
+                        <section class="row g-3 mb-4">
+                            <!-- Overdue tenants -->
+                            <div class="col-12 col-xl-6">
+                                <div class="o_rent_card h-100">
+                                    <RentCardHeader title.translate="Overdue tenants" icon="'warning'" variant="'danger'" action="this.kpi('overdue').action"/>
+                                    <ul t-if="data.overdue_tenants.length" class="o_rent_list">
+                                        <li t-foreach="data.overdue_tenants" t-as="row" t-key="row.partner_id"
+                                            t-att-class="{'o_rent_row': row.action}" t-on-click="() => this.openAction(row.action)">
+                                            <span class="o_rent_avatar" t-out="this.initials(row.tenant)"/>
+                                            <div class="o_rent_list_main">
+                                                <div class="fw-semibold" t-out="row.tenant"/>
+                                                <div class="o_rent_muted_sm">
+                                                    <t t-out="row.leases"/><t t-if="row.phone"> · <t t-out="row.phone"/></t>
+                                                </div>
+                                            </div>
+                                            <div class="text-end">
+                                                <div class="fw-semibold o_rent_num" t-out="this.money(row.amount)"/>
+                                                <span t-attf-class="o_rent_pill {{ row.days > 30 ? 'o_rent_pill_danger' : 'o_rent_pill_warning' }}">
+                                                    <i class="oi" data-icon="schedule"/> <t t-out="row.days"/> days late
+                                                </span>
+                                            </div>
+                                        </li>
+                                    </ul>
+                                    <div t-else="" class="o_rent_empty o_rent_empty_good">
+                                        <i class="oi" data-icon="check_circle"/><span>Nobody is late. Nice!</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- Expiring leases -->
+                            <div class="col-12 col-xl-6">
+                                <div class="o_rent_card h-100">
+                                    <RentCardHeader title.translate="Leases ending in 60 days" icon="'event_upcoming'" variant="'warning'" action="this.kpi('expiring').action"/>
+                                    <ul t-if="data.expiring_leases.length" class="o_rent_list">
+                                        <li t-foreach="data.expiring_leases" t-as="row" t-key="row.id" class="o_rent_row"
+                                            t-on-click="() => this.openRecord('rent.lease', row.id)">
+                                            <span class="o_rent_date_chip">
+                                                <span class="o_rent_date_chip_days o_rent_num" t-out="row.days_left"/>
+                                                <span class="o_rent_date_chip_unit">days</span>
+                                            </span>
+                                            <div class="o_rent_list_main">
+                                                <div class="fw-semibold"><t t-out="row.tenant"/></div>
+                                                <div class="o_rent_muted_sm"><t t-out="row.name"/> · <t t-out="row.unit"/></div>
+                                            </div>
+                                            <div class="text-end">
+                                                <div class="o_rent_muted_sm">Ends</div>
+                                                <div class="fw-semibold" t-out="this.date(row.end_date)"/>
+                                                <span t-if="row.renewal" class="o_rent_pill o_rent_pill_good">
+                                                    <i class="oi" data-icon="autorenew"/> Renewal
+                                                </span>
+                                            </div>
+                                        </li>
+                                    </ul>
+                                    <div t-else="" class="o_rent_empty o_rent_empty_good">
+                                        <i class="oi" data-icon="check_circle"/><span>No lease ends in the next 60 days</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </section>
+
+                        <section class="row g-3 mb-2">
+                            <!-- Recent payments -->
+                            <div t-if="data.can_bill" class="col-12 col-xl-4">
+                                <div class="o_rent_card h-100">
+                                    <RentCardHeader title.translate="Recent payments" icon="'payments'" variant="'success'" action="this.kpi('collected').action"/>
+                                    <ul t-if="data.recent_payments.length" class="o_rent_list">
+                                        <li t-foreach="data.recent_payments" t-as="row" t-key="row_index" class="o_rent_row"
+                                            t-on-click="() => this.openRecord('account.move', row.invoice_id)">
+                                            <span class="o_rent_avatar" t-out="this.initials(row.tenant)"/>
+                                            <div class="o_rent_list_main">
+                                                <div class="fw-semibold" t-out="row.tenant"/>
+                                                <div class="o_rent_muted_sm"><t t-out="this.date(row.date)"/> · <t t-out="row.invoice"/></div>
+                                            </div>
+                                            <div class="fw-semibold o_rent_num o_rent_amount_in" t-out="'+ ' + this.money(row.amount)"/>
+                                        </li>
+                                    </ul>
+                                    <div t-else="" class="o_rent_empty"><i class="oi" data-icon="payments"/><span>No payment received yet</span></div>
+                                </div>
+                            </div>
+                            <!-- Maintenance -->
+                            <div t-attf-class="col-12 {{ data.can_bill ? 'col-xl-4' : 'col-xl-6' }}">
+                                <div class="o_rent_card h-100">
+                                    <RentCardHeader title.translate="Open maintenance" icon="'build'" variant="'warning'" action="this.kpi('maintenance').action"/>
+                                    <ul t-if="data.maintenance.length" class="o_rent_list">
+                                        <li t-foreach="data.maintenance" t-as="row" t-key="row.id" class="o_rent_row"
+                                            t-on-click="() => this.openRecord('rent.maintenance.request', row.id)">
+                                            <div class="o_rent_list_main">
+                                                <div class="fw-semibold" t-out="row.unit"/>
+                                                <div class="o_rent_muted_sm">
+                                                    <t t-out="row.category"/> · <t t-out="row.name"/>
+                                                    <t t-if="row.assigned"> · <t t-out="row.assigned"/></t>
+                                                </div>
+                                            </div>
+                                            <div class="text-end text-nowrap">
+                                                <span t-if="row.priority >= 2" class="o_rent_pill o_rent_pill_danger">
+                                                    <i class="oi" data-icon="priority_high"/>
+                                                    <t t-out="row.priority === 3 ? 'Urgent' : 'High'"/>
+                                                </span>
+                                                <div class="o_rent_muted_sm">
+                                                    <t t-if="row.age">opened <t t-out="row.age"/> d ago</t>
+                                                    <t t-else="">opened today</t>
+                                                </div>
+                                            </div>
+                                        </li>
+                                    </ul>
+                                    <div t-else="" class="o_rent_empty o_rent_empty_good">
+                                        <i class="oi" data-icon="check_circle"/><span>No open request</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- Meter readings -->
+                            <div t-attf-class="col-12 {{ data.can_bill ? 'col-xl-4' : 'col-xl-6' }}">
+                                <div class="o_rent_card h-100">
+                                    <RentCardHeader title.translate="Meter readings to enter" icon="'flash_on'" variant="'warning'" action="this.kpi('readings_to_enter').action"/>
+                                    <ul t-if="data.readings_to_enter.length" class="o_rent_list">
+                                        <li t-foreach="data.readings_to_enter" t-as="row" t-key="row.id" class="o_rent_row"
+                                            t-on-click="() => this.openRecord('rent.electricity.reading', row.id)">
+                                            <div class="o_rent_list_main">
+                                                <div class="fw-semibold" t-out="row.unit"/>
+                                                <div class="o_rent_muted_sm"><t t-out="row.tenant"/> · <t t-out="row.period"/></div>
+                                            </div>
+                                            <div class="text-end">
+                                                <div class="o_rent_muted_sm">Last reading</div>
+                                                <div class="fw-semibold o_rent_num" t-out="this.number(row.previous)"/>
+                                            </div>
+                                        </li>
+                                    </ul>
+                                    <div t-else="" class="o_rent_empty o_rent_empty_good">
+                                        <i class="oi" data-icon="check_circle"/><span>All readings entered</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </section>
+                    </div>
+                </t>
+            </div>
+        </div>
+    </t>
+</templates>

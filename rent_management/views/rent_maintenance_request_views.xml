@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="rent_maintenance_request_view_list" model="ir.ui.view">
+        <field name="name">rent.maintenance.request.view.list</field>
+        <field name="model">rent.maintenance.request</field>
+        <field name="arch" type="xml">
+            <list>
+                <field name="priority" widget="priority" optional="show"/>
+                <field name="name"/>
+                <field name="property_id"/>
+                <field name="unit_id"/>
+                <field name="tenant_id"/>
+                <field name="category"/>
+                <field name="assigned_to" widget="many2one_avatar_user"/>
+                <field name="cost" sum="Total"/>
+                <field name="charge_to" optional="hide"/>
+                <field name="create_date" string="Reported On" optional="show"/>
+                <field name="state" widget="badge"
+                       decoration-info="state == 'new'" decoration-warning="state == 'in_progress'"
+                       decoration-success="state == 'done'"/>
+                <field name="currency_id" column_invisible="1"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="rent_maintenance_request_view_form" model="ir.ui.view">
+        <field name="name">rent.maintenance.request.view.form</field>
+        <field name="model">rent.maintenance.request</field>
+        <field name="arch" type="xml">
+            <form>
+                <header>
+                    <button name="action_start" type="object" string="Start" class="oe_highlight" invisible="state != 'new'"/>
+                    <button name="action_done" type="object" string="Mark as Done" class="oe_highlight" invisible="state != 'in_progress'"/>
+                    <button name="action_cancel" type="object" string="Cancel" invisible="state in ('done', 'cancelled')"/>
+                    <button name="action_reset" type="object" string="Reopen" invisible="state != 'cancelled'"/>
+                    <field name="state" widget="statusbar" statusbar_visible="new,in_progress,done"/>
+                </header>
+                <sheet>
+                    <div class="oe_title">
+                        <field name="priority" widget="priority"/>
+                        <h1><field name="name"/></h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="unit_id"/>
+                            <field name="property_id"/>
+                            <field name="lease_id" domain="[('unit_id', '=', unit_id)]"/>
+                            <field name="tenant_id"/>
+                            <field name="category"/>
+                        </group>
+                        <group>
+                            <field name="assigned_to" widget="many2one_avatar_user"/>
+                            <field name="vendor_id"/>
+                            <field name="cost"/>
+                            <field name="charge_to" widget="radio" options="{'horizontal': true}"/>
+                            <field name="invoice_id" invisible="not invoice_id" groups="rent_management.group_rent_accountant"/>
+                            <field name="currency_id" invisible="1"/>
+                            <field name="company_id" groups="base.group_multi_company"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page name="description" string="Description">
+                            <field name="description" placeholder="Describe the problem..."/>
+                        </page>
+                        <page name="photos" string="Photos">
+                            <field name="image_ids" widget="many2many_binary"/>
+                        </page>
+                    </notebook>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <record id="rent_maintenance_request_view_kanban" model="ir.ui.view">
+        <field name="name">rent.maintenance.request.view.kanban</field>
+        <field name="model">rent.maintenance.request</field>
+        <field name="arch" type="xml">
+            <kanban default_group_by="state" highlight_color="kanban_state_color" quick_create="false">
+                <templates>
+                    <t t-name="card">
+                        <div class="d-flex">
+                            <field name="name" class="fw-bold"/>
+                            <field name="priority" widget="priority" class="ms-auto"/>
+                        </div>
+                        <field name="unit_id"/>
+                        <field name="category" class="text-muted"/>
+                        <footer>
+                            <field name="tenant_id"/>
+                            <field name="assigned_to" widget="many2one_avatar_user" class="ms-auto"/>
+                        </footer>
+                    </t>
+                </templates>
+            </kanban>
+        </field>
+    </record>
+
+    <record id="rent_maintenance_request_view_search" model="ir.ui.view">
+        <field name="name">rent.maintenance.request.view.search</field>
+        <field name="model">rent.maintenance.request</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="name"/>
+                <field name="unit_id"/>
+                <field name="property_id"/>
+                <field name="tenant_id"/>
+                <field name="assigned_to"/>
+                <filter name="open" string="Open" domain="[('state', 'in', ('new', 'in_progress'))]"/>
+                <filter name="done" string="Done" domain="[('state', '=', 'done')]"/>
+                <separator/>
+                <filter name="my_requests" string="Assigned to Me" domain="[('assigned_to', '=', uid)]"/>
+                <filter name="urgent" string="High Priority" domain="[('priority', 'in', ('2', '3'))]"/>
+                <filter name="tenant_charged" string="Charged to Tenant" domain="[('charge_to', '=', 'tenant')]"/>
+                <group>
+                    <filter name="group_property" string="Property" context="{'group_by': 'property_id'}"/>
+                    <filter name="group_category" string="Category" context="{'group_by': 'category'}"/>
+                    <filter name="group_state" string="Status" context="{'group_by': 'state'}"/>
+                    <filter name="group_assigned" string="Assigned To" context="{'group_by': 'assigned_to'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="rent_maintenance_request_action" model="ir.actions.act_window">
+        <field name="name">Maintenance Requests</field>
+        <field name="res_model">rent.maintenance.request</field>
+        <field name="view_mode">kanban,list,form</field>
+        <field name="context">{'search_default_open': 1}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">No maintenance request</p>
+        </field>
+    </record>
+</odoo>

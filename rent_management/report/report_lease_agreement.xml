@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <template id="report_lease_agreement_document">
+        <t t-set="o" t-value="lease"/>
+        <t t-call="web.external_layout">
+            <t t-set="lease" t-value="lease.with_context(lang=lease.tenant_id.lang)"/>
+            <div class="page">
+                <h2 class="text-center">Lease Agreement <span t-field="lease.name"/></h2>
+                <p class="mt-4">
+                    This lease agreement is made between <strong t-out="(lease.property_id.owner_id or lease.company_id.partner_id).name"/>
+                    (the "Landlord") and <strong t-field="lease.tenant_id"/> (the "Tenant").
+                </p>
+                <h4 class="mt-4">1. Premises</h4>
+                <p>
+                    Unit <strong t-field="lease.unit_id.name"/> (<span t-field="lease.unit_id.unit_type"/>,
+                    floor <span t-out="lease.unit_id.floor or '-'"/>) of <strong t-field="lease.property_id"/>,
+                    <span t-out="', '.join(filter(None, [lease.property_id.street, lease.property_id.city, lease.property_id.zip]))"/>.
+                </p>
+                <h4>2. Term</h4>
+                <p>From <strong t-field="lease.start_date"/> to <strong t-field="lease.end_date"/>
+                    (<span t-field="lease.duration_months"/> months). Notice period: <span t-field="lease.notice_period_days"/> days.</p>
+                <h4>3. Rent and charges</h4>
+                <table class="table table-sm">
+                    <tbody>
+                        <tr><td>Rent</td><td class="text-end"><span t-field="lease.rent_amount"/> (<span t-field="lease.billing_frequency"/>, due on day <span t-field="lease.billing_day"/>)</td></tr>
+                        <tr><td>Maintenance charge</td><td class="text-end"><span t-field="lease.maintenance_charge"/></td></tr>
+                        <tr t-if="lease.electricity_billing != 'none'"><td>Electricity</td>
+                            <td class="text-end">
+                                <t t-if="lease.electricity_billing == 'metered'">Metered at <span t-out="lease.electricity_rate"/> per kWh, billed monthly in arrears</t>
+                                <t t-else=""><span t-field="lease.electricity_fixed_amount"/> per month</t>
+                            </td></tr>
+                        <tr><td>Security deposit</td><td class="text-end"><span t-field="lease.deposit_amount"/></td></tr>
+                        <tr t-if="lease.late_fee_value"><td>Late fee (after <span t-field="lease.grace_days"/> days of grace)</td>
+                            <td class="text-end">
+                                <t t-if="lease.late_fee_type == 'percent'"><span t-out="lease.late_fee_value"/> % of the amount due</t>
+                                <t t-else=""><span t-out="lease.late_fee_value" t-options="{'widget': 'monetary', 'display_currency': lease.currency_id}"/></t>
+                            </td></tr>
+                        <tr t-if="lease.escalation_percent"><td>Rent escalation</td>
+                            <td class="text-end"><span t-out="lease.escalation_percent"/> % every <span t-field="lease.escalation_every_months"/> months</td></tr>
+                    </tbody>
+                </table>
+                <div t-if="lease.notes" class="mt-3">
+                    <h4>4. Additional terms</h4>
+                    <div t-field="lease.notes"/>
+                </div>
+                <div class="row mt-5 pt-5">
+                    <div class="col-6 text-center">
+                        <p>______________________________</p>
+                        <p>Landlord</p>
+                    </div>
+                    <div class="col-6 text-center">
+                        <p>______________________________</p>
+                        <p>Tenant: <span t-field="lease.tenant_id.name"/></p>
+                    </div>
+                </div>
+            </div>
+        </t>
+    </template>
+
+    <template id="report_lease_agreement">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="lease">
+                <t t-call="rent_management.report_lease_agreement_document" t-lang="lease.tenant_id.lang"/>
+            </t>
+        </t>
+    </template>
+</odoo>

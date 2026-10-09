@@ -1,0 +1,852 @@
+// Rent dashboard. Data colors come from the validated palette (light steps here, dark steps in
+// rent_dashboard.dark.scss, compiled only in the dark bundle); everything else uses Odoo's
+// variables, which the dark bundle redefines, so the layout follows the theme by itself.
+.o_rent_dashboard {
+    --o-rent-page: #{$o-webclient-background-color};
+    --o-rent-surface: #{$o-view-background-color};
+    --o-rent-border: #{rgba($border-color, 0.8)};
+    --o-rent-series-1: #2a78d6;
+    --o-rent-series-2: #eb6834;
+    --o-rent-grid: #{rgba($border-color, 0.7)};
+    --o-rent-text-muted: #{$text-muted};
+    --o-rent-meter-track: #cde2fb;
+    --o-rent-spark: #{rgba($text-muted, 0.55)};
+    --o-rent-spark-area: #{rgba($text-muted, 0.08)};
+    // Status steps (fixed, never themed); always paired with an icon and a label.
+    --o-rent-good: #0ca30c;
+    --o-rent-good-text: #006300;
+    --o-rent-warning: #fab219;
+    --o-rent-critical: #d03b3b;
+    --o-rent-shadow: 0 1px 2px #{rgba($black, 0.04)}, 0 2px 8px #{rgba($black, 0.04)};
+    --o-rent-shadow-hover: 0 2px 4px #{rgba($black, 0.06)}, 0 8px 24px #{rgba($black, 0.08)};
+    --o-rent-radius: 14px;
+
+    background-color: var(--o-rent-page);
+}
+
+.o_rent_container {
+    // The action wrapper is a flex container: without an explicit width the content (e.g. the wide
+    // property table) would size the page instead of the screen.
+    width: 100%;
+    min-width: 0;
+    max-width: 1600px;
+    margin: 0 auto;
+    padding: map-get($spacers, 4) map-get($spacers, 4) map-get($spacers, 5);
+
+    @include media-breakpoint-down(md) {
+        padding: map-get($spacers, 3);
+    }
+}
+
+.o_rent_num {
+    font-variant-numeric: tabular-nums;
+}
+
+.o_rent_muted {
+    color: $text-muted;
+}
+
+.o_rent_muted_sm {
+    color: $text-muted;
+    font-size: $font-size-sm;
+}
+
+// Header ----------------------------------------------------------------------
+
+.o_rent_header {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: map-get($spacers, 3);
+    margin-bottom: map-get($spacers, 4);
+}
+
+.o_rent_greeting {
+    margin: 0;
+    font-size: 1.75rem;
+    font-weight: $font-weight-bold;
+    letter-spacing: -0.01em;
+}
+
+.o_rent_header_sub {
+    margin: 2px 0 0;
+    color: $text-muted;
+
+    .oi {
+        vertical-align: -2px;
+    }
+}
+
+.o_rent_dot {
+    margin: 0 map-get($spacers, 1);
+}
+
+.o_rent_filters {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: map-get($spacers, 2);
+    max-width: 100%;
+}
+
+.o_rent_select {
+    display: inline-flex;
+    align-items: center;
+    gap: map-get($spacers, 1);
+    margin: 0;
+    padding: 0 map-get($spacers, 2);
+    height: 36px;
+    border: $border-width solid var(--o-rent-border);
+    border-radius: 999px;
+    background-color: var(--o-rent-surface);
+    color: $text-muted;
+    box-shadow: var(--o-rent-shadow);
+
+    select {
+        max-width: 200px;
+        border: 0;
+        outline: 0;
+        background: transparent;
+        color: $body-color;
+        cursor: pointer;
+    }
+}
+
+.o_rent_segmented {
+    display: inline-flex;
+    gap: 2px;
+    max-width: 100%;
+    padding: 3px;
+    border-radius: 999px;
+    background-color: rgba($text-muted, 0.12);
+    overflow-x: auto;
+    scrollbar-width: none;
+
+    button {
+        padding: 5px 14px;
+        border: 0;
+        border-radius: 999px;
+        background: transparent;
+        color: $text-muted;
+        font-size: $font-size-sm;
+        font-weight: $font-weight-bold;
+        white-space: nowrap;
+        transition: background-color 0.15s, color 0.15s;
+
+        &:hover {
+            color: $body-color;
+        }
+
+        &.active {
+            background-color: var(--o-rent-surface);
+            color: $body-color;
+            box-shadow: var(--o-rent-shadow);
+        }
+    }
+}
+
+.o_rent_icon_btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 30px;
+    height: 30px;
+    border: 0;
+    border-radius: 50%;
+    background: transparent;
+    color: $text-muted;
+
+    &:hover {
+        background-color: rgba($text-muted, 0.12);
+        color: $body-color;
+    }
+}
+
+.o_rent_icon_btn_lg {
+    width: 36px;
+    height: 36px;
+    border: $border-width solid var(--o-rent-border);
+    background-color: var(--o-rent-surface);
+    box-shadow: var(--o-rent-shadow);
+}
+
+.o_rent_spin {
+    animation: o_rent_spin 0.8s linear infinite;
+}
+
+@keyframes o_rent_spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+// Shared surfaces -------------------------------------------------------------
+
+%o_rent_surface {
+    border: $border-width solid var(--o-rent-border);
+    border-radius: var(--o-rent-radius);
+    background-color: var(--o-rent-surface);
+    box-shadow: var(--o-rent-shadow);
+}
+
+%o_rent_clickable {
+    color: $body-color;
+    text-align: start;
+    cursor: pointer;
+    transition: box-shadow 0.15s, transform 0.15s, border-color 0.15s;
+
+    &:not(:disabled):hover {
+        transform: translateY(-1px);
+        box-shadow: var(--o-rent-shadow-hover);
+    }
+
+    &:focus-visible {
+        outline: 2px solid var(--o-rent-series-1);
+        outline-offset: 2px;
+    }
+
+    &:disabled {
+        opacity: 1;
+        cursor: default;
+    }
+}
+
+.o_rent_card {
+    @extend %o_rent_surface;
+    padding: map-get($spacers, 3) map-get($spacers, 4);
+
+    @include media-breakpoint-down(md) {
+        padding: map-get($spacers, 3);
+    }
+}
+
+.o_rent_card_header {
+    display: flex;
+    align-items: center;
+    gap: map-get($spacers, 2);
+    margin-bottom: map-get($spacers, 3);
+}
+
+.o_rent_card_title {
+    margin: 0;
+    font-size: 1rem;
+    font-weight: $font-weight-bold;
+}
+
+.o_rent_card_subtitle {
+    color: $text-muted;
+    font-size: $font-size-sm;
+}
+
+.o_rent_link {
+    display: inline-flex;
+    align-items: center;
+    gap: 2px;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    color: var(--o-rent-series-1);
+    font-size: $font-size-sm;
+    font-weight: $font-weight-bold;
+    white-space: nowrap;
+
+    &:hover {
+        text-decoration: underline;
+    }
+}
+
+// Icon badges: tinted square, icon in the accent; the label next to it carries the meaning.
+.o_rent_badge_icon {
+    --o-rent-accent: #{$primary};
+
+    display: inline-flex;
+    flex: 0 0 auto;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    background-color: color-mix(in srgb, var(--o-rent-accent) 13%, transparent);
+    color: var(--o-rent-accent);
+    font-size: 1.15rem;
+}
+
+.o_rent_badge_icon_sm {
+    width: 30px;
+    height: 30px;
+    border-radius: 8px;
+    font-size: 1rem;
+}
+
+.o_rent_variant_primary {
+    --o-rent-accent: #{$primary};
+}
+
+.o_rent_variant_success {
+    --o-rent-accent: var(--o-rent-good);
+}
+
+.o_rent_variant_warning {
+    --o-rent-accent: var(--o-rent-warning);
+}
+
+.o_rent_variant_danger {
+    --o-rent-accent: var(--o-rent-critical);
+}
+
+// A variant class on the tile itself colors its badge.
+.o_rent_hero,
+.o_rent_highlight,
+.o_rent_tile {
+    &.o_rent_variant_success .o_rent_badge_icon {
+        --o-rent-accent: var(--o-rent-good);
+    }
+
+    &.o_rent_variant_warning .o_rent_badge_icon {
+        --o-rent-accent: var(--o-rent-warning);
+    }
+
+    &.o_rent_variant_danger .o_rent_badge_icon {
+        --o-rent-accent: var(--o-rent-critical);
+    }
+}
+
+// Overview: one hero figure + four highlights -----------------------------------
+
+.o_rent_overview {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    grid-auto-rows: minmax(150px, auto);
+    gap: map-get($spacers, 3);
+
+    @include media-breakpoint-down(xl) {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    @include media-breakpoint-down(sm) {
+        gap: map-get($spacers, 2);
+    }
+}
+
+.o_rent_hero {
+    @extend %o_rent_surface;
+    @extend %o_rent_clickable;
+    grid-column: span 2;
+    grid-row: span 2;
+    display: flex;
+    flex-direction: column;
+    gap: map-get($spacers, 2);
+    padding: map-get($spacers, 4);
+    background-image: linear-gradient(135deg, #{rgba($primary, 0.07)} 0%, transparent 55%);
+
+    @include media-breakpoint-down(xl) {
+        grid-row: span 1;
+    }
+
+    @include media-breakpoint-down(md) {
+        padding: map-get($spacers, 3);
+    }
+}
+
+.o_rent_hero_value {
+    margin-top: map-get($spacers, 1);
+    font-size: 3rem;
+    font-weight: $font-weight-bold;
+    line-height: 1.05;
+    letter-spacing: -0.02em;
+
+    @include media-breakpoint-down(md) {
+        font-size: 2.4rem;
+    }
+}
+
+.o_rent_hero_progress {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin-top: map-get($spacers, 2);
+    color: $text-muted;
+    font-size: $font-size-sm;
+
+    strong {
+        color: $body-color;
+    }
+}
+
+.o_rent_hero_trend {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    margin-top: auto;
+    padding-top: map-get($spacers, 2);
+
+    .o_rent_sparkline {
+        height: 56px;
+    }
+}
+
+.o_rent_trend_caption {
+    color: $text-muted;
+    font-size: $font-size-sm;
+}
+
+.o_rent_highlight {
+    @extend %o_rent_surface;
+    @extend %o_rent_clickable;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    padding: map-get($spacers, 3);
+    min-width: 0;
+}
+
+.o_rent_tile_head {
+    display: flex;
+    align-items: center;
+    gap: map-get($spacers, 2);
+}
+
+.o_rent_tile_label {
+    overflow: hidden;
+    color: $text-muted;
+    font-size: $font-size-sm;
+    font-weight: $font-weight-bold;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.o_rent_highlight_value {
+    overflow: hidden;
+    font-size: 1.6rem;
+    font-weight: $font-weight-bold;
+    line-height: 1.15;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+
+    @include media-breakpoint-down(sm) {
+        font-size: 1.25rem;
+    }
+}
+
+.o_rent_tile_meta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px;
+    min-height: 22px;
+}
+
+.o_rent_tile_hint {
+    color: $text-muted;
+    font-size: $font-size-sm;
+}
+
+.o_rent_highlight .o_rent_sparkline {
+    height: 36px;
+    margin-top: auto;
+}
+
+// Deltas: signed text + arrow, colored by whether the direction is good.
+.o_rent_delta {
+    display: inline-flex;
+    align-items: center;
+    gap: 2px;
+    padding: 1px 8px 1px 5px;
+    border-radius: 999px;
+    font-size: $font-size-sm;
+    font-weight: $font-weight-bold;
+}
+
+.o_rent_delta_good {
+    background-color: color-mix(in srgb, var(--o-rent-good) 14%, transparent);
+    color: var(--o-rent-good-text);
+}
+
+.o_rent_delta_bad {
+    background-color: color-mix(in srgb, var(--o-rent-critical) 13%, transparent);
+    color: var(--o-rent-critical);
+}
+
+.o_rent_delta_flat {
+    background-color: rgba($text-muted, 0.12);
+    color: $text-muted;
+}
+
+.o_rent_delta_label {
+    color: $text-muted;
+    font-size: $font-size-sm;
+}
+
+.o_rent_sparkline {
+    display: block;
+    width: 100%;
+    overflow: visible;
+}
+
+.o_rent_sparkline_line {
+    fill: none;
+    stroke: var(--o-rent-spark);
+    stroke-width: 2;
+    stroke-linejoin: round;
+    stroke-linecap: round;
+}
+
+.o_rent_sparkline_area {
+    fill: var(--o-rent-spark-area);
+}
+
+.o_rent_sparkline_dot {
+    fill: var(--o-rent-series-1);
+    stroke: var(--o-rent-surface);
+    stroke-width: 2;
+}
+
+// Meters: fill in the accent, track a lighter step of the same ramp.
+.o_rent_meter {
+    display: block;
+    height: 6px;
+    border-radius: 3px;
+    background-color: var(--o-rent-meter-track);
+    overflow: hidden;
+}
+
+.o_rent_meter_lg {
+    height: 10px;
+    border-radius: 5px;
+}
+
+.o_rent_meter_fill {
+    display: block;
+    height: 100%;
+    border-radius: inherit;
+    background-color: var(--o-rent-series-1);
+    transition: width 0.4s ease;
+}
+
+.o_rent_meter_value {
+    min-width: 3.2em;
+    color: $text-muted;
+    font-size: $font-size-sm;
+    text-align: end;
+}
+
+// Compact tiles -----------------------------------------------------------------
+
+.o_rent_section_title {
+    margin-bottom: map-get($spacers, 2);
+    color: $text-muted;
+    font-size: 0.75rem;
+    font-weight: $font-weight-bold;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+}
+
+.o_rent_tile_grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: map-get($spacers, 2);
+
+    @include media-breakpoint-down(md) {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+.o_rent_tile {
+    @extend %o_rent_surface;
+    @extend %o_rent_clickable;
+    display: flex;
+    align-items: center;
+    gap: map-get($spacers, 2);
+    min-width: 0;
+    padding: 10px map-get($spacers, 2);
+    border-radius: 12px;
+}
+
+.o_rent_tile_body {
+    display: flex;
+    flex: 1 1 auto;
+    flex-direction: column;
+    min-width: 0;
+
+    // Full label on up to two lines rather than an ellipsis.
+    .o_rent_tile_label {
+        display: -webkit-box;
+        font-weight: $font-weight-normal;
+        line-height: 1.25;
+        white-space: normal;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+    }
+
+    .o_rent_tile_hint {
+        overflow: hidden;
+        font-size: 0.75rem;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+}
+
+.o_rent_tile_value {
+    overflow: hidden;
+    font-size: 1.15rem;
+    font-weight: $font-weight-bold;
+    line-height: 1.2;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.o_rent_tile_chevron {
+    color: $text-muted;
+    opacity: 0;
+    transition: opacity 0.15s;
+
+    .o_rent_tile:hover & {
+        opacity: 1;
+    }
+}
+
+// Charts ------------------------------------------------------------------------
+
+.o_rent_chart_canvas {
+    position: relative;
+    height: 260px;
+}
+
+.o_rent_chart_table {
+    max-height: 260px;
+    overflow-y: auto;
+}
+
+// Tables and lists ----------------------------------------------------------------
+
+.o_rent_table {
+    --bs-table-bg: transparent;
+    --bs-table-hover-bg: #{rgba($text-muted, 0.06)};
+
+    thead th {
+        border-bottom-width: $border-width;
+        color: $text-muted;
+        font-size: 0.75rem;
+        font-weight: $font-weight-bold;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+        white-space: nowrap;
+    }
+
+    td {
+        padding-top: 10px;
+        padding-bottom: 10px;
+        border-color: var(--o-rent-border);
+    }
+
+    tbody tr:last-child td {
+        border-bottom: 0;
+    }
+}
+
+.o_rent_row {
+    cursor: pointer;
+}
+
+.o_rent_col_occupancy {
+    min-width: 170px;
+}
+
+.o_rent_list {
+    margin: 0 calc(-1 * #{map-get($spacers, 2)});
+    padding: 0;
+    list-style: none;
+
+    li {
+        display: flex;
+        align-items: center;
+        gap: map-get($spacers, 2);
+        padding: 10px map-get($spacers, 2);
+        border-radius: 10px;
+
+        & + li {
+            border-top: $border-width solid var(--o-rent-border);
+        }
+
+        &.o_rent_row:hover {
+            background-color: rgba($text-muted, 0.06);
+        }
+    }
+}
+
+.o_rent_list_main {
+    flex: 1 1 auto;
+    min-width: 0;
+
+    > div {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+}
+
+.o_rent_avatar {
+    display: inline-flex;
+    flex: 0 0 auto;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background-color: rgba($text-muted, 0.14);
+    color: $body-color;
+    font-size: 0.8rem;
+    font-weight: $font-weight-bold;
+}
+
+.o_rent_avatar_square {
+    border-radius: 10px;
+}
+
+.o_rent_date_chip {
+    display: inline-flex;
+    flex: 0 0 auto;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 46px;
+    height: 46px;
+    border-radius: 12px;
+    background-color: color-mix(in srgb, var(--o-rent-warning) 16%, transparent);
+    line-height: 1;
+}
+
+.o_rent_date_chip_days {
+    font-size: 1.1rem;
+    font-weight: $font-weight-bold;
+}
+
+.o_rent_date_chip_unit {
+    color: $text-muted;
+    font-size: 0.65rem;
+    text-transform: uppercase;
+}
+
+// Pills: tinted background, status icon, text in the text ink.
+.o_rent_pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+    padding: 1px 8px 1px 6px;
+    border-radius: 999px;
+    color: $body-color;
+    font-size: 0.75rem;
+    font-weight: $font-weight-bold;
+    white-space: nowrap;
+
+    .oi {
+        font-size: 0.85rem;
+    }
+}
+
+.o_rent_pill_good {
+    background-color: color-mix(in srgb, var(--o-rent-good) 14%, transparent);
+
+    .oi {
+        color: var(--o-rent-good);
+    }
+}
+
+.o_rent_pill_warning {
+    background-color: color-mix(in srgb, var(--o-rent-warning) 20%, transparent);
+
+    .oi {
+        color: color-mix(in srgb, var(--o-rent-warning) 70%, #{$body-color});
+    }
+}
+
+.o_rent_pill_danger {
+    background-color: color-mix(in srgb, var(--o-rent-critical) 13%, transparent);
+
+    .oi {
+        color: var(--o-rent-critical);
+    }
+}
+
+.o_rent_amount_in {
+    color: var(--o-rent-good-text);
+}
+
+.o_rent_empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: map-get($spacers, 1);
+    padding: map-get($spacers, 4) 0;
+    color: $text-muted;
+    text-align: center;
+
+    .oi {
+        font-size: 1.75rem;
+        opacity: 0.6;
+    }
+}
+
+.o_rent_empty_good .oi {
+    color: var(--o-rent-good);
+    opacity: 1;
+}
+
+// Loading -------------------------------------------------------------------------
+
+.o_rent_loading {
+    opacity: 0.55;
+    transition: opacity 0.2s;
+}
+
+.o_rent_skel {
+    border-radius: var(--o-rent-radius);
+    background: linear-gradient(90deg, #{rgba($text-muted, 0.08)} 25%, #{rgba($text-muted, 0.16)} 50%, #{rgba($text-muted, 0.08)} 75%);
+    background-size: 200% 100%;
+    animation: o_rent_shimmer 1.2s ease-in-out infinite;
+}
+
+.o_rent_skel.o_rent_hero {
+    min-height: 316px;
+    border: 0;
+    box-shadow: none;
+    background-image: none;
+    background: linear-gradient(90deg, #{rgba($text-muted, 0.08)} 25%, #{rgba($text-muted, 0.16)} 50%, #{rgba($text-muted, 0.08)} 75%);
+    background-size: 200% 100%;
+}
+
+.o_rent_skel_tile {
+    min-height: 150px;
+}
+
+.o_rent_skel_chart {
+    height: 300px;
+}
+
+@keyframes o_rent_shimmer {
+    from {
+        background-position: 200% 0;
+    }
+
+    to {
+        background-position: -200% 0;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .o_rent_skel,
+    .o_rent_spin {
+        animation: none;
+    }
+
+    .o_rent_hero,
+    .o_rent_highlight,
+    .o_rent_tile {
+        transition: none;
+
+        &:not(:disabled):hover {
+            transform: none;
+        }
+    }
+}

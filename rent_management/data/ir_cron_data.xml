@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo noupdate="1">
+    <record id="ir_cron_rent_generate_invoices" model="ir.cron">
+        <field name="name">Rent: Generate Rent Invoices</field>
+        <field name="model_id" ref="model_rent_lease"/>
+        <field name="state">code</field>
+        <field name="code">model._cron_generate_invoices()</field>
+        <field name="interval_number">1</field>
+        <field name="interval_type">days</field>
+        <field name="nextcall" eval="(DateTime.now() + timedelta(days=1)).strftime('%Y-%m-%d 01:00:00')"/>
+    </record>
+    <record id="ir_cron_rent_send_reminders" model="ir.cron">
+        <field name="name">Rent: Payment Reminders and Overdue Notices</field>
+        <field name="model_id" ref="model_rent_lease"/>
+        <field name="state">code</field>
+        <field name="code">model._cron_send_reminders()</field>
+        <field name="interval_number">1</field>
+        <field name="interval_type">days</field>
+        <field name="nextcall" eval="(DateTime.now() + timedelta(days=1)).strftime('%Y-%m-%d 06:00:00')"/>
+    </record>
+    <record id="ir_cron_rent_apply_late_fees" model="ir.cron">
+        <field name="name">Rent: Apply Late Fees</field>
+        <field name="model_id" ref="model_rent_lease"/>
+        <field name="state">code</field>
+        <field name="code">model._cron_apply_late_fees()</field>
+        <field name="interval_number">1</field>
+        <field name="interval_type">days</field>
+        <field name="nextcall" eval="(DateTime.now() + timedelta(days=1)).strftime('%Y-%m-%d 02:00:00')"/>
+    </record>
+    <record id="ir_cron_rent_lease_expiry" model="ir.cron">
+        <field name="name">Rent: Lease Expiry Alerts</field>
+        <field name="model_id" ref="model_rent_lease"/>
+        <field name="state">code</field>
+        <field name="code">model._cron_lease_expiry()</field>
+        <field name="interval_number">1</field>
+        <field name="interval_type">days</field>
+        <field name="nextcall" eval="(DateTime.now() + timedelta(days=1)).strftime('%Y-%m-%d 03:00:00')"/>
+    </record>
+    <record id="ir_cron_rent_expire_leases" model="ir.cron">
+        <field name="name">Rent: Expire Ended Leases</field>
+        <field name="model_id" ref="model_rent_lease"/>
+        <field name="state">code</field>
+        <field name="code">model._cron_expire_leases()</field>
+        <field name="interval_number">1</field>
+        <field name="interval_type">days</field>
+        <field name="nextcall" eval="(DateTime.now() + timedelta(days=1)).strftime('%Y-%m-%d 00:30:00')"/>
+    </record>
+    <record id="ir_cron_rent_apply_escalation" model="ir.cron">
+        <field name="name">Rent: Apply Rent Escalation</field>
+        <field name="model_id" ref="model_rent_lease"/>
+        <field name="state">code</field>
+        <field name="code">model._cron_apply_escalation()</field>
+        <field name="interval_number">1</field>
+        <field name="interval_type">days</field>
+        <field name="nextcall" eval="(DateTime.now() + timedelta(days=1)).strftime('%Y-%m-%d 00:45:00')"/>
+    </record>
+    <record id="ir_cron_rent_prepare_electricity" model="ir.cron">
+        <field name="name">Rent: Prepare Monthly Electricity Readings</field>
+        <field name="model_id" ref="model_rent_lease"/>
+        <field name="state">code</field>
+        <field name="code">model._cron_prepare_electricity_readings()</field>
+        <field name="interval_number">1</field>
+        <field name="interval_type">days</field>
+        <field name="nextcall" eval="(DateTime.now() + timedelta(days=1)).strftime('%Y-%m-%d 00:15:00')"/>
+    </record>
+</odoo>

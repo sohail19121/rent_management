@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="rent_moveout_wizard_view_form" model="ir.ui.view">
+        <field name="name">rent.moveout.wizard.view.form</field>
+        <field name="model">rent.moveout.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Move-out">
+                <group>
+                    <group>
+                        <field name="lease_id"/>
+                        <field name="tenant_id"/>
+                        <field name="moveout_date"/>
+                    </group>
+                    <group>
+                        <field name="deposit_amount"/>
+                        <field name="damage_charges"/>
+                        <field name="unpaid_dues"/>
+                        <field name="electricity_billing" invisible="1"/>
+                        <field name="previous_meter_reading" string="Last Meter Reading" invisible="electricity_billing != 'metered'"/>
+                        <field name="final_meter_reading" invisible="electricity_billing != 'metered'"/>
+                        <field name="electricity_charges" invisible="electricity_billing != 'metered'"/>
+                        <field name="refund_amount" class="fw-bold"/>
+                        <field name="currency_id" invisible="1"/>
+                    </group>
+                </group>
+                <field name="deduction_note" placeholder="Details of the deductions (damages, cleaning, ...)"/>
+                <p class="text-muted">
+                    Confirming terminates the lease, frees the unit, invoices the damages and issues a credit note
+                    for the deposit, offset against the unpaid dues. Pay the remaining credit to the tenant from the credit note.
+                </p>
+                <footer>
+                    <button name="action_confirm" type="object" string="Confirm Move-out" class="btn-primary" data-hotkey="q"/>
+                    <button string="Discard" special="cancel" data-hotkey="x"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+</odoo>

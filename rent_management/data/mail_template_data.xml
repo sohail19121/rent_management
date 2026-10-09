@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo noupdate="1">
+    <record id="mail_template_lease_confirmation" model="mail.template">
+        <field name="name">Rent: Lease Confirmation</field>
+        <field name="model_id" ref="model_rent_lease"/>
+        <field name="subject">Your lease {{ object.name }} is confirmed</field>
+        <field name="email_from">{{ (object.company_id.email_formatted or user.email_formatted) }}</field>
+        <field name="partner_to">{{ object.tenant_id.id }}</field>
+        <field name="description">Sent to the tenant when a lease is confirmed</field>
+        <field name="report_template_ids" eval="[Command.link(ref('rent_management.action_report_lease_agreement'))]"/>
+        <field name="body_html" type="html">
+<div style="margin: 0px; padding: 0px; font-size: 13px;">
+    <p>Dear <t t-out="object.tenant_id.name or ''">Tenant</t>,</p>
+    <p>Your lease <strong t-out="object.name or ''">LEASE/2026/0001</strong> for
+        <t t-out="object.unit_id.display_name or ''">Unit</t> is confirmed.</p>
+    <ul>
+        <li>Period: <t t-out="format_date(object.start_date)"/> to <t t-out="format_date(object.end_date)"/></li>
+        <li>Rent: <t t-out="format_amount(object.rent_amount, object.currency_id)"/> (<t t-out="object.billing_frequency"/>)</li>
+        <li>Security deposit: <t t-out="format_amount(object.deposit_amount, object.currency_id)"/></li>
+    </ul>
+    <p>The lease agreement is attached. Welcome!</p>
+</div>
+        </field>
+        <field name="auto_delete" eval="True"/>
+    </record>
+
+    <record id="mail_template_rent_invoice" model="mail.template">
+        <field name="name">Rent: Rent Invoice</field>
+        <field name="model_id" ref="account.model_account_move"/>
+        <field name="subject">Rent invoice {{ object.name }}</field>
+        <field name="email_from">{{ (object.company_id.email_formatted or user.email_formatted) }}</field>
+        <field name="partner_to">{{ object.partner_id.id }}</field>
+        <field name="description">Sent to the tenant when a rent invoice is generated</field>
+        <field name="report_template_ids" eval="[Command.link(ref('account.account_invoices'))]"/>
+        <field name="body_html" type="html">
+<div style="margin: 0px; padding: 0px; font-size: 13px;">
+    <p>Dear <t t-out="object.partner_id.name or ''">Tenant</t>,</p>
+    <p>Your rent invoice <strong t-out="object.name or ''">INV/2026/0001</strong> of
+        <strong t-out="format_amount(object.amount_total, object.currency_id)"/> is due on
+        <t t-out="format_date(object.invoice_date_due)"/>.</p>
+    <p>You can pay it online from your portal:
+        <a t-att-href="object.get_base_url() + object.get_portal_url()">view and pay</a>.</p>
+</div>
+        </field>
+        <field name="auto_delete" eval="True"/>
+    </record>
+
+    <record id="mail_template_payment_reminder" model="mail.template">
+        <field name="name">Rent: Payment Reminder</field>
+        <field name="model_id" ref="account.model_account_move"/>
+        <field name="subject">Reminder: rent {{ object.name }} is due soon</field>
+        <field name="email_from">{{ (object.company_id.email_formatted or user.email_formatted) }}</field>
+        <field name="partner_to">{{ object.partner_id.id }}</field>
+        <field name="description">Sent a few days before a rent invoice is due</field>
+        <field name="body_html" type="html">
+<div style="margin: 0px; padding: 0px; font-size: 13px;">
+    <p>Dear <t t-out="object.partner_id.name or ''">Tenant</t>,</p>
+    <p>This is a friendly reminder that <strong t-out="format_amount(object.amount_residual, object.currency_id)"/>
+        on rent invoice <t t-out="object.name or ''"/> is due on <t t-out="format_date(object.invoice_date_due)"/>.</p>
+    <p><a t-att-href="object.get_base_url() + object.get_portal_url()">Pay now</a></p>
+</div>
+        </field>
+        <field name="auto_delete" eval="True"/>
+    </record>
+
+    <record id="mail_template_overdue_notice" model="mail.template">
+        <field name="name">Rent: Overdue Notice</field>
+        <field name="model_id" ref="account.model_account_move"/>
+        <field name="subject">Overdue rent: {{ object.name }}</field>
+        <field name="email_from">{{ (object.company_id.email_formatted or user.email_formatted) }}</field>
+        <field name="partner_to">{{ object.partner_id.id }}</field>
+        <field name="description">Sent when a rent invoice becomes overdue</field>
+        <field name="body_html" type="html">
+<div style="margin: 0px; padding: 0px; font-size: 13px;">
+    <p>Dear <t t-out="object.partner_id.name or ''">Tenant</t>,</p>
+    <p>Rent invoice <strong t-out="object.name or ''"/> was due on <t t-out="format_date(object.invoice_date_due)"/>
+        and <strong t-out="format_amount(object.amount_residual, object.currency_id)"/> is still unpaid.</p>
+    <p t-if="object.rent_lease_id.late_fee_value">A late fee applies after
+        <t t-out="object.rent_lease_id.grace_days"/> days of grace.</p>
+    <p><a t-att-href="object.get_base_url() + object.get_portal_url()">Pay now</a></p>
+</div>
+        </field>
+        <field name="auto_delete" eval="True"/>
+    </record>
+
+    <record id="mail_template_lease_expiry" model="mail.template">
+        <field name="name">Rent: Lease Expiry Notice</field>
+        <field name="model_id" ref="model_rent_lease"/>
+        <field name="subject">Your lease {{ object.name }} ends soon</field>
+        <field name="email_from">{{ (object.company_id.email_formatted or user.email_formatted) }}</field>
+        <field name="partner_to">{{ object.tenant_id.id }}</field>
+        <field name="description">Sent to the tenant when a lease approaches its end date</field>
+        <field name="body_html" type="html">
+<div style="margin: 0px; padding: 0px; font-size: 13px;">
+    <p>Dear <t t-out="object.tenant_id.name or ''">Tenant</t>,</p>
+    <p>Your lease <strong t-out="object.name or ''"/> for <t t-out="object.unit_id.display_name or ''"/>
+        ends on <strong t-out="format_date(object.end_date)"/>.</p>
+    <p>Please let us know whether you wish to renew it or plan your move-out
+        (notice period: <t t-out="object.notice_period_days"/> days).</p>
+</div>
+        </field>
+        <field name="auto_delete" eval="True"/>
+    </record>
+
+    <record id="mail_template_moveout_settlement" model="mail.template">
+        <field name="name">Rent: Move-out Settlement</field>
+        <field name="model_id" ref="model_rent_lease"/>
+        <field name="subject">Move-out settlement for lease {{ object.name }}</field>
+        <field name="email_from">{{ (object.company_id.email_formatted or user.email_formatted) }}</field>
+        <field name="partner_to">{{ object.tenant_id.id }}</field>
+        <field name="description">Sent to the tenant with the deposit settlement at move-out</field>
+        <field name="report_template_ids" eval="[Command.link(ref('rent_management.action_report_moveout_settlement'))]"/>
+        <field name="body_html" type="html">
+<div style="margin: 0px; padding: 0px; font-size: 13px;">
+    <p>Dear <t t-out="object.tenant_id.name or ''">Tenant</t>,</p>
+    <p>Thank you for staying with us. Here is the settlement of your security deposit:</p>
+    <ul>
+        <li>Deposit: <t t-out="format_amount(object.deposit_amount, object.currency_id)"/></li>
+        <li>Damage charges: <t t-out="format_amount(object.moveout_damage_charges, object.currency_id)"/></li>
+        <li>Unpaid dues: <t t-out="format_amount(object.moveout_unpaid_dues, object.currency_id)"/></li>
+        <li>Refund: <strong t-out="format_amount(object.deposit_refunded_amount, object.currency_id)"/></li>
+    </ul>
+    <p>The detailed settlement is attached.</p>
+</div>
+        </field>
+        <field name="auto_delete" eval="True"/>
+    </record>
+</odoo>

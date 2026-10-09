@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <menuitem id="rent_menu_root" name="Rent Management" sequence="45"
+              web_icon="rent_management,static/description/icon.png"
+              groups="group_rent_user"/>
+
+    <menuitem id="rent_menu_dashboard" name="Dashboard" parent="rent_menu_root" action="rent_dashboard_action" sequence="1"/>
+    <menuitem id="rent_menu_properties" name="Properties" parent="rent_menu_root" action="rent_property_action" sequence="10"/>
+    <menuitem id="rent_menu_units" name="Units" parent="rent_menu_root" action="rent_unit_action" sequence="20"/>
+    <menuitem id="rent_menu_tenants" name="Tenants" parent="rent_menu_root" sequence="30">
+        <menuitem id="rent_menu_tenant_list" name="Tenants" action="res_partner_action_tenant" sequence="1"/>
+        <menuitem id="rent_menu_owner_list" name="Property Owners" action="res_partner_action_owner" sequence="2"/>
+    </menuitem>
+    <menuitem id="rent_menu_leases" name="Leases" parent="rent_menu_root" action="rent_lease_action" sequence="40"/>
+    <menuitem id="rent_menu_maintenance" name="Maintenance" parent="rent_menu_root" action="rent_maintenance_request_action" sequence="50"/>
+    <menuitem id="rent_menu_billing" name="Billing" parent="rent_menu_root" sequence="60">
+        <menuitem id="rent_menu_billing_invoices" name="Rent Invoices" action="rent_invoice_action" sequence="1"
+                  groups="group_rent_accountant"/>
+        <menuitem id="rent_menu_billing_electricity" name="Electricity Readings" action="rent_electricity_reading_action" sequence="10"/>
+    </menuitem>
+    <menuitem id="rent_menu_reports" name="Reports" parent="rent_menu_root" sequence="70">
+        <menuitem id="rent_menu_report_collection" name="Rent Collection" action="rent_collection_action" sequence="1"
+                  groups="group_rent_accountant"/>
+        <menuitem id="rent_menu_report_occupancy" name="Occupancy" action="rent_occupancy_action" sequence="2"/>
+        <menuitem id="rent_menu_report_electricity" name="Electricity Consumption" action="rent_electricity_analysis_action" sequence="3"/>
+    </menuitem>
+    <menuitem id="rent_menu_config" name="Configuration" parent="rent_menu_root" sequence="100" groups="group_rent_admin">
+        <menuitem id="rent_menu_settings" name="Settings" action="rent_config_settings_action" sequence="1" groups="base.group_system"/>
+        <menuitem id="rent_menu_amenities" name="Amenities" action="rent_amenity_action" sequence="10"/>
+    </menuitem>
+</odoo>

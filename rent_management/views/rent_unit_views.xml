@@ -1,0 +1,175 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="rent_unit_view_list" model="ir.ui.view">
+        <field name="name">rent.unit.view.list</field>
+        <field name="model">rent.unit</field>
+        <field name="arch" type="xml">
+            <list>
+                <field name="property_id"/>
+                <field name="name"/>
+                <field name="floor"/>
+                <field name="unit_type"/>
+                <field name="bedrooms" optional="show"/>
+                <field name="area_sqft" optional="show"/>
+                <field name="furnishing" optional="hide"/>
+                <field name="base_rent" sum="Total"/>
+                <field name="current_tenant_id"/>
+                <field name="state" widget="badge"
+                       decoration-success="state == 'vacant'" decoration-info="state == 'occupied'"
+                       decoration-warning="state == 'reserved'" decoration-danger="state == 'under_maintenance'"/>
+                <field name="currency_id" column_invisible="1"/>
+                <field name="company_id" groups="base.group_multi_company" optional="hide"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="rent_unit_view_form" model="ir.ui.view">
+        <field name="name">rent.unit.view.form</field>
+        <field name="model">rent.unit</field>
+        <field name="arch" type="xml">
+            <form>
+                <header>
+                    <field name="state" widget="statusbar" statusbar_visible="vacant,reserved,occupied"/>
+                </header>
+                <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button name="action_view_leases" type="object" class="oe_stat_button" icon="contract">
+                            <div class="o_stat_info"><span class="o_stat_text">Leases</span></div>
+                        </button>
+                    </div>
+                    <widget name="web_ribbon" title="Archived" bg_color="text-bg-danger" invisible="active"/>
+                    <field name="image" widget="image" class="oe_avatar"/>
+                    <div class="oe_title">
+                        <label for="name"/>
+                        <h1><field name="name" placeholder="e.g. A-101"/></h1>
+                    </div>
+                    <group>
+                        <group name="details" string="Details">
+                            <field name="property_id"/>
+                            <field name="floor"/>
+                            <field name="unit_type"/>
+                            <field name="area_sqft"/>
+                            <field name="bedrooms" invisible="unit_type not in ('flat', 'room')"/>
+                            <field name="furnishing"/>
+                            <field name="meter_number"/>
+                            <label for="meter_qr_image" string="Meter QR Code"/>
+                            <div class="d-flex align-items-start gap-2">
+                                <field name="meter_qr_image" widget="image" options="{'size': [120, 120]}" nolabel="1" readonly="1"/>
+                                <div class="d-flex flex-column gap-1">
+                                    <button name="%(rent_management.action_report_meter_qr_label)d" type="action" string="Print Label"
+                                            class="btn btn-secondary btn-sm" icon="print"/>
+                                    <button name="action_regenerate_meter_qr" type="object" string="New QR Code"
+                                            class="btn btn-link btn-sm" icon="autorenew"
+                                            confirm="Printed labels of this meter will stop working. Continue?"/>
+                                </div>
+                            </div>
+                            <field name="meter_qr_url" widget="CopyClipboardChar" readonly="1"/>
+                            <field name="under_maintenance"/>
+                            <field name="active" invisible="1"/>
+                        </group>
+                        <group name="pricing" string="Pricing">
+                            <field name="base_rent"/>
+                            <field name="deposit_amount"/>
+                            <field name="maintenance_charge"/>
+                            <field name="currency_id" invisible="1"/>
+                            <field name="company_id" groups="base.group_multi_company"/>
+                        </group>
+                    </group>
+                    <group name="occupancy" string="Occupancy">
+                        <field name="current_lease_id"/>
+                        <field name="current_tenant_id"/>
+                    </group>
+                    <notebook>
+                        <page name="leases" string="Lease History">
+                            <field name="lease_ids" readonly="1">
+                                <list>
+                                    <field name="name"/>
+                                    <field name="tenant_id"/>
+                                    <field name="start_date"/>
+                                    <field name="end_date"/>
+                                    <field name="rent_amount"/>
+                                    <field name="state" widget="badge"/>
+                                    <field name="currency_id" column_invisible="1"/>
+                                </list>
+                            </field>
+                        </page>
+                        <page name="maintenance" string="Maintenance">
+                            <field name="maintenance_request_ids" readonly="1">
+                                <list>
+                                    <field name="name"/>
+                                    <field name="category"/>
+                                    <field name="create_date" string="Reported On"/>
+                                    <field name="state" widget="badge"/>
+                                </list>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <record id="rent_unit_view_kanban" model="ir.ui.view">
+        <field name="name">rent.unit.view.kanban</field>
+        <field name="model">rent.unit</field>
+        <field name="arch" type="xml">
+            <kanban default_group_by="state" highlight_color="color" group_create="false" group_delete="false" records_draggable="false">
+                <field name="state"/>
+                <progressbar field="state" colors='{"vacant": "success", "occupied": "info", "reserved": "warning", "under_maintenance": "danger"}'/>
+                <templates>
+                    <t t-name="card">
+                        <div class="d-flex">
+                            <field name="name" class="fw-bold fs-5"/>
+                            <field name="state" widget="badge" class="ms-auto"
+                                   decoration-success="state == 'vacant'" decoration-info="state == 'occupied'"
+                                   decoration-warning="state == 'reserved'" decoration-danger="state == 'under_maintenance'"/>
+                        </div>
+                        <field name="property_id" class="text-muted"/>
+                        <div>
+                            <field name="unit_type"/> - <field name="area_sqft"/> sq ft
+                        </div>
+                        <div class="fw-bold"><field name="base_rent" widget="monetary"/> / month</div>
+                        <field name="currency_id" invisible="1"/>
+                        <footer>
+                            <field name="current_tenant_id" invisible="not current_tenant_id"/>
+                        </footer>
+                    </t>
+                </templates>
+            </kanban>
+        </field>
+    </record>
+
+    <record id="rent_unit_view_search" model="ir.ui.view">
+        <field name="name">rent.unit.view.search</field>
+        <field name="model">rent.unit</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="name"/>
+                <field name="property_id"/>
+                <field name="current_tenant_id"/>
+                <filter name="vacant" string="Vacant" domain="[('state', '=', 'vacant')]"/>
+                <filter name="occupied" string="Occupied" domain="[('state', '=', 'occupied')]"/>
+                <filter name="reserved" string="Reserved" domain="[('state', '=', 'reserved')]"/>
+                <filter name="under_maintenance" string="Under Maintenance" domain="[('state', '=', 'under_maintenance')]"/>
+                <separator/>
+                <filter name="my_units" string="My Properties" domain="[('property_id.manager_id', '=', uid)]"/>
+                <filter name="archived" string="Archived" domain="[('active', '=', False)]"/>
+                <group>
+                    <filter name="group_property" string="Property" context="{'group_by': 'property_id'}"/>
+                    <filter name="group_state" string="Status" context="{'group_by': 'state'}"/>
+                    <filter name="group_type" string="Type" context="{'group_by': 'unit_type'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="rent_unit_action" model="ir.actions.act_window">
+        <field name="name">Units</field>
+        <field name="res_model">rent.unit</field>
+        <field name="view_mode">kanban,list,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">Add a rentable unit</p>
+        </field>
+    </record>
+</odoo>

@@ -1,0 +1,246 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <template id="portal_breadcrumbs" name="Portal layout: rent menu entries" inherit_id="portal.portal_breadcrumbs" priority="40">
+        <xpath expr="//ol[hasclass('o_portal_submenu')]" position="inside">
+            <li t-if="page_name == 'rent_lease'" t-attf-class="breadcrumb-item #{'active' if not lease else ''}">
+                <a t-if="lease" href="/my/leases">Leases</a>
+                <t t-else="">Leases</t>
+            </li>
+            <li t-if="page_name == 'rent_lease' and lease" class="breadcrumb-item active" t-out="lease.name"/>
+            <li t-if="page_name == 'rent_invoice'" class="breadcrumb-item active">Rent Invoices</li>
+            <li t-if="page_name in ('rent_maintenance', 'rent_maintenance_new')"
+                t-attf-class="breadcrumb-item #{'active' if page_name == 'rent_maintenance' and not maintenance_request else ''}">
+                <a t-if="maintenance_request or page_name == 'rent_maintenance_new'" href="/my/maintenance">Maintenance</a>
+                <t t-else="">Maintenance</t>
+            </li>
+            <li t-if="page_name == 'rent_maintenance' and maintenance_request" class="breadcrumb-item active" t-out="maintenance_request.name"/>
+            <li t-if="page_name == 'rent_maintenance_new'" class="breadcrumb-item active">New Request</li>
+        </xpath>
+    </template>
+
+    <!-- Leases -->
+    <template id="portal_my_leases" name="My Leases">
+        <t t-call="portal.portal_layout">
+            <t t-call="portal.portal_searchbar" breadcrumbs_searchbar="True" title.translate="Leases"/>
+            <p t-if="not leases" class="alert alert-warning">You have no lease yet.</p>
+            <t t-if="leases" t-call="portal.portal_table">
+                <thead>
+                    <tr>
+                        <th>Lease #</th>
+                        <th>Unit</th>
+                        <th class="d-none d-md-table-cell">Period</th>
+                        <th class="text-end">Rent</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr t-foreach="leases" t-as="lease">
+                        <td><a t-att-href="lease.get_portal_url()" t-out="lease.name"/></td>
+                        <td t-out="lease.unit_id.display_name"/>
+                        <td class="d-none d-md-table-cell"><span t-field="lease.start_date"/> - <span t-field="lease.end_date"/></td>
+                        <td class="text-end"><span t-field="lease.rent_amount"/></td>
+                        <td><span class="badge rounded-pill text-bg-secondary" t-field="lease.state"/></td>
+                    </tr>
+                </tbody>
+            </t>
+        </t>
+    </template>
+
+    <template id="portal_lease_page" name="Lease">
+        <t t-call="portal.portal_layout">
+            <div class="row mt-3">
+                <div class="col-12 col-lg-8">
+                    <div class="card">
+                        <div class="card-header d-flex align-items-center">
+                            <h4 class="mb-0">Lease <span t-out="lease.name"/></h4>
+                            <span class="badge rounded-pill text-bg-secondary ms-auto" t-field="lease.state"/>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <p><strong>Property:</strong> <span t-out="lease.property_id.name"/></p>
+                                    <p><strong>Unit:</strong> <span t-out="lease.unit_id.name"/></p>
+                                    <p><strong>Period:</strong> <span t-field="lease.start_date"/> - <span t-field="lease.end_date"/></p>
+                                    <p><strong>Notice period:</strong> <span t-out="lease.notice_period_days"/> days</p>
+                                </div>
+                                <div class="col-md-6">
+                                    <p><strong>Rent:</strong> <span t-field="lease.rent_amount"/> (<span t-field="lease.billing_frequency"/>)</p>
+                                    <p t-if="lease.maintenance_charge"><strong>Maintenance:</strong> <span t-field="lease.maintenance_charge"/></p>
+                                    <p><strong>Electricity:</strong> <span t-field="lease.electricity_billing"/>
+                                        <t t-if="lease.electricity_billing == 'metered'"> at <span t-out="lease.electricity_rate"/> per kWh</t></p>
+                                    <p><strong>Deposit:</strong> <span t-field="lease.deposit_amount"/> (<span t-field="lease.deposit_status"/>)</p>
+                                    <p t-if="lease.next_invoice_date"><strong>Next due date:</strong> <span t-field="lease.next_invoice_date"/></p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div t-if="lease.electricity_billing == 'metered'" class="col-12 col-lg-8 order-lg-last mt-3">
+                    <t t-set="readings" t-value="lease.electricity_reading_ids.filtered(lambda r: r.state in ('confirmed', 'invoiced'))"/>
+                    <h5>Electricity</h5>
+                    <p t-if="not readings" class="text-muted">No meter reading yet.</p>
+                    <t t-else="" t-call="portal.portal_table">
+                        <thead>
+                            <tr>
+                                <th>Period</th>
+                                <th class="text-end">Previous</th>
+                                <th class="text-end">Current</th>
+                                <th class="text-end">kWh</th>
+                                <th class="text-end">Amount</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr t-foreach="readings" t-as="reading">
+                                <td><span t-field="reading.period_start"/> - <span t-field="reading.period_end"/></td>
+                                <td class="text-end" t-out="reading.previous_reading"/>
+                                <td class="text-end" t-out="reading.current_reading"/>
+                                <td class="text-end" t-out="reading.consumption"/>
+                                <td class="text-end"><span t-field="reading.amount"/></td>
+                            </tr>
+                        </tbody>
+                    </t>
+                </div>
+                <div class="col-12 col-lg-4 mt-3 mt-lg-0">
+                    <div class="d-grid gap-2">
+                        <a class="btn btn-primary" t-attf-href="/my/leases/#{lease.id}/agreement?access_token=#{lease.access_token or ''}">
+                            <i class="oi me-1" data-icon="download"/> Download Agreement
+                        </a>
+                        <a class="btn btn-secondary" href="/my/rent-invoices">Rent Invoices</a>
+                        <a t-if="lease.state in ('active', 'expiring')" class="btn btn-secondary" href="/my/maintenance/new">Report a Problem</a>
+                    </div>
+                </div>
+            </div>
+        </t>
+    </template>
+
+    <!-- Rent invoices: detail and online payment use the standard invoice portal -->
+    <template id="portal_my_rent_invoices" name="My Rent Invoices">
+        <t t-call="portal.portal_layout">
+            <t t-call="portal.portal_searchbar" breadcrumbs_searchbar="True" title.translate="Rent Invoices"/>
+            <p t-if="not invoices" class="alert alert-warning">There is no rent invoice for your account.</p>
+            <t t-if="invoices" t-call="portal.portal_table">
+                <thead>
+                    <tr>
+                        <th>Invoice #</th>
+                        <th>Lease</th>
+                        <th class="d-none d-md-table-cell">Invoice Date</th>
+                        <th>Due Date</th>
+                        <th class="text-end">Amount Due</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr t-foreach="invoices" t-as="invoice">
+                        <td><a t-att-href="invoice.get_portal_url()" t-out="invoice.name"/></td>
+                        <td t-out="invoice.invoice_origin"/>
+                        <td class="d-none d-md-table-cell"><span t-field="invoice.invoice_date"/></td>
+                        <td><span t-field="invoice.invoice_date_due"/></td>
+                        <td class="text-end"><span t-field="invoice.amount_residual"/></td>
+                        <td>
+                            <span t-if="invoice.payment_state in ('paid', 'in_payment', 'reversed')" class="badge rounded-pill text-bg-success">Paid</span>
+                            <a t-else="" t-att-href="invoice.get_portal_url()" class="btn btn-sm btn-primary">Pay Now</a>
+                        </td>
+                    </tr>
+                </tbody>
+            </t>
+        </t>
+    </template>
+
+    <!-- Maintenance -->
+    <template id="portal_my_maintenance" name="My Maintenance Requests">
+        <t t-call="portal.portal_layout">
+            <t t-call="portal.portal_searchbar" breadcrumbs_searchbar="True" title.translate="Maintenance Requests"/>
+            <div class="my-3">
+                <a href="/my/maintenance/new" class="btn btn-primary"><i class="oi me-1" data-icon="add"/> New Request</a>
+            </div>
+            <p t-if="not maintenance_requests" class="alert alert-info">You have not reported any problem.</p>
+            <t t-if="maintenance_requests" t-call="portal.portal_table">
+                <thead>
+                    <tr>
+                        <th>Reference</th>
+                        <th>Unit</th>
+                        <th>Category</th>
+                        <th class="d-none d-md-table-cell">Reported On</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr t-foreach="maintenance_requests" t-as="maintenance">
+                        <td><a t-att-href="maintenance.get_portal_url()" t-out="maintenance.name"/></td>
+                        <td t-out="maintenance.unit_id.display_name"/>
+                        <td><span t-field="maintenance.category"/></td>
+                        <td class="d-none d-md-table-cell"><span t-field="maintenance.create_date" t-options="{'widget': 'date'}"/></td>
+                        <td><span class="badge rounded-pill text-bg-secondary" t-field="maintenance.state"/></td>
+                    </tr>
+                </tbody>
+            </t>
+        </t>
+    </template>
+
+    <template id="portal_maintenance_page" name="Maintenance Request">
+        <t t-call="portal.portal_layout">
+            <div class="card mt-3">
+                <div class="card-header d-flex align-items-center">
+                    <h4 class="mb-0" t-out="maintenance_request.name"/>
+                    <span class="badge rounded-pill text-bg-secondary ms-auto" t-field="maintenance_request.state"/>
+                </div>
+                <div class="card-body">
+                    <p><strong>Unit:</strong> <span t-out="maintenance_request.unit_id.display_name"/></p>
+                    <p><strong>Category:</strong> <span t-field="maintenance_request.category"/></p>
+                    <p><strong>Reported on:</strong> <span t-field="maintenance_request.create_date"/></p>
+                    <div t-field="maintenance_request.description"/>
+                    <div t-if="maintenance_request.image_ids" class="d-flex flex-wrap gap-2 mt-3">
+                        <t t-foreach="maintenance_request.image_ids" t-as="photo">
+                            <img t-attf-src="/web/image/#{photo.id}"
+                                 class="img-thumbnail" style="max-height: 160px;" t-att-alt="photo.name"/>
+                        </t>
+                    </div>
+                </div>
+            </div>
+            <div class="mt-4">
+                <t t-call="portal.message_thread">
+                    <t t-set="object" t-value="maintenance_request"/>
+                </t>
+            </div>
+        </t>
+    </template>
+
+    <template id="portal_maintenance_new" name="New Maintenance Request">
+        <t t-call="portal.portal_layout">
+            <h3 class="mt-3">Report a Problem</h3>
+            <p t-if="not leases" class="alert alert-warning">You need an active lease to report a problem.</p>
+            <form t-else="" action="/my/maintenance/new" method="post" enctype="multipart/form-data" class="mt-3">
+                <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+                <div t-if="error" class="alert alert-danger" t-out="error"/>
+                <div class="mb-3">
+                    <label class="form-label" for="lease_id">Unit</label>
+                    <select name="lease_id" id="lease_id" class="form-select" required="required">
+                        <t t-foreach="leases" t-as="lease">
+                            <option t-att-value="lease.id" t-att-selected="str(lease.id) == post.get('lease_id')"
+                                    t-out="lease.unit_id.display_name"/>
+                        </t>
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label" for="category">Category</label>
+                    <select name="category" id="category" class="form-select" required="required">
+                        <t t-foreach="categories" t-as="category">
+                            <option t-att-value="category[0]" t-att-selected="category[0] == post.get('category')" t-out="category[1]"/>
+                        </t>
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label" for="description">Description</label>
+                    <textarea name="description" id="description" class="form-control" rows="5" required="required"
+                              placeholder="What is the problem? Where is it?" t-out="post.get('description', '')"/>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label" for="photos">Photos</label>
+                    <input type="file" name="photos" id="photos" class="form-control" accept="image/*" multiple="multiple"/>
+                    <div class="form-text">Up to 5 images, 10 MB each.</div>
+                </div>
+                <button type="submit" class="btn btn-primary">Submit Request</button>
+            </form>
+        </t>
+    </template>
+</odoo>

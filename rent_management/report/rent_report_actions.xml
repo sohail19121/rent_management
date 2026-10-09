@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="action_report_lease_agreement" model="ir.actions.report">
+        <field name="name">Lease Agreement</field>
+        <field name="model">rent.lease</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">rent_management.report_lease_agreement</field>
+        <field name="print_report_name">'Lease Agreement - %s' % object.name</field>
+        <field name="binding_model_id" ref="model_rent_lease"/>
+        <field name="binding_type">report</field>
+    </record>
+    <record id="action_report_moveout_settlement" model="ir.actions.report">
+        <field name="name">Move-out Settlement</field>
+        <field name="model">rent.lease</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">rent_management.report_moveout_settlement</field>
+        <field name="print_report_name">'Move-out Settlement - %s' % object.name</field>
+        <field name="binding_model_id" ref="model_rent_lease"/>
+        <field name="binding_type">report</field>
+    </record>
+    <record id="action_report_rent_receipt" model="ir.actions.report">
+        <field name="name">Rent Receipt</field>
+        <field name="model">account.move</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">rent_management.report_rent_receipt</field>
+        <field name="print_report_name">'Rent Receipt - %s' % object.name</field>
+        <field name="binding_model_id" ref="account.model_account_move"/>
+        <field name="binding_type">report</field>
+        <field name="group_ids" eval="[Command.link(ref('group_rent_accountant'))]"/>
+    </record>
+    <record id="action_report_tenant_statement" model="ir.actions.report">
+        <field name="name">Tenant Statement</field>
+        <field name="model">res.partner</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">rent_management.report_tenant_statement</field>
+        <field name="print_report_name">'Tenant Statement - %s' % object.name</field>
+        <field name="binding_model_id" ref="base.model_res_partner"/>
+        <field name="binding_type">report</field>
+        <field name="group_ids" eval="[Command.link(ref('group_rent_accountant'))]"/>
+    </record>
+</odoo>

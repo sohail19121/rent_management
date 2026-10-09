@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="res_config_settings_view_form" model="ir.ui.view">
+        <field name="name">res.config.settings.view.form.inherit.rent.management</field>
+        <field name="model">res.config.settings</field>
+        <field name="priority" eval="90"/>
+        <field name="inherit_id" ref="base.res_config_settings_view_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//form" position="inside">
+                <app data-string="Rent Management" string="Rent Management" name="rent_management" groups="rent_management.group_rent_admin">
+                    <block title="Accounting" name="rent_accounting_container">
+                        <setting id="rent_accounts" string="Accounts" company_dependent="1"
+                                 help="Income account for rent, liability account for security deposits">
+                            <div class="content-group">
+                                <div class="row mt8">
+                                    <label for="rent_income_account_id" class="col-lg-5 o_light_label"/>
+                                    <field name="rent_income_account_id" options="{'no_create': True}"/>
+                                </div>
+                                <div class="row">
+                                    <label for="rent_deposit_account_id" class="col-lg-5 o_light_label"/>
+                                    <field name="rent_deposit_account_id" options="{'no_create': True}"/>
+                                </div>
+                                <div class="row">
+                                    <label for="rent_journal_id" class="col-lg-5 o_light_label"/>
+                                    <field name="rent_journal_id" options="{'no_create': True}"/>
+                                </div>
+                            </div>
+                        </setting>
+                        <setting id="rent_products" string="Products" company_dependent="1"
+                                 help="Products used on late fee and maintenance charge lines">
+                            <div class="content-group">
+                                <div class="row mt8">
+                                    <label for="rent_late_fee_product_id" class="col-lg-5 o_light_label"/>
+                                    <field name="rent_late_fee_product_id"/>
+                                </div>
+                                <div class="row">
+                                    <label for="rent_maintenance_product_id" class="col-lg-5 o_light_label"/>
+                                    <field name="rent_maintenance_product_id"/>
+                                </div>
+                            </div>
+                        </setting>
+                    </block>
+                    <block title="Electricity" name="rent_electricity_container">
+                        <setting id="rent_electricity_rate" string="Default Electricity Rate" company_dependent="1"
+                                 help="Rate per kWh proposed on new metered leases. Readings to enter are created on the 1st of each month.">
+                            <field name="rent_electricity_rate"/>
+                        </setting>
+                    </block>
+                    <block title="Automation" name="rent_automation_container">
+                        <setting id="rent_invoice_advance" string="Invoice Generation" company_dependent="1"
+                                 help="Generate rent invoices this many days before they are due">
+                            <field name="rent_invoice_advance_days"/>
+                        </setting>
+                        <setting id="rent_reminders" string="Payment Reminders" company_dependent="1"
+                                 help="Email a reminder this many days before the due date">
+                            <field name="rent_reminder_days_before"/>
+                        </setting>
+                        <setting id="rent_overdue" string="Overdue Notices" company_dependent="1"
+                                 help="Email tenants when a rent invoice becomes overdue">
+                            <field name="rent_send_overdue_notice"/>
+                        </setting>
+                        <setting id="rent_expiry" string="Lease Expiry Alerts" company_dependent="1"
+                                 help="Flag leases as expiring this many days before their end date">
+                            <field name="rent_expiry_notice_days"/>
+                        </setting>
+                    </block>
+                </app>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="rent_config_settings_action" model="ir.actions.act_window">
+        <field name="name">Settings</field>
+        <field name="res_model">res.config.settings</field>
+        <field name="view_mode">form</field>
+        <field name="context">{'module': 'rent_management'}</field>
+    </record>
+</odoo>

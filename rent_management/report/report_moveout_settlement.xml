@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <template id="report_moveout_settlement_document">
+        <t t-set="o" t-value="lease"/>
+        <t t-call="web.external_layout">
+            <t t-set="address">
+                <div t-field="lease.tenant_id" t-options="{'widget': 'contact', 'fields': ['address', 'name'], 'no_marker': True}"/>
+            </t>
+            <div class="page">
+                <h2>Move-out Settlement - <span t-field="lease.name"/></h2>
+                <div class="row mt-3 mb-4">
+                    <div class="col-4"><strong>Unit:</strong> <span t-field="lease.unit_id"/></div>
+                    <div class="col-4"><strong>Lease period:</strong> <span t-field="lease.start_date"/> - <span t-field="lease.end_date"/></div>
+                    <div class="col-4"><strong>Move-out date:</strong> <span t-field="lease.moveout_date"/></div>
+                </div>
+                <table class="table table-sm">
+                    <tbody>
+                        <tr><td>Security deposit held</td><td class="text-end"><span t-field="lease.deposit_amount"/></td></tr>
+                        <tr><td>Less: damage charges</td><td class="text-end">- <span t-field="lease.moveout_damage_charges"/></td></tr>
+                        <tr t-if="lease.moveout_electricity_charges"><td>Less: final electricity charges</td><td class="text-end">- <span t-field="lease.moveout_electricity_charges"/></td></tr>
+                        <tr><td>Less: unpaid dues</td><td class="text-end">- <span t-field="lease.moveout_unpaid_dues"/></td></tr>
+                        <tr class="fw-bold border-top"><td>Refund to tenant</td><td class="text-end"><span t-field="lease.deposit_refunded_amount"/></td></tr>
+                    </tbody>
+                </table>
+                <div t-if="lease.moveout_deduction_note">
+                    <strong>Deduction details</strong>
+                    <p t-field="lease.moveout_deduction_note"/>
+                </div>
+                <div class="row mt-5 pt-5">
+                    <div class="col-6 text-center"><p>______________________________</p><p>Landlord</p></div>
+                    <div class="col-6 text-center"><p>______________________________</p><p>Tenant</p></div>
+                </div>
+            </div>
+        </t>
+    </template>
+
+    <template id="report_moveout_settlement">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="lease">
+                <t t-call="rent_management.report_moveout_settlement_document" t-lang="lease.tenant_id.lang"/>
+            </t>
+        </t>
+    </template>
+</odoo>

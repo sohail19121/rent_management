@@ -1,0 +1,255 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="rent_lease_view_list" model="ir.ui.view">
+        <field name="name">rent.lease.view.list</field>
+        <field name="model">rent.lease</field>
+        <field name="arch" type="xml">
+            <list decoration-warning="state == 'expiring'" decoration-muted="state in ('expired', 'terminated', 'renewed', 'cancelled')">
+                <field name="name"/>
+                <field name="tenant_id"/>
+                <field name="property_id"/>
+                <field name="unit_id"/>
+                <field name="start_date"/>
+                <field name="end_date"/>
+                <field name="rent_amount" sum="Total"/>
+                <field name="billing_frequency" optional="hide"/>
+                <field name="next_invoice_date" optional="show"/>
+                <field name="amount_due" sum="Total Due" optional="show" groups="rent_management.group_rent_accountant"/>
+                <field name="deposit_status" optional="hide"/>
+                <field name="state" widget="badge"
+                       decoration-info="state in ('draft', 'confirmed')" decoration-success="state == 'active'"
+                       decoration-warning="state == 'expiring'" decoration-danger="state in ('expired', 'terminated')"/>
+                <field name="currency_id" column_invisible="1"/>
+                <field name="company_id" groups="base.group_multi_company" optional="hide"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="rent_lease_view_form" model="ir.ui.view">
+        <field name="name">rent.lease.view.form</field>
+        <field name="model">rent.lease</field>
+        <field name="arch" type="xml">
+            <form>
+                <header>
+                    <button name="action_confirm" type="object" string="Confirm" class="oe_highlight" invisible="state != 'draft'"/>
+                    <button name="action_activate" type="object" string="Activate (Move-in)" class="oe_highlight" invisible="state != 'confirmed'"/>
+                    <button name="action_generate_invoice" type="object" string="Generate Invoice Now"
+                            invisible="state not in ('active', 'expiring')" groups="rent_management.group_rent_accountant"/>
+                    <button name="action_create_deposit_invoice" type="object" string="Invoice Deposit"
+                            invisible="state not in ('confirmed', 'active', 'expiring') or deposit_invoice_id or not deposit_amount"
+                            groups="rent_management.group_rent_accountant"/>
+                    <button name="action_request_signature" type="object" string="Request Signature" invisible="signed or state != 'confirmed'"/>
+                    <button name="action_renew" type="object" string="Renew" invisible="state not in ('active', 'expiring', 'expired')"/>
+                    <button name="action_open_moveout_wizard" type="object" string="Terminate / Move-out"
+                            invisible="state not in ('active', 'expiring', 'expired')"/>
+                    <button name="action_cancel" type="object" string="Cancel" invisible="state not in ('draft', 'confirmed')"/>
+                    <button name="action_draft" type="object" string="Reset to Draft" invisible="state != 'cancelled'"/>
+                    <field name="state" widget="statusbar" statusbar_visible="draft,confirmed,active,expiring,expired"/>
+                </header>
+                <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button name="action_view_invoices" type="object" class="oe_stat_button" icon="receipt_long"
+                                invisible="not invoice_count" groups="rent_management.group_rent_accountant">
+                            <field name="invoice_count" widget="statinfo" string="Invoices"/>
+                        </button>
+                        <button name="action_view_electricity" type="object" class="oe_stat_button" icon="flash_on"
+                                invisible="electricity_billing != 'metered'">
+                            <field name="electricity_reading_count" widget="statinfo" string="Meter Readings"/>
+                        </button>
+                        <button name="action_view_maintenance" type="object" class="oe_stat_button" icon="build">
+                            <field name="maintenance_count" widget="statinfo" string="Maintenance"/>
+                        </button>
+                    </div>
+                    <widget name="web_ribbon" title="Signed" bg_color="text-bg-success" invisible="not signed"/>
+                    <div class="oe_title">
+                        <h1><field name="name"/></h1>
+                    </div>
+                    <group>
+                        <group name="parties">
+                            <field name="tenant_id" context="{'default_is_tenant': True}" readonly="state not in ('draft', 'confirmed')"/>
+                            <field name="unit_id" readonly="state != 'draft'"/>
+                            <field name="property_id"/>
+                            <field name="manager_id" widget="many2one_avatar_user"/>
+                        </group>
+                        <group name="period">
+                            <field name="start_date" readonly="state != 'draft'"/>
+                            <field name="end_date" readonly="state not in ('draft', 'confirmed')"/>
+                            <field name="duration_months"/>
+                            <field name="renewed_from_id" invisible="not renewed_from_id"/>
+                            <field name="company_id" groups="base.group_multi_company" readonly="state != 'draft'"/>
+                            <field name="currency_id" invisible="1"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page name="terms" string="Terms">
+                            <group>
+                                <group string="Rent">
+                                    <field name="rent_amount" readonly="state not in ('draft', 'confirmed')"/>
+                                    <field name="maintenance_charge"/>
+                                    <field name="notice_period_days"/>
+                                </group>
+                                <group string="Escalation">
+                                    <field name="escalation_percent"/>
+                                    <field name="escalation_every_months" invisible="not escalation_percent"/>
+                                    <field name="next_escalation_date" invisible="not escalation_percent"/>
+                                </group>
+                            </group>
+                            <field name="notes" placeholder="Additional terms and conditions..."/>
+                        </page>
+                        <page name="billing" string="Billing">
+                            <group>
+                                <group string="Schedule">
+                                    <field name="billing_frequency"/>
+                                    <field name="billing_day"/>
+                                    <field name="next_invoice_date"/>
+                                    <field name="amount_due" groups="rent_management.group_rent_accountant"/>
+                                </group>
+                                <group string="Late Fees">
+                                    <field name="late_fee_type"/>
+                                    <field name="late_fee_value"/>
+                                    <field name="grace_days"/>
+                                </group>
+                                <group string="Electricity" name="electricity">
+                                    <field name="electricity_billing"/>
+                                    <field name="electricity_rate" invisible="electricity_billing != 'metered'"/>
+                                    <field name="electricity_fixed_amount" invisible="electricity_billing == 'none'"
+                                           string="Fixed Amount / Meter Charge"/>
+                                    <field name="electricity_opening_reading" invisible="electricity_billing != 'metered'"/>
+                                </group>
+                            </group>
+                        </page>
+                        <page name="deposit" string="Deposit">
+                            <group>
+                                <group>
+                                    <field name="deposit_amount" readonly="deposit_invoice_id"/>
+                                    <field name="deposit_status" widget="badge"/>
+                                    <field name="deposit_invoice_id" groups="rent_management.group_rent_accountant"/>
+                                </group>
+                                <group invisible="not deposit_settled" string="Move-out Settlement">
+                                    <field name="moveout_date"/>
+                                    <field name="moveout_damage_charges"/>
+                                    <field name="moveout_unpaid_dues"/>
+                                    <field name="moveout_electricity_charges" invisible="not moveout_electricity_charges"/>
+                                    <field name="deposit_refunded_amount"/>
+                                    <field name="deposit_refund_id" groups="rent_management.group_rent_accountant"/>
+                                    <field name="moveout_deduction_note"/>
+                                    <field name="deposit_settled" invisible="1"/>
+                                </group>
+                            </group>
+                        </page>
+                        <page name="invoices" string="Invoices" groups="rent_management.group_rent_accountant">
+                            <field name="invoice_ids" readonly="1">
+                                <list>
+                                    <field name="name"/>
+                                    <field name="rent_invoice_type"/>
+                                    <field name="invoice_date"/>
+                                    <field name="invoice_date_due"/>
+                                    <field name="amount_total_signed" string="Total" sum="Total"/>
+                                    <field name="amount_residual_signed" string="Amount Due" sum="Due"/>
+                                    <field name="payment_state" widget="badge"/>
+                                    <field name="state" column_invisible="1"/>
+                                    <field name="company_currency_id" column_invisible="1"/>
+                                </list>
+                            </field>
+                        </page>
+                        <page name="electricity" string="Electricity" invisible="electricity_billing != 'metered'">
+                            <field name="electricity_reading_ids" context="{'default_lease_id': id}">
+                                <list editable="bottom">
+                                    <field name="period_start"/>
+                                    <field name="period_end"/>
+                                    <field name="previous_reading"/>
+                                    <field name="current_reading"/>
+                                    <field name="consumption" sum="kWh"/>
+                                    <field name="amount" sum="Total"/>
+                                    <field name="state" widget="badge" decoration-info="state == 'draft'"
+                                           decoration-warning="state == 'confirmed'" decoration-success="state == 'invoiced'"/>
+                                    <field name="currency_id" column_invisible="1"/>
+                                </list>
+                            </field>
+                        </page>
+                        <page name="maintenance" string="Maintenance">
+                            <field name="maintenance_request_ids" readonly="1">
+                                <list>
+                                    <field name="name"/>
+                                    <field name="category"/>
+                                    <field name="assigned_to"/>
+                                    <field name="cost"/>
+                                    <field name="charge_to"/>
+                                    <field name="state" widget="badge"/>
+                                    <field name="currency_id" column_invisible="1"/>
+                                </list>
+                            </field>
+                        </page>
+                        <page name="documents" string="Documents">
+                            <group>
+                                <field name="signed"/>
+                                <field name="agreement_attachment_id"
+                                       domain="[('res_model', '=', 'rent.lease'), ('res_id', '=', id)]"
+                                       context="{'default_res_model': 'rent.lease', 'default_res_id': id}"/>
+                            </group>
+                            <p class="text-muted">
+                                Upload the signed agreement in the chatter, then select it here. The tenant can download it from the portal.
+                            </p>
+                        </page>
+                    </notebook>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <record id="rent_lease_view_calendar" model="ir.ui.view">
+        <field name="name">rent.lease.view.calendar</field>
+        <field name="model">rent.lease</field>
+        <field name="arch" type="xml">
+            <calendar string="Lease End Dates" date_start="end_date" color="property_id" mode="month" quick_create="0" event_open_popup="1">
+                <field name="tenant_id"/>
+                <field name="unit_id"/>
+                <field name="state"/>
+            </calendar>
+        </field>
+    </record>
+
+    <record id="rent_lease_view_search" model="ir.ui.view">
+        <field name="name">rent.lease.view.search</field>
+        <field name="model">rent.lease</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="name"/>
+                <field name="tenant_id"/>
+                <field name="unit_id"/>
+                <field name="property_id"/>
+                <filter name="running" string="Running" domain="[('state', 'in', ('active', 'expiring'))]"/>
+                <filter name="draft" string="Draft" domain="[('state', '=', 'draft')]"/>
+                <filter name="confirmed" string="Confirmed" domain="[('state', '=', 'confirmed')]"/>
+                <filter name="expiring" string="Expiring" domain="[('state', '=', 'expiring')]"/>
+                <filter name="ended" string="Ended" domain="[('state', 'in', ('expired', 'terminated', 'renewed'))]"/>
+                <separator/>
+                <filter name="ending_30" string="Ending in 30 Days"
+                        domain="[('state', 'in', ('active', 'expiring')), ('end_date', '&lt;=', (context_today() + relativedelta(days=30)).strftime('%Y-%m-%d'))]"/>
+                <filter name="unsigned" string="Not Signed" domain="[('signed', '=', False)]"/>
+                <filter name="deposit_pending" string="Deposit Pending" domain="[('deposit_status', '=', 'pending'), ('deposit_amount', '>', 0)]"/>
+                <separator/>
+                <filter name="my_leases" string="My Properties" domain="[('property_id.manager_id', '=', uid)]"/>
+                <filter name="start_date" string="Start Date" date="start_date"/>
+                <filter name="end_date" string="End Date" date="end_date"/>
+                <group>
+                    <filter name="group_property" string="Property" context="{'group_by': 'property_id'}"/>
+                    <filter name="group_tenant" string="Tenant" context="{'group_by': 'tenant_id'}"/>
+                    <filter name="group_state" string="Status" context="{'group_by': 'state'}"/>
+                    <filter name="group_end" string="End Month" context="{'group_by': 'end_date:month'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="rent_lease_action" model="ir.actions.act_window">
+        <field name="name">Leases</field>
+        <field name="res_model">rent.lease</field>
+        <field name="view_mode">list,form,calendar</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">Create a lease agreement</p>
+            <p>Confirm it, activate it at move-in and rent is invoiced automatically.</p>
+        </field>
+    </record>
+</odoo>

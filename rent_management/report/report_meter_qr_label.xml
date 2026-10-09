@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="action_report_meter_qr_label" model="ir.actions.report">
+        <field name="name">Meter QR Labels</field>
+        <field name="model">rent.unit</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">rent_management.report_meter_qr_label</field>
+        <field name="print_report_name">'Meter QR - %s' % object.name</field>
+        <field name="binding_model_id" ref="model_rent_unit"/>
+        <field name="binding_type">report</field>
+    </record>
+
+    <template id="report_meter_qr_label">
+        <t t-call="web.html_container">
+            <t t-call="web.basic_layout">
+                <div class="page">
+                    <div class="row">
+                        <t t-foreach="docs" t-as="unit">
+                            <div class="col-4 mb-4" style="page-break-inside: avoid;">
+                                <div class="border rounded p-2 text-center">
+                                    <div class="fw-bold" t-out="unit.property_id.name"/>
+                                    <div class="fs-4 fw-bold" t-out="unit.name"/>
+                                    <img t-att-src="image_data_uri(unit.meter_qr_image)" style="width: 160px; height: 160px;" alt="Meter QR code"/>
+                                    <div>Meter <strong t-out="unit.meter_number or '-'"/></div>
+                                    <div class="small text-muted">Scan with your phone to enter the reading</div>
+                                </div>
+                            </div>
+                        </t>
+                    </div>
+                </div>
+            </t>
+        </t>
+    </template>
+</odoo>

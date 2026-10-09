@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo noupdate="1">
+    <record id="product_rent" model="product.product">
+        <field name="name">Rent</field>
+        <field name="type">service</field>
+        <field name="default_code">RENT</field>
+        <field name="list_price">0.0</field>
+        <field name="purchase_ok" eval="False"/>
+        <field name="taxes_id" eval="[Command.clear()]"/>
+    </record>
+    <record id="product_maintenance_charge" model="product.product">
+        <field name="name">Maintenance Charge</field>
+        <field name="type">service</field>
+        <field name="default_code">RENT-MAINT</field>
+        <field name="list_price">0.0</field>
+        <field name="taxes_id" eval="[Command.clear()]"/>
+    </record>
+    <record id="product_late_fee" model="product.product">
+        <field name="name">Late Fee</field>
+        <field name="type">service</field>
+        <field name="default_code">RENT-LATE</field>
+        <field name="list_price">0.0</field>
+        <field name="purchase_ok" eval="False"/>
+        <field name="taxes_id" eval="[Command.clear()]"/>
+    </record>
+    <record id="product_security_deposit" model="product.product">
+        <field name="name">Security Deposit</field>
+        <field name="type">service</field>
+        <field name="default_code">RENT-DEPOSIT</field>
+        <field name="list_price">0.0</field>
+        <field name="purchase_ok" eval="False"/>
+        <field name="taxes_id" eval="[Command.clear()]"/>
+    </record>
+    <record id="product_electricity" model="product.product">
+        <field name="name">Electricity Charges</field>
+        <field name="type">service</field>
+        <field name="default_code">RENT-ELEC</field>
+        <field name="list_price">0.0</field>
+        <field name="purchase_ok" eval="False"/>
+        <field name="taxes_id" eval="[Command.clear()]"/>
+    </record>
+</odoo>

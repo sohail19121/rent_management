@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_partner_form" model="ir.ui.view">
+        <field name="name">res.partner.view.form.inherit.rent.management</field>
+        <field name="model">res.partner</field>
+        <field name="inherit_id" ref="base.view_partner_form"/>
+        <field name="arch" type="xml">
+            <div name="button_box" position="inside">
+                <button name="action_view_leases" type="object" class="oe_stat_button" icon="contract"
+                        groups="rent_management.group_rent_user" invisible="not is_tenant">
+                    <field name="lease_count" widget="statinfo" string="Leases"/>
+                </button>
+            </div>
+            <page name="internal_notes" position="before">
+                <page name="rent_tenant" string="Rent" groups="rent_management.group_rent_user">
+                    <group>
+                        <group name="rent_roles" string="Roles">
+                            <field name="is_tenant"/>
+                            <field name="is_owner"/>
+                            <field name="rent_total_due" invisible="not is_tenant"/>
+                        </group>
+                        <group name="rent_emergency" string="Emergency Contact" invisible="not is_tenant">
+                            <field name="emergency_contact_name" string="Name"/>
+                            <field name="emergency_contact_phone" string="Phone" widget="phone"/>
+                        </group>
+                    </group>
+                    <group name="rent_kyc" string="KYC" invisible="not is_tenant">
+                        <group>
+                            <field name="kyc_id_type"/>
+                            <field name="kyc_id_number"/>
+                            <field name="kyc_verified"/>
+                        </group>
+                        <group>
+                            <field name="kyc_document_ids" widget="many2many_binary"/>
+                        </group>
+                    </group>
+                </page>
+            </page>
+        </field>
+    </record>
+
+    <record id="res_partner_view_list_tenant" model="ir.ui.view">
+        <field name="name">res.partner.view.list.tenant</field>
+        <field name="model">res.partner</field>
+        <field name="mode">primary</field>
+        <field name="priority">100</field>
+        <field name="arch" type="xml">
+            <list>
+                <field name="name"/>
+                <field name="phone"/>
+                <field name="email"/>
+                <field name="city" optional="show"/>
+                <field name="kyc_verified" widget="boolean_toggle" readonly="1"/>
+                <field name="lease_count"/>
+                <field name="rent_total_due" sum="Total Due"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="res_partner_view_search_tenant" model="ir.ui.view">
+        <field name="name">res.partner.view.search.tenant</field>
+        <field name="model">res.partner</field>
+        <field name="inherit_id" ref="base.view_res_partner_filter"/>
+        <field name="arch" type="xml">
+            <filter name="filter_vat_set" position="after">
+                <separator/>
+                <filter name="tenants" string="Tenants" domain="[('is_tenant', '=', True)]"/>
+                <filter name="owners" string="Property Owners" domain="[('is_owner', '=', True)]"/>
+            </filter>
+        </field>
+    </record>
+
+    <record id="res_partner_action_tenant" model="ir.actions.act_window">
+        <field name="name">Tenants</field>
+        <field name="res_model">res.partner</field>
+        <field name="view_mode">list,kanban,form</field>
+        <field name="domain">[('is_tenant', '=', True)]</field>
+        <field name="context">{'default_is_tenant': True, 'default_is_company': False}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">Add a tenant</p>
+        </field>
+    </record>
+    <record id="res_partner_action_tenant_view_list" model="ir.actions.act_window.view">
+        <field name="sequence">1</field>
+        <field name="view_mode">list</field>
+        <field name="view_id" ref="res_partner_view_list_tenant"/>
+        <field name="act_window_id" ref="res_partner_action_tenant"/>
+    </record>
+
+    <record id="res_partner_action_owner" model="ir.actions.act_window">
+        <field name="name">Property Owners</field>
+        <field name="res_model">res.partner</field>
+        <field name="view_mode">list,kanban,form</field>
+        <field name="domain">[('is_owner', '=', True)]</field>
+        <field name="context">{'default_is_owner': True}</field>
+    </record>
+</odoo>

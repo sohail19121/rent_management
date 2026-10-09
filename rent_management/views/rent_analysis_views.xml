@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Rent collection by property and month -->
+    <record id="account_move_view_pivot_rent" model="ir.ui.view">
+        <field name="name">account.move.view.pivot.rent</field>
+        <field name="model">account.move</field>
+        <field name="arch" type="xml">
+            <pivot string="Rent Collection" sample="1">
+                <field name="rent_property_id" type="row"/>
+                <field name="invoice_date" interval="month" type="col"/>
+                <field name="amount_total_signed" string="Billed" type="measure"/>
+                <field name="amount_residual_signed" string="Outstanding" type="measure"/>
+            </pivot>
+        </field>
+    </record>
+
+    <record id="account_move_view_graph_rent" model="ir.ui.view">
+        <field name="name">account.move.view.graph.rent</field>
+        <field name="model">account.move</field>
+        <field name="arch" type="xml">
+            <graph string="Rent Collection" type="bar" stacked="1" sample="1">
+                <field name="invoice_date" interval="month"/>
+                <field name="rent_property_id"/>
+                <field name="amount_total_signed" string="Billed" type="measure"/>
+            </graph>
+        </field>
+    </record>
+
+    <record id="rent_collection_action" model="ir.actions.act_window">
+        <field name="name">Rent Collection</field>
+        <field name="res_model">account.move</field>
+        <field name="view_mode">pivot,graph,list,form</field>
+        <field name="search_view_id" ref="account_move_view_search_rent"/>
+        <field name="domain">[('rent_lease_id', '!=', False), ('state', '=', 'posted'), ('move_type', '=', 'out_invoice')]</field>
+        <field name="context">{'create': False}</field>
+    </record>
+    <record id="rent_collection_action_view_pivot" model="ir.actions.act_window.view">
+        <field name="sequence">1</field>
+        <field name="view_mode">pivot</field>
+        <field name="view_id" ref="account_move_view_pivot_rent"/>
+        <field name="act_window_id" ref="rent_collection_action"/>
+    </record>
+    <record id="rent_collection_action_view_graph" model="ir.actions.act_window.view">
+        <field name="sequence">2</field>
+        <field name="view_mode">graph</field>
+        <field name="view_id" ref="account_move_view_graph_rent"/>
+        <field name="act_window_id" ref="rent_collection_action"/>
+    </record>
+
+    <!-- Occupancy by property -->
+    <record id="rent_unit_view_pivot" model="ir.ui.view">
+        <field name="name">rent.unit.view.pivot</field>
+        <field name="model">rent.unit</field>
+        <field name="arch" type="xml">
+            <pivot string="Occupancy" sample="1">
+                <field name="property_id" type="row"/>
+                <field name="state" type="col"/>
+                <field name="base_rent" type="measure"/>
+            </pivot>
+        </field>
+    </record>
+
+    <record id="rent_unit_view_graph" model="ir.ui.view">
+        <field name="name">rent.unit.view.graph</field>
+        <field name="model">rent.unit</field>
+        <field name="arch" type="xml">
+            <graph string="Occupancy" type="bar" stacked="1" sample="1">
+                <field name="property_id"/>
+                <field name="state"/>
+            </graph>
+        </field>
+    </record>
+
+    <record id="rent_occupancy_action" model="ir.actions.act_window">
+        <field name="name">Occupancy</field>
+        <field name="res_model">rent.unit</field>
+        <field name="view_mode">graph,pivot,list,form</field>
+        <field name="search_view_id" ref="rent_unit_view_search"/>
+        <field name="context">{'create': False}</field>
+    </record>
+    <record id="rent_occupancy_action_view_graph" model="ir.actions.act_window.view">
+        <field name="sequence">1</field>
+        <field name="view_mode">graph</field>
+        <field name="view_id" ref="rent_unit_view_graph"/>
+        <field name="act_window_id" ref="rent_occupancy_action"/>
+    </record>
+    <record id="rent_occupancy_action_view_pivot" model="ir.actions.act_window.view">
+        <field name="sequence">2</field>
+        <field name="view_mode">pivot</field>
+        <field name="view_id" ref="rent_unit_view_pivot"/>
+        <field name="act_window_id" ref="rent_occupancy_action"/>
+    </record>
+</odoo>

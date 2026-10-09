@@ -1,0 +1,27 @@
+id,name,model_id,group_id/id,operation,domain
+access_rent_amenity_user,rent.amenity.user,rent.amenity,group_rent_user,r,
+access_rent_amenity_admin,rent.amenity.admin,rent.amenity,group_rent_admin,crud,
+access_rent_property_user,rent.property.user,rent.property,group_rent_user,crud,"[('manager_id', '=', user.id)]"
+access_rent_property_accountant,rent.property.accountant,rent.property,group_rent_accountant,r,
+access_rent_property_admin,rent.property.admin,rent.property,group_rent_admin,crud,
+access_rent_unit_user,rent.unit.user,rent.unit,group_rent_user,crud,"[('property_id.manager_id', '=', user.id)]"
+access_rent_unit_accountant,rent.unit.accountant,rent.unit,group_rent_accountant,r,
+access_rent_unit_admin,rent.unit.admin,rent.unit,group_rent_admin,crud,
+access_rent_lease_user,rent.lease.user,rent.lease,group_rent_user,crud,"[('property_id.manager_id', '=', user.id)]"
+access_rent_lease_accountant,rent.lease.accountant,rent.lease,group_rent_accountant,ru,
+access_rent_lease_admin,rent.lease.admin,rent.lease,group_rent_admin,crud,
+access_rent_lease_portal,rent.lease.portal,rent.lease,base.group_portal,r,"[('tenant_id', 'child_of', user.commercial_partner_id.id), ('state', '!=', 'draft')]"
+access_rent_maintenance_request_user,rent.maintenance.request.user,rent.maintenance.request,group_rent_user,crud,"['|', ('unit_id.property_id.manager_id', '=', user.id), ('assigned_to', '=', user.id)]"
+access_rent_maintenance_request_accountant,rent.maintenance.request.accountant,rent.maintenance.request,group_rent_accountant,ru,
+access_rent_maintenance_request_admin,rent.maintenance.request.admin,rent.maintenance.request,group_rent_admin,crud,
+access_rent_maintenance_request_portal,rent.maintenance.request.portal,rent.maintenance.request,base.group_portal,r,"[('tenant_id', 'child_of', user.commercial_partner_id.id)]"
+access_rent_electricity_reading_user,rent.electricity.reading.user,rent.electricity.reading,group_rent_user,crud,"[('property_id.manager_id', '=', user.id)]"
+access_rent_electricity_reading_accountant,rent.electricity.reading.accountant,rent.electricity.reading,group_rent_accountant,cru,
+access_rent_electricity_reading_admin,rent.electricity.reading.admin,rent.electricity.reading,group_rent_admin,crud,
+access_rent_electricity_reading_portal,rent.electricity.reading.portal,rent.electricity.reading,base.group_portal,r,"[('tenant_id', 'child_of', user.commercial_partner_id.id), ('state', 'in', ('confirmed', 'invoiced'))]"
+access_rent_moveout_wizard_user,rent.moveout.wizard.user,rent.moveout.wizard,group_rent_user,crud,
+access_rent_property_company,rent.property.company,rent.property,,crud,"[('company_id', 'in', company_ids + [False])]"
+access_rent_unit_company,rent.unit.company,rent.unit,,crud,"[('company_id', 'in', company_ids + [False])]"
+access_rent_lease_company,rent.lease.company,rent.lease,,crud,"[('company_id', 'in', company_ids)]"
+access_rent_maintenance_request_company,rent.maintenance.request.company,rent.maintenance.request,,crud,"[('company_id', 'in', company_ids)]"
+access_rent_electricity_reading_company,rent.electricity.reading.company,rent.electricity.reading,,crud,"[('company_id', 'in', company_ids)]"

@@ -1,0 +1,773 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- Amenities -->
+    <record id="amenity_parking" model="rent.amenity">
+        <field name="name">Parking</field>
+        <field name="icon">two_wheeler</field>
+    </record>
+    <record id="amenity_wifi" model="rent.amenity">
+        <field name="name">Wi-Fi</field>
+        <field name="icon">wifi</field>
+    </record>
+    <record id="amenity_security" model="rent.amenity">
+        <field name="name">24/7 Security</field>
+        <field name="icon">security</field>
+    </record>
+    <record id="amenity_power_backup" model="rent.amenity">
+        <field name="name">Power Backup</field>
+        <field name="icon">power</field>
+    </record>
+    <record id="amenity_lift" model="rent.amenity">
+        <field name="name">Lift</field>
+        <field name="icon">arrow_upward</field>
+    </record>
+    <record id="amenity_gym" model="rent.amenity">
+        <field name="name">Gym</field>
+        <field name="icon">sports_score</field>
+    </record>
+    <record id="amenity_pool" model="rent.amenity">
+        <field name="name">Swimming Pool</field>
+        <field name="icon">water_drop</field>
+    </record>
+    <record id="amenity_cctv" model="rent.amenity">
+        <field name="name">CCTV</field>
+        <field name="icon">videocam</field>
+    </record>
+    <record id="amenity_clubhouse" model="rent.amenity">
+        <field name="name">Clubhouse</field>
+        <field name="icon">group</field>
+    </record>
+    <record id="amenity_garden" model="rent.amenity">
+        <field name="name">Garden</field>
+        <field name="icon">park</field>
+    </record>
+
+    <!-- Owners -->
+    <record id="partner_owner" model="res.partner">
+        <field name="name">Rajesh Malhotra</field>
+        <field name="is_owner" eval="True"/>
+        <field name="email">rajesh.malhotra@example.com</field>
+        <field name="city">Pune</field>
+    </record>
+    <record id="partner_owner_2" model="res.partner">
+        <field name="name">Meera Iyer</field>
+        <field name="is_owner" eval="True"/>
+        <field name="email">meera.iyer@example.com</field>
+        <field name="city">Mumbai</field>
+    </record>
+    <record id="partner_owner_3" model="res.partner">
+        <field name="name">Sunrise Estates Pvt Ltd</field>
+        <field name="is_owner" eval="True"/>
+        <field name="email">info@sunrise-estates.example.com</field>
+        <field name="city">Bengaluru</field>
+        <field name="is_company" eval="True"/>
+    </record>
+
+    <!-- Tenants -->
+    <record id="partner_tenant_1" model="res.partner">
+        <field name="name">Ananya Sharma</field>
+        <field name="is_tenant" eval="True"/>
+        <field name="email">ananya.sharma@example.com</field>
+        <field name="phone">+91 98200 11111</field>
+        <field name="kyc_id_type">pan</field>
+        <field name="kyc_id_number">ABCPS1234K</field>
+        <field name="kyc_verified" eval="True"/>
+        <field name="emergency_contact_name">Vikram Sharma</field>
+        <field name="emergency_contact_phone">+91 98200 22222</field>
+    </record>
+    <record id="partner_tenant_2" model="res.partner">
+        <field name="name">Rohan Verma</field>
+        <field name="is_tenant" eval="True"/>
+        <field name="email">rohan.verma@example.com</field>
+        <field name="phone">+91 98200 33333</field>
+        <field name="kyc_id_type">aadhaar</field>
+        <field name="kyc_id_number">1234 5678 9012</field>
+        <field name="kyc_verified" eval="True"/>
+        <field name="emergency_contact_name">Neha Verma</field>
+        <field name="emergency_contact_phone">+91 98200 44444</field>
+    </record>
+    <record id="partner_tenant_3" model="res.partner">
+        <field name="name">Bright Bakes LLP</field>
+        <field name="is_tenant" eval="True"/>
+        <field name="email">accounts@brightbakes.example.com</field>
+        <field name="phone">+91 20 2567 1000</field>
+        <field name="kyc_id_type">other</field>
+        <field name="kyc_id_number">LLP-AAB-1234</field>
+        <field name="kyc_verified" eval="True"/>
+        <field name="is_company" eval="True"/>
+    </record>
+    <record id="partner_tenant_4" model="res.partner">
+        <field name="name">Karan Mehta</field>
+        <field name="is_tenant" eval="True"/>
+        <field name="email">karan.mehta@example.com</field>
+        <field name="phone">+91 98200 55555</field>
+        <field name="kyc_id_type">passport</field>
+        <field name="kyc_id_number">Z1234567</field>
+        <field name="kyc_verified" eval="True"/>
+        <field name="emergency_contact_name">Pooja Mehta</field>
+        <field name="emergency_contact_phone">+91 98200 66666</field>
+    </record>
+    <record id="partner_tenant_5" model="res.partner">
+        <field name="name">Nimbus Tech Solutions</field>
+        <field name="is_tenant" eval="True"/>
+        <field name="email">admin@nimbustech.example.com</field>
+        <field name="phone">+91 80 4123 4567</field>
+        <field name="kyc_id_type">pan</field>
+        <field name="kyc_id_number">AAFCN1234Q</field>
+        <field name="kyc_verified" eval="True"/>
+        <field name="is_company" eval="True"/>
+    </record>
+    <record id="partner_tenant_6" model="res.partner">
+        <field name="name">Priya Nair</field>
+        <field name="is_tenant" eval="True"/>
+        <field name="email">priya.nair@example.com</field>
+        <field name="phone">+91 98200 77777</field>
+        <field name="kyc_id_type">aadhaar</field>
+        <field name="kyc_id_number">2345 6789 0123</field>
+        <field name="kyc_verified" eval="True"/>
+        <field name="emergency_contact_name">Arun Nair</field>
+        <field name="emergency_contact_phone">+91 98200 88888</field>
+    </record>
+    <record id="partner_tenant_7" model="res.partner">
+        <field name="name">Siddharth Rao</field>
+        <field name="is_tenant" eval="True"/>
+        <field name="email">siddharth.rao@example.com</field>
+        <field name="phone">+91 98200 99999</field>
+        <field name="kyc_id_type">pan</field>
+        <field name="kyc_id_number">BCDPR5678L</field>
+        <field name="kyc_verified" eval="False"/>
+        <field name="emergency_contact_name">Lakshmi Rao</field>
+        <field name="emergency_contact_phone">+91 98201 00000</field>
+    </record>
+    <record id="partner_tenant_8" model="res.partner">
+        <field name="name">Fatima Sheikh</field>
+        <field name="is_tenant" eval="True"/>
+        <field name="email">fatima.sheikh@example.com</field>
+        <field name="phone">+91 98201 11111</field>
+        <field name="kyc_id_type">aadhaar</field>
+        <field name="kyc_id_number">3456 7890 1234</field>
+        <field name="kyc_verified" eval="True"/>
+        <field name="emergency_contact_name">Imran Sheikh</field>
+        <field name="emergency_contact_phone">+91 98201 22222</field>
+    </record>
+    <record id="partner_tenant_9" model="res.partner">
+        <field name="name">Green Leaf Pharmacy</field>
+        <field name="is_tenant" eval="True"/>
+        <field name="email">orders@greenleaf.example.com</field>
+        <field name="phone">+91 22 2611 2233</field>
+        <field name="kyc_id_type">other</field>
+        <field name="kyc_id_number">GST27AAGFG1234</field>
+        <field name="kyc_verified" eval="False"/>
+        <field name="is_company" eval="True"/>
+    </record>
+    <record id="partner_tenant_10" model="res.partner">
+        <field name="name">Arjun Kapoor</field>
+        <field name="is_tenant" eval="True"/>
+        <field name="email">arjun.kapoor@example.com</field>
+        <field name="phone">+91 98201 33333</field>
+        <field name="kyc_id_type">passport</field>
+        <field name="kyc_id_number">Y7654321</field>
+        <field name="kyc_verified" eval="True"/>
+        <field name="emergency_contact_name">Ritu Kapoor</field>
+        <field name="emergency_contact_phone">+91 98201 44444</field>
+    </record>
+
+    <!-- Properties -->
+    <record id="property_green_park" model="rent.property">
+        <field name="name">Green Park Residency</field>
+        <field name="property_type">residential</field>
+        <field name="owner_id" ref="partner_owner"/>
+        <field name="manager_id" ref="base.user_admin"/>
+        <field name="street">12 MG Road</field>
+        <field name="city">Pune</field>
+        <field name="zip">411001</field>
+        <field name="country_id" ref="base.in"/>
+        <field name="amenity_ids" eval="[Command.set([ref('amenity_parking'), ref('amenity_wifi'), ref('amenity_security'), ref('amenity_lift')])]"/>
+    </record>
+    <record id="property_city_plaza" model="rent.property">
+        <field name="name">City Plaza</field>
+        <field name="property_type">commercial</field>
+        <field name="owner_id" ref="partner_owner"/>
+        <field name="manager_id" ref="base.user_admin"/>
+        <field name="street">45 FC Road</field>
+        <field name="city">Pune</field>
+        <field name="zip">411004</field>
+        <field name="country_id" ref="base.in"/>
+        <field name="amenity_ids" eval="[Command.set([ref('amenity_parking'), ref('amenity_power_backup'), ref('amenity_cctv')])]"/>
+    </record>
+    <record id="property_lake_view" model="rent.property">
+        <field name="name">Lake View Apartments</field>
+        <field name="property_type">residential</field>
+        <field name="owner_id" ref="partner_owner_2"/>
+        <field name="manager_id" ref="base.user_admin"/>
+        <field name="street">8 Powai Lake Road</field>
+        <field name="city">Mumbai</field>
+        <field name="zip">400076</field>
+        <field name="country_id" ref="base.in"/>
+        <field name="amenity_ids" eval="[Command.set([ref('amenity_pool'), ref('amenity_gym'), ref('amenity_lift'), ref('amenity_security')])]"/>
+    </record>
+    <record id="property_tech_park" model="rent.property">
+        <field name="name">Orion Tech Park</field>
+        <field name="property_type">commercial</field>
+        <field name="owner_id" ref="partner_owner_3"/>
+        <field name="manager_id" ref="base.user_admin"/>
+        <field name="street">100 Outer Ring Road</field>
+        <field name="city">Bengaluru</field>
+        <field name="zip">560103</field>
+        <field name="country_id" ref="base.in"/>
+        <field name="amenity_ids" eval="[Command.set([ref('amenity_parking'), ref('amenity_power_backup'), ref('amenity_cctv'), ref('amenity_wifi')])]"/>
+    </record>
+    <record id="property_palm_court" model="rent.property">
+        <field name="name">Palm Court</field>
+        <field name="property_type">mixed</field>
+        <field name="owner_id" ref="partner_owner_2"/>
+        <field name="manager_id" ref="base.user_admin"/>
+        <field name="street">22 Linking Road</field>
+        <field name="city">Mumbai</field>
+        <field name="zip">400050</field>
+        <field name="country_id" ref="base.in"/>
+        <field name="amenity_ids" eval="[Command.set([ref('amenity_lift'), ref('amenity_security'), ref('amenity_cctv')])]"/>
+    </record>
+    <record id="property_silver_oak" model="rent.property">
+        <field name="name">Silver Oak Villas</field>
+        <field name="property_type">residential</field>
+        <field name="owner_id" ref="partner_owner_3"/>
+        <field name="manager_id" ref="base.user_admin"/>
+        <field name="street">5 Whitefield Main Road</field>
+        <field name="city">Bengaluru</field>
+        <field name="zip">560066</field>
+        <field name="country_id" ref="base.in"/>
+        <field name="amenity_ids" eval="[Command.set([ref('amenity_garden'), ref('amenity_clubhouse'), ref('amenity_pool'), ref('amenity_security')])]"/>
+    </record>
+    <record id="property_market_square" model="rent.property">
+        <field name="name">Market Square</field>
+        <field name="property_type">commercial</field>
+        <field name="owner_id" ref="partner_owner"/>
+        <field name="manager_id" ref="base.user_admin"/>
+        <field name="street">3 Laxmi Road</field>
+        <field name="city">Pune</field>
+        <field name="zip">411030</field>
+        <field name="country_id" ref="base.in"/>
+        <field name="amenity_ids" eval="[Command.set([ref('amenity_parking'), ref('amenity_cctv')])]"/>
+    </record>
+    <record id="property_hill_crest" model="rent.property">
+        <field name="name">Hill Crest Homes</field>
+        <field name="property_type">residential</field>
+        <field name="owner_id" ref="partner_owner_2"/>
+        <field name="manager_id" ref="base.user_admin"/>
+        <field name="street">17 Bandra West</field>
+        <field name="city">Mumbai</field>
+        <field name="zip">400050</field>
+        <field name="country_id" ref="base.in"/>
+        <field name="amenity_ids" eval="[Command.set([ref('amenity_garden'), ref('amenity_security'), ref('amenity_wifi')])]"/>
+    </record>
+    <record id="property_riverside" model="rent.property">
+        <field name="name">Riverside Warehouses</field>
+        <field name="property_type">commercial</field>
+        <field name="owner_id" ref="partner_owner_3"/>
+        <field name="manager_id" ref="base.user_admin"/>
+        <field name="street">Plot 9 Peenya Industrial Area</field>
+        <field name="city">Bengaluru</field>
+        <field name="zip">560058</field>
+        <field name="country_id" ref="base.in"/>
+        <field name="amenity_ids" eval="[Command.set([ref('amenity_parking'), ref('amenity_security'), ref('amenity_power_backup')])]"/>
+    </record>
+    <record id="property_sunshine" model="rent.property">
+        <field name="name">Sunshine Co-Living</field>
+        <field name="property_type">residential</field>
+        <field name="owner_id" ref="partner_owner"/>
+        <field name="manager_id" ref="base.user_admin"/>
+        <field name="street">44 Koregaon Park</field>
+        <field name="city">Pune</field>
+        <field name="zip">411001</field>
+        <field name="country_id" ref="base.in"/>
+        <field name="amenity_ids" eval="[Command.set([ref('amenity_wifi'), ref('amenity_gym'), ref('amenity_clubhouse')])]"/>
+    </record>
+
+    <!-- Units -->
+    <record id="unit_gp_a101" model="rent.unit">
+        <field name="meter_number">MTR-100231</field>
+        <field name="name">A-101</field>
+        <field name="property_id" ref="property_green_park"/>
+        <field name="floor">1</field>
+        <field name="unit_type">flat</field>
+        <field name="area_sqft">850</field>
+        <field name="bedrooms">2</field>
+        <field name="furnishing">semi</field>
+        <field name="base_rent">18000</field>
+        <field name="deposit_amount">54000</field>
+        <field name="maintenance_charge">1500</field>
+    </record>
+    <record id="unit_gp_a102" model="rent.unit">
+        <field name="meter_number">MTR-100248</field>
+        <field name="name">A-102</field>
+        <field name="property_id" ref="property_green_park"/>
+        <field name="floor">1</field>
+        <field name="unit_type">flat</field>
+        <field name="area_sqft">1100</field>
+        <field name="bedrooms">3</field>
+        <field name="furnishing">full</field>
+        <field name="base_rent">25000</field>
+        <field name="deposit_amount">75000</field>
+        <field name="maintenance_charge">2000</field>
+    </record>
+    <record id="unit_gp_b201" model="rent.unit">
+        <field name="meter_number">MTR-100265</field>
+        <field name="name">B-201</field>
+        <field name="property_id" ref="property_green_park"/>
+        <field name="floor">2</field>
+        <field name="unit_type">flat</field>
+        <field name="area_sqft">650</field>
+        <field name="bedrooms">1</field>
+        <field name="furnishing">unfurnished</field>
+        <field name="base_rent">12000</field>
+        <field name="deposit_amount">36000</field>
+        <field name="maintenance_charge">1000</field>
+    </record>
+    <record id="unit_gp_b202" model="rent.unit">
+        <field name="meter_number">MTR-100282</field>
+        <field name="name">B-202</field>
+        <field name="property_id" ref="property_green_park"/>
+        <field name="floor">2</field>
+        <field name="unit_type">room</field>
+        <field name="area_sqft">300</field>
+        <field name="bedrooms">1</field>
+        <field name="furnishing">unfurnished</field>
+        <field name="base_rent">7000</field>
+        <field name="deposit_amount">14000</field>
+        <field name="maintenance_charge">0</field>
+        <field name="under_maintenance" eval="True"/>
+    </record>
+    <record id="unit_cp_s01" model="rent.unit">
+        <field name="meter_number">MTR-100299</field>
+        <field name="name">Shop 01</field>
+        <field name="property_id" ref="property_city_plaza"/>
+        <field name="floor">Ground</field>
+        <field name="unit_type">shop</field>
+        <field name="area_sqft">400</field>
+        <field name="furnishing">unfurnished</field>
+        <field name="base_rent">35000</field>
+        <field name="deposit_amount">105000</field>
+        <field name="maintenance_charge">3000</field>
+    </record>
+    <record id="unit_cp_o301" model="rent.unit">
+        <field name="meter_number">MTR-100316</field>
+        <field name="name">Office 301</field>
+        <field name="property_id" ref="property_city_plaza"/>
+        <field name="floor">3</field>
+        <field name="unit_type">office</field>
+        <field name="area_sqft">1200</field>
+        <field name="furnishing">semi</field>
+        <field name="base_rent">60000</field>
+        <field name="deposit_amount">180000</field>
+        <field name="maintenance_charge">5000</field>
+    </record>
+    <record id="unit_lv_701" model="rent.unit">
+        <field name="meter_number">MTR-100333</field>
+        <field name="name">LV-701</field>
+        <field name="property_id" ref="property_lake_view"/>
+        <field name="floor">7</field>
+        <field name="unit_type">flat</field>
+        <field name="area_sqft">1250</field>
+        <field name="bedrooms">3</field>
+        <field name="furnishing">full</field>
+        <field name="base_rent">55000</field>
+        <field name="deposit_amount">165000</field>
+        <field name="maintenance_charge">4000</field>
+    </record>
+    <record id="unit_tp_501" model="rent.unit">
+        <field name="meter_number">MTR-100350</field>
+        <field name="name">Suite 501</field>
+        <field name="property_id" ref="property_tech_park"/>
+        <field name="floor">5</field>
+        <field name="unit_type">office</field>
+        <field name="area_sqft">3000</field>
+        <field name="furnishing">full</field>
+        <field name="base_rent">150000</field>
+        <field name="deposit_amount">450000</field>
+        <field name="maintenance_charge">12000</field>
+    </record>
+    <record id="unit_pc_g02" model="rent.unit">
+        <field name="meter_number">MTR-100367</field>
+        <field name="name">PC-G02</field>
+        <field name="property_id" ref="property_palm_court"/>
+        <field name="floor">Ground</field>
+        <field name="unit_type">shop</field>
+        <field name="area_sqft">550</field>
+        <field name="furnishing">unfurnished</field>
+        <field name="base_rent">45000</field>
+        <field name="deposit_amount">135000</field>
+        <field name="maintenance_charge">2500</field>
+    </record>
+    <record id="unit_pc_302" model="rent.unit">
+        <field name="meter_number">MTR-100384</field>
+        <field name="name">PC-302</field>
+        <field name="property_id" ref="property_palm_court"/>
+        <field name="floor">3</field>
+        <field name="unit_type">flat</field>
+        <field name="area_sqft">900</field>
+        <field name="bedrooms">2</field>
+        <field name="furnishing">semi</field>
+        <field name="base_rent">38000</field>
+        <field name="deposit_amount">114000</field>
+        <field name="maintenance_charge">2500</field>
+    </record>
+    <record id="unit_so_v05" model="rent.unit">
+        <field name="meter_number">MTR-100401</field>
+        <field name="name">Villa 05</field>
+        <field name="property_id" ref="property_silver_oak"/>
+        <field name="floor">Ground</field>
+        <field name="unit_type">flat</field>
+        <field name="area_sqft">2400</field>
+        <field name="bedrooms">4</field>
+        <field name="furnishing">full</field>
+        <field name="base_rent">85000</field>
+        <field name="deposit_amount">255000</field>
+        <field name="maintenance_charge">6000</field>
+    </record>
+    <record id="unit_ms_s12" model="rent.unit">
+        <field name="meter_number">MTR-100418</field>
+        <field name="name">Shop 12</field>
+        <field name="property_id" ref="property_market_square"/>
+        <field name="floor">Ground</field>
+        <field name="unit_type">shop</field>
+        <field name="area_sqft">350</field>
+        <field name="furnishing">unfurnished</field>
+        <field name="base_rent">28000</field>
+        <field name="deposit_amount">84000</field>
+        <field name="maintenance_charge">1500</field>
+    </record>
+    <record id="unit_hc_204" model="rent.unit">
+        <field name="meter_number">MTR-100435</field>
+        <field name="name">HC-204</field>
+        <field name="property_id" ref="property_hill_crest"/>
+        <field name="floor">2</field>
+        <field name="unit_type">flat</field>
+        <field name="area_sqft">780</field>
+        <field name="bedrooms">2</field>
+        <field name="furnishing">semi</field>
+        <field name="base_rent">42000</field>
+        <field name="deposit_amount">126000</field>
+        <field name="maintenance_charge">2000</field>
+    </record>
+    <record id="unit_rs_w01" model="rent.unit">
+        <field name="meter_number">MTR-100452</field>
+        <field name="name">Warehouse 1</field>
+        <field name="property_id" ref="property_riverside"/>
+        <field name="floor">Ground</field>
+        <field name="unit_type">warehouse</field>
+        <field name="area_sqft">8000</field>
+        <field name="furnishing">unfurnished</field>
+        <field name="base_rent">120000</field>
+        <field name="deposit_amount">360000</field>
+        <field name="maintenance_charge">5000</field>
+    </record>
+    <record id="unit_sc_r11" model="rent.unit">
+        <field name="meter_number">MTR-100469</field>
+        <field name="name">Room 11</field>
+        <field name="property_id" ref="property_sunshine"/>
+        <field name="floor">1</field>
+        <field name="unit_type">room</field>
+        <field name="area_sqft">220</field>
+        <field name="bedrooms">1</field>
+        <field name="furnishing">full</field>
+        <field name="base_rent">14000</field>
+        <field name="deposit_amount">28000</field>
+        <field name="maintenance_charge">1000</field>
+    </record>
+
+    <!-- Leases -->
+    <record id="lease_1" model="rent.lease">
+        <field name="electricity_billing">metered</field>
+        <field name="electricity_rate">8.5</field>
+        <field name="electricity_fixed_amount">150</field>
+        <field name="electricity_opening_reading">4520</field>
+        <field name="tenant_id" ref="partner_tenant_1"/>
+        <field name="unit_id" ref="unit_gp_a101"/>
+        <field name="start_date" eval="(DateTime.today() - relativedelta(months=6)).strftime('%Y-%m-01')"/>
+        <field name="end_date" eval="(DateTime.today() + relativedelta(months=6)).strftime('%Y-%m-01')"/>
+        <field name="rent_amount">18000</field>
+        <field name="maintenance_charge">1500</field>
+        <field name="deposit_amount">54000</field>
+        <field name="billing_day">1</field>
+        <field name="next_invoice_date" eval="DateTime.today().strftime('%Y-%m-01')"/>
+        <field name="late_fee_type">fixed</field>
+        <field name="late_fee_value">500</field>
+        <field name="escalation_percent">5</field>
+        <field name="escalation_every_months">12</field>
+        <field name="signed" eval="True"/>
+        <field name="state">confirmed</field>
+    </record>
+    <record id="lease_2" model="rent.lease">
+        <field name="electricity_billing">fixed</field>
+        <field name="electricity_fixed_amount">2500</field>
+        <field name="tenant_id" ref="partner_tenant_3"/>
+        <field name="unit_id" ref="unit_cp_s01"/>
+        <field name="start_date" eval="(DateTime.today() - relativedelta(months=11, days=10)).strftime('%Y-%m-%d')"/>
+        <field name="end_date" eval="(DateTime.today() + relativedelta(days=20)).strftime('%Y-%m-%d')"/>
+        <field name="rent_amount">35000</field>
+        <field name="maintenance_charge">3000</field>
+        <field name="deposit_amount">105000</field>
+        <field name="billing_day">5</field>
+        <field name="next_invoice_date" eval="DateTime.today().strftime('%Y-%m-05')"/>
+        <field name="late_fee_type">percent</field>
+        <field name="late_fee_value">2</field>
+        <field name="grace_days">7</field>
+        <field name="state">confirmed</field>
+    </record>
+    <record id="lease_3" model="rent.lease">
+        <field name="tenant_id" ref="partner_tenant_2"/>
+        <field name="unit_id" ref="unit_gp_b201"/>
+        <field name="start_date" eval="(DateTime.today() + relativedelta(days=15)).strftime('%Y-%m-%d')"/>
+        <field name="end_date" eval="(DateTime.today() + relativedelta(days=15, years=1)).strftime('%Y-%m-%d')"/>
+        <field name="rent_amount">12000</field>
+        <field name="maintenance_charge">1000</field>
+        <field name="deposit_amount">36000</field>
+        <field name="billing_day">10</field>
+    </record>
+    <record id="lease_4" model="rent.lease">
+        <field name="electricity_billing">metered</field>
+        <field name="electricity_rate">8.5</field>
+        <field name="electricity_fixed_amount">150</field>
+        <field name="electricity_opening_reading">12030</field>
+        <field name="tenant_id" ref="partner_tenant_4"/>
+        <field name="unit_id" ref="unit_gp_a102"/>
+        <field name="start_date" eval="(DateTime.today() - relativedelta(months=3)).strftime('%Y-%m-%d')"/>
+        <field name="end_date" eval="(DateTime.today() + relativedelta(months=9)).strftime('%Y-%m-%d')"/>
+        <field name="rent_amount">25000</field>
+        <field name="maintenance_charge">2000</field>
+        <field name="deposit_amount">75000</field>
+        <field name="billing_day">1</field>
+        <field name="next_invoice_date" eval="DateTime.today().strftime('%Y-%m-01')"/>
+        <field name="late_fee_type">fixed</field>
+        <field name="late_fee_value">750</field>
+        <field name="signed" eval="True"/>
+        <field name="state">confirmed</field>
+    </record>
+    <record id="lease_5" model="rent.lease">
+        <field name="electricity_billing">metered</field>
+        <field name="electricity_rate">11</field>
+        <field name="electricity_fixed_amount">1200</field>
+        <field name="electricity_opening_reading">88210</field>
+        <field name="tenant_id" ref="partner_tenant_5"/>
+        <field name="unit_id" ref="unit_tp_501"/>
+        <field name="start_date" eval="(DateTime.today() - relativedelta(months=14)).strftime('%Y-%m-%d')"/>
+        <field name="end_date" eval="(DateTime.today() + relativedelta(months=22)).strftime('%Y-%m-%d')"/>
+        <field name="rent_amount">150000</field>
+        <field name="maintenance_charge">12000</field>
+        <field name="deposit_amount">450000</field>
+        <field name="billing_day">1</field>
+        <field name="billing_frequency">quarterly</field>
+        <field name="next_invoice_date" eval="DateTime.today().strftime('%Y-%m-01')"/>
+        <field name="escalation_percent">7</field>
+        <field name="escalation_every_months">12</field>
+        <field name="next_escalation_date" eval="(DateTime.today() - relativedelta(days=2)).strftime('%Y-%m-%d')"/>
+        <field name="late_fee_type">percent</field>
+        <field name="late_fee_value">1.5</field>
+        <field name="notice_period_days">90</field>
+        <field name="signed" eval="True"/>
+        <field name="state">confirmed</field>
+    </record>
+    <record id="lease_6" model="rent.lease">
+        <field name="electricity_billing">metered</field>
+        <field name="electricity_rate">9</field>
+        <field name="electricity_opening_reading">23110</field>
+        <field name="tenant_id" ref="partner_tenant_6"/>
+        <field name="unit_id" ref="unit_lv_701"/>
+        <field name="start_date" eval="(DateTime.today() - relativedelta(months=8)).strftime('%Y-%m-%d')"/>
+        <field name="end_date" eval="(DateTime.today() + relativedelta(months=4)).strftime('%Y-%m-%d')"/>
+        <field name="rent_amount">55000</field>
+        <field name="maintenance_charge">4000</field>
+        <field name="deposit_amount">165000</field>
+        <field name="billing_day">7</field>
+        <field name="next_invoice_date" eval="DateTime.today().strftime('%Y-%m-07')"/>
+        <field name="late_fee_type">fixed</field>
+        <field name="late_fee_value">1000</field>
+        <field name="state">confirmed</field>
+    </record>
+    <record id="lease_7" model="rent.lease">
+        <field name="tenant_id" ref="partner_tenant_7"/>
+        <field name="unit_id" ref="unit_pc_302"/>
+        <field name="start_date" eval="(DateTime.today() + relativedelta(days=10)).strftime('%Y-%m-%d')"/>
+        <field name="end_date" eval="(DateTime.today() + relativedelta(days=10, months=11)).strftime('%Y-%m-%d')"/>
+        <field name="rent_amount">38000</field>
+        <field name="maintenance_charge">2500</field>
+        <field name="deposit_amount">114000</field>
+        <field name="billing_day">15</field>
+        <field name="state">confirmed</field>
+    </record>
+    <record id="lease_8" model="rent.lease">
+        <field name="tenant_id" ref="partner_tenant_8"/>
+        <field name="unit_id" ref="unit_hc_204"/>
+        <field name="start_date" eval="(DateTime.today() - relativedelta(years=1, days=5)).strftime('%Y-%m-%d')"/>
+        <field name="end_date" eval="(DateTime.today() - relativedelta(days=5)).strftime('%Y-%m-%d')"/>
+        <field name="rent_amount">42000</field>
+        <field name="maintenance_charge">2000</field>
+        <field name="deposit_amount">126000</field>
+        <field name="billing_day">1</field>
+        <field name="state">confirmed</field>
+    </record>
+    <record id="lease_9" model="rent.lease">
+        <field name="tenant_id" ref="partner_tenant_9"/>
+        <field name="unit_id" ref="unit_ms_s12"/>
+        <field name="start_date" eval="(DateTime.today() + relativedelta(months=1)).strftime('%Y-%m-%d')"/>
+        <field name="end_date" eval="(DateTime.today() + relativedelta(months=1, years=3)).strftime('%Y-%m-%d')"/>
+        <field name="rent_amount">28000</field>
+        <field name="maintenance_charge">1500</field>
+        <field name="deposit_amount">84000</field>
+        <field name="billing_day">1</field>
+        <field name="state">confirmed</field>
+    </record>
+    <record id="lease_10" model="rent.lease">
+        <field name="electricity_billing">metered</field>
+        <field name="electricity_rate">9</field>
+        <field name="electricity_fixed_amount">300</field>
+        <field name="electricity_opening_reading">6400</field>
+        <field name="tenant_id" ref="partner_tenant_10"/>
+        <field name="unit_id" ref="unit_so_v05"/>
+        <field name="start_date" eval="(DateTime.today() - relativedelta(months=2)).strftime('%Y-%m-%d')"/>
+        <field name="end_date" eval="(DateTime.today() + relativedelta(months=10)).strftime('%Y-%m-%d')"/>
+        <field name="rent_amount">85000</field>
+        <field name="maintenance_charge">6000</field>
+        <field name="deposit_amount">255000</field>
+        <field name="billing_day">10</field>
+        <field name="next_invoice_date" eval="DateTime.today().strftime('%Y-%m-10')"/>
+        <field name="late_fee_type">fixed</field>
+        <field name="late_fee_value">2000</field>
+        <field name="grace_days">3</field>
+        <field name="signed" eval="True"/>
+        <field name="state">confirmed</field>
+    </record>
+
+    <function model="rent.lease" name="action_activate" eval="[[ref('lease_1'), ref('lease_2'), ref('lease_4'), ref('lease_5'), ref('lease_6'), ref('lease_10'), ref('lease_8')]]"/>
+    <function model="rent.lease" name="action_cancel" eval="[[ref('lease_9')]]"/>
+    <function model="rent.lease" name="_cron_expire_leases"/>
+    <function model="rent.lease" name="_cron_lease_expiry"/>
+    <function model="rent.lease" name="_cron_apply_escalation"/>
+
+    <!-- Electricity: last-but-one month confirmed, last month prepared by the monthly cron -->
+    <record id="electricity_reading_1" model="rent.electricity.reading">
+        <field name="lease_id" ref="lease_1"/>
+        <field name="period_start" eval="(DateTime.today() - relativedelta(months=2)).strftime('%Y-%m-01')"/>
+        <field name="period_end" eval="(DateTime.today().replace(day=1) - relativedelta(months=1) - relativedelta(days=1)).strftime('%Y-%m-%d')"/>
+        <field name="previous_reading">4520</field>
+        <field name="current_reading">4705</field>
+    </record>
+    <record id="electricity_reading_2" model="rent.electricity.reading">
+        <field name="lease_id" ref="lease_4"/>
+        <field name="period_start" eval="(DateTime.today() - relativedelta(months=2)).strftime('%Y-%m-01')"/>
+        <field name="period_end" eval="(DateTime.today().replace(day=1) - relativedelta(months=1) - relativedelta(days=1)).strftime('%Y-%m-%d')"/>
+        <field name="previous_reading">12030</field>
+        <field name="current_reading">12298</field>
+    </record>
+    <record id="electricity_reading_3" model="rent.electricity.reading">
+        <field name="lease_id" ref="lease_5"/>
+        <field name="period_start" eval="(DateTime.today() - relativedelta(months=2)).strftime('%Y-%m-01')"/>
+        <field name="period_end" eval="(DateTime.today().replace(day=1) - relativedelta(months=1) - relativedelta(days=1)).strftime('%Y-%m-%d')"/>
+        <field name="previous_reading">88210</field>
+        <field name="current_reading">91460</field>
+    </record>
+    <record id="electricity_reading_4" model="rent.electricity.reading">
+        <field name="lease_id" ref="lease_6"/>
+        <field name="period_start" eval="(DateTime.today() - relativedelta(months=2)).strftime('%Y-%m-01')"/>
+        <field name="period_end" eval="(DateTime.today().replace(day=1) - relativedelta(months=1) - relativedelta(days=1)).strftime('%Y-%m-%d')"/>
+        <field name="previous_reading">23110</field>
+        <field name="current_reading">23342</field>
+    </record>
+    <function model="rent.electricity.reading" name="action_confirm"
+              eval="[[ref('electricity_reading_1'), ref('electricity_reading_2'), ref('electricity_reading_3'), ref('electricity_reading_4')]]"/>
+    <function model="rent.lease" name="_cron_prepare_electricity_readings"/>
+
+    <!-- Maintenance requests -->
+    <record id="maintenance_1" model="rent.maintenance.request">
+        <field name="unit_id" ref="unit_gp_a101"/>
+        <field name="category">plumbing</field>
+        <field name="priority">2</field>
+        <field name="description"><![CDATA[<p>Kitchen sink is leaking.</p>]]></field>
+        <field name="charge_to">owner</field>
+        <field name="assigned_to" ref="base.user_admin"/>
+    </record>
+    <record id="maintenance_2" model="rent.maintenance.request">
+        <field name="unit_id" ref="unit_cp_s01"/>
+        <field name="category">electrical</field>
+        <field name="priority">1</field>
+        <field name="description"><![CDATA[<p>Signboard lights not working.</p>]]></field>
+        <field name="cost">2500</field>
+        <field name="charge_to">tenant</field>
+        <field name="state">in_progress</field>
+    </record>
+    <record id="maintenance_3" model="rent.maintenance.request">
+        <field name="unit_id" ref="unit_tp_501"/>
+        <field name="category">appliance</field>
+        <field name="priority">3</field>
+        <field name="description"><![CDATA[<p>Central AC unit on 5th floor not cooling.</p>]]></field>
+        <field name="cost">18000</field>
+        <field name="charge_to">owner</field>
+        <field name="assigned_to" ref="base.user_admin"/>
+        <field name="state">in_progress</field>
+    </record>
+    <record id="maintenance_4" model="rent.maintenance.request">
+        <field name="unit_id" ref="unit_lv_701"/>
+        <field name="category">plumbing</field>
+        <field name="priority">1</field>
+        <field name="description"><![CDATA[<p>Bathroom geyser replaced.</p>]]></field>
+        <field name="cost">6500</field>
+        <field name="charge_to">owner</field>
+        <field name="assigned_to" ref="base.user_admin"/>
+        <field name="state">done</field>
+    </record>
+    <record id="maintenance_5" model="rent.maintenance.request">
+        <field name="unit_id" ref="unit_gp_a102"/>
+        <field name="category">cleaning</field>
+        <field name="priority">0</field>
+        <field name="description"><![CDATA[<p>Deep cleaning before move-in.</p>]]></field>
+        <field name="cost">3000</field>
+        <field name="charge_to">owner</field>
+        <field name="state">done</field>
+    </record>
+    <record id="maintenance_6" model="rent.maintenance.request">
+        <field name="unit_id" ref="unit_so_v05"/>
+        <field name="category">electrical</field>
+        <field name="priority">2</field>
+        <field name="description"><![CDATA[<p>Frequent power trips in the living room.</p>]]></field>
+        <field name="charge_to">owner</field>
+        <field name="assigned_to" ref="base.user_admin"/>
+    </record>
+    <record id="maintenance_7" model="rent.maintenance.request">
+        <field name="unit_id" ref="unit_gp_b202"/>
+        <field name="category">other</field>
+        <field name="priority">1</field>
+        <field name="description"><![CDATA[<p>Wall seepage repair and repainting.</p>]]></field>
+        <field name="cost">12000</field>
+        <field name="charge_to">owner</field>
+        <field name="assigned_to" ref="base.user_admin"/>
+        <field name="state">in_progress</field>
+    </record>
+    <record id="maintenance_8" model="rent.maintenance.request">
+        <field name="unit_id" ref="unit_lv_701"/>
+        <field name="category">appliance</field>
+        <field name="priority">1</field>
+        <field name="description"><![CDATA[<p>Washing machine drain pump is noisy.</p>]]></field>
+        <field name="cost">1800</field>
+        <field name="charge_to">tenant</field>
+    </record>
+    <record id="maintenance_9" model="rent.maintenance.request">
+        <field name="unit_id" ref="unit_cp_o301"/>
+        <field name="category">cleaning</field>
+        <field name="priority">0</field>
+        <field name="description"><![CDATA[<p>Window cleaning (requested twice).</p>]]></field>
+        <field name="charge_to">owner</field>
+        <field name="state">cancelled</field>
+    </record>
+    <record id="maintenance_10" model="rent.maintenance.request">
+        <field name="unit_id" ref="unit_so_v05"/>
+        <field name="category">other</field>
+        <field name="priority">1</field>
+        <field name="description"><![CDATA[<p>Garden fence repaired.</p>]]></field>
+        <field name="cost">4200</field>
+        <field name="charge_to">owner</field>
+        <field name="assigned_to" ref="base.user_admin"/>
+        <field name="state">done</field>
+    </record>
+</odoo>

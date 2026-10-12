@@ -18,229 +18,595 @@
         </xpath>
     </template>
 
-    <!-- Leases -->
+    <!-- Leases, in the tenant design -->
+    <template id="tenant_lease_term" name="Lease Term Bar">
+        <div class="o_rp_term_bar">
+            <div><small>Start</small><strong t-field="term_lease.start_date"/></div>
+            <div class="o_rp_term_track">
+                <span class="o_rp_meter o_rp_meter_lg" role="meter" aria-label="Lease elapsed"
+                      t-att-aria-valuenow="term_values['progress']" aria-valuemin="0" aria-valuemax="100">
+                    <span class="o_rp_meter_fill" t-attf-style="width: {{ term_values['progress'] }}%"/>
+                </span>
+                <div class="o_rp_term_caption">
+                    <t t-out="term_values['progress']"/>% of <t t-out="term_values['months_total']"/> months
+                    <t t-if="term_lease.state in ('active', 'expiring', 'confirmed')"> · <strong><t t-out="term_values['days_left']"/> days left</strong></t>
+                </div>
+            </div>
+            <div class="text-end"><small>End</small><strong t-field="term_lease.end_date"/></div>
+        </div>
+    </template>
+
+    <template id="tenant_lease_status" name="Lease Status Pill">
+        <span t-attf-class="o_rp_status_pill {{ {'active': 'o_rp_status_good', 'expiring': 'o_rp_status_warning', 'confirmed': 'o_rp_status_info', 'terminated': 'o_rp_status_muted', 'expired': 'o_rp_status_muted', 'renewed': 'o_rp_status_info', 'cancelled': 'o_rp_status_muted'}.get(status_lease.state, 'o_rp_status_muted') }}">
+            <i class="oi" t-att-data-icon="{'active': 'check_circle', 'expiring': 'event_upcoming', 'confirmed': 'schedule', 'renewed': 'autorenew'}.get(status_lease.state, 'remove')"/>
+            <span t-field="status_lease.state"/>
+        </span>
+    </template>
+
     <template id="portal_my_leases" name="My Leases">
-        <t t-call="portal.portal_layout">
-            <t t-call="portal.portal_searchbar" breadcrumbs_searchbar="True" title.translate="Leases"/>
-            <p t-if="not leases" class="alert alert-warning">You have no lease yet.</p>
-            <t t-if="leases" t-call="portal.portal_table">
-                <thead>
-                    <tr>
-                        <th>Lease #</th>
-                        <th>Unit</th>
-                        <th class="d-none d-md-table-cell">Period</th>
-                        <th class="text-end">Rent</th>
-                        <th>Status</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr t-foreach="leases" t-as="lease">
-                        <td><a t-att-href="lease.get_portal_url()" t-out="lease.name"/></td>
-                        <td t-out="lease.unit_id.display_name"/>
-                        <td class="d-none d-md-table-cell"><span t-field="lease.start_date"/> - <span t-field="lease.end_date"/></td>
-                        <td class="text-end"><span t-field="lease.rent_amount"/></td>
-                        <td><span class="badge rounded-pill text-bg-secondary" t-field="lease.state"/></td>
-                    </tr>
-                </tbody>
+        <t t-call="rent_management.tenant_shell" page_title.translate="My leases"
+           page_subtitle.translate="Your homes, their terms and agreements, all in one place.">
+            <t t-set="money" t-value="{'widget': 'monetary', 'display_currency': currency}"/>
+
+            <section class="o_rp_stats">
+                <div class="o_rp_stat_card">
+                    <span class="o_rp_stat_text">
+                        <span class="o_rp_stat_number" t-out="running_count"/>
+                        <span class="o_rp_stat_caption">Active lease(s)</span>
+                    </span>
+                    <span class="o_rp_stat_badge o_rp_tint_primary"><i class="oi" data-icon="contract"/></span>
+                </div>
+                <div class="o_rp_stat_card">
+                    <span class="o_rp_stat_text">
+                        <span class="o_rp_stat_number" t-out="monthly_rent_total" t-options="money"/>
+                        <span class="o_rp_stat_caption">Monthly rent</span>
+                    </span>
+                    <span class="o_rp_stat_badge o_rp_tint_good"><i class="oi" data-icon="payments"/></span>
+                </div>
+                <div class="o_rp_stat_card">
+                    <span class="o_rp_stat_text">
+                        <t t-if="next_end">
+                            <span class="o_rp_stat_number" t-field="next_end.end_date"/>
+                            <span class="o_rp_stat_caption">Next lease end · <t t-out="next_end.unit_id.name"/></span>
+                        </t>
+                        <t t-else="">
+                            <span class="o_rp_stat_number">-</span>
+                            <span class="o_rp_stat_caption">No running lease</span>
+                        </t>
+                    </span>
+                    <span class="o_rp_stat_badge o_rp_tint_warning"><i class="oi" data-icon="event_upcoming"/></span>
+                </div>
+            </section>
+
+            <t t-if="lease_cards">
+                <article t-foreach="lease_cards" t-as="card" class="o_rp_card o_rp_lease_card">
+                    <t t-set="card_lease" t-value="card[0]"/>
+                    <t t-set="card_values" t-value="card[1]"/>
+                    <div class="o_rp_lease_card_head">
+                        <span class="o_rp_lease_avatar">
+                            <img t-if="card_lease.unit_id.image or card_lease.property_id.image"
+                                 t-att-src="image_data_uri(card_lease.unit_id.image or card_lease.property_id.image)" alt="Property"/>
+                            <i t-else="" class="oi" data-icon="home"/>
+                        </span>
+                        <div class="o_rp_lease_card_title">
+                            <h3><t t-out="card_lease.unit_id.name"/> <span>· <t t-out="card_lease.property_id.name"/></span></h3>
+                            <div class="o_rp_muted_line">
+                                <t t-out="card_lease.name"/>
+                                <t t-if="card_lease.property_id.city"> · <i class="oi" data-icon="location_on"/> <t t-out="card_lease.property_id.city"/></t>
+                            </div>
+                        </div>
+                        <t t-call="rent_management.tenant_lease_status" status_lease="card_lease"/>
+                    </div>
+                    <t t-call="rent_management.tenant_lease_term" term_lease="card_lease" term_values="card_values"/>
+                    <div class="o_rp_lease_card_foot">
+                        <dl class="o_rp_inline_facts">
+                            <div><dt>Monthly rent</dt><dd><span t-field="card_lease.rent_amount"/></dd></div>
+                            <div><dt>Deposit</dt><dd><span t-field="card_lease.deposit_amount"/></dd></div>
+                            <div><dt>Billing</dt><dd><span t-field="card_lease.billing_frequency"/>, day <t t-out="card_lease.billing_day"/></dd></div>
+                            <div t-if="card_values['lease_unpaid']"><dt>To pay</dt><dd class="o_rp_text_danger"><t t-out="card_values['lease_unpaid']" t-options="money"/></dd></div>
+                        </dl>
+                        <div class="o_rp_lease_card_actions">
+                            <a t-attf-href="/my/leases/{{ card_lease.id }}/agreement" class="o_rp_outline_btn"><i class="oi" data-icon="download"/> Agreement</a>
+                            <a t-att-href="card_lease.get_portal_url()" class="o_rp_primary_btn">View details <i class="oi" data-icon="arrow_forward"/></a>
+                        </div>
+                    </div>
+                </article>
             </t>
+            <div t-else="" class="o_rp_card o_rp_empty_state">
+                <i class="oi" data-icon="contract"/>
+                <h4>No lease yet</h4>
+                <p class="text-muted">Your lease appears here once your property manager confirms it.</p>
+            </div>
         </t>
     </template>
 
     <template id="portal_lease_page" name="Lease">
-        <t t-call="portal.portal_layout">
-            <div class="row mt-3">
-                <div class="col-12 col-lg-8">
-                    <div class="card">
-                        <div class="card-header d-flex align-items-center">
-                            <h4 class="mb-0">Lease <span t-out="lease.name"/></h4>
-                            <span class="badge rounded-pill text-bg-secondary ms-auto" t-field="lease.state"/>
+        <t t-call="rent_management.tenant_shell" page_title="lease.name"
+           page_subtitle="'%s · %s' % (lease.unit_id.display_name, lease.property_id.city or '')">
+            <t t-set="money" t-value="{'widget': 'monetary', 'display_currency': lease.currency_id}"/>
+            <t t-set="this_values" t-value="{'progress': progress, 'days_left': days_left, 'months_total': months_total}"/>
+            <a href="/my/leases" class="o_rp_back"><i class="oi" data-icon="arrow_back"/> My leases</a>
+
+            <!-- Hero -->
+            <section class="o_rp_card o_rp_lease_hero">
+                <div class="o_rp_lease_hero_top">
+                    <span class="o_rp_lease_avatar o_rp_lease_avatar_lg">
+                        <img t-if="lease.unit_id.image or lease.property_id.image"
+                             t-att-src="image_data_uri(lease.unit_id.image or lease.property_id.image)" alt="Property"/>
+                        <i t-else="" class="oi" data-icon="home"/>
+                    </span>
+                    <div class="o_rp_lease_hero_main">
+                        <div class="o_rp_invoice_hero_tags">
+                            <t t-call="rent_management.tenant_lease_status" status_lease="lease"/>
+                            <span t-if="lease.signed" class="o_rp_status_pill o_rp_status_good"><i class="oi" data-icon="verified"/> Signed</span>
+                            <span class="o_rp_tag" t-field="lease.unit_id.unit_type"/>
                         </div>
-                        <div class="card-body">
-                            <div class="row">
-                                <div class="col-md-6">
-                                    <p><strong>Property:</strong> <span t-out="lease.property_id.name"/></p>
-                                    <p><strong>Unit:</strong> <span t-out="lease.unit_id.name"/></p>
-                                    <p><strong>Period:</strong> <span t-field="lease.start_date"/> - <span t-field="lease.end_date"/></p>
-                                    <p><strong>Notice period:</strong> <span t-out="lease.notice_period_days"/> days</p>
+                        <h2 class="o_rp_lease_hero_title"><t t-out="lease.unit_id.name"/> <span>· <t t-out="lease.property_id.name"/></span></h2>
+                        <div class="o_rp_muted_line"><i class="oi" data-icon="location_on"/>
+                            <t t-out="', '.join(filter(None, [lease.property_id.street, lease.property_id.city, lease.property_id.zip]))"/></div>
+                    </div>
+                    <div class="o_rp_lease_hero_rent">
+                        <div class="o_rp_label">Monthly rent</div>
+                        <div class="o_rp_invoice_hero_amount" t-field="lease.rent_amount"/>
+                        <div t-if="monthly_total != lease.rent_amount" class="o_rp_muted_line">
+                            <t t-out="monthly_total" t-options="money"/> per month with charges</div>
+                    </div>
+                </div>
+                <t t-call="rent_management.tenant_lease_term" term_lease="lease" term_values="this_values"/>
+                <div class="o_rp_invoice_hero_actions">
+                    <a t-if="lease_pay_invoice" t-att-href="lease_pay_invoice.get_portal_url()" class="o_rp_primary_btn">
+                        <i class="oi" data-icon="credit_card"/> Pay <t t-out="lease_unpaid" t-options="money"/>
+                    </a>
+                    <a t-attf-href="/my/leases/{{ lease.id }}/agreement" class="o_rp_outline_btn"><i class="oi" data-icon="download"/> Download agreement</a>
+                    <a t-if="lease.state in ('active', 'expiring')" href="/my/maintenance/new" class="o_rp_outline_btn"><i class="oi" data-icon="build"/> Report a problem</a>
+                </div>
+            </section>
+
+            <!-- Detail cards -->
+            <section class="o_rp_detail_cards">
+                <div class="o_rp_card o_rp_info_card">
+                    <div class="o_rp_info_card_head"><span class="o_rp_row_icon"><i class="oi" data-icon="payments"/></span><h3>Rent &amp; billing</h3></div>
+                    <dl class="o_rp_kv">
+                        <div><dt>Rent</dt><dd><span t-field="lease.rent_amount"/> / month</dd></div>
+                        <div t-if="lease.maintenance_charge"><dt>Maintenance</dt><dd><span t-field="lease.maintenance_charge"/> / month</dd></div>
+                        <div><dt>Billing</dt><dd><span t-field="lease.billing_frequency"/>, day <t t-out="lease.billing_day"/></dd></div>
+                        <div t-if="lease.next_invoice_date and lease.state in ('active', 'expiring')"><dt>Next invoice</dt><dd><span t-field="lease.next_invoice_date"/></dd></div>
+                        <div t-if="lease.late_fee_value"><dt>Late fee</dt><dd>
+                            <t t-if="lease.late_fee_type == 'percent'"><t t-out="'%g' % lease.late_fee_value"/>%</t>
+                            <t t-else="" t-out="lease.late_fee_value" t-options="money"/> after <t t-out="lease.grace_days"/> days</dd></div>
+                    </dl>
+                </div>
+                <div class="o_rp_card o_rp_info_card">
+                    <div class="o_rp_info_card_head"><span class="o_rp_row_icon"><i class="oi" data-icon="account_balance"/></span><h3>Security deposit</h3></div>
+                    <div class="o_rp_info_big" t-field="lease.deposit_amount"/>
+                    <span t-attf-class="o_rp_status_pill {{ lease.deposit_status in ('received', 'refunded') and 'o_rp_status_good' or 'o_rp_status_warning' }}">
+                        <i class="oi" t-att-data-icon="lease.deposit_status in ('received', 'refunded') and 'check_circle' or 'schedule'"/>
+                        <span t-field="lease.deposit_status"/>
+                    </span>
+                    <dl t-if="lease.deposit_settled" class="o_rp_kv mt-3">
+                        <div><dt>Refunded</dt><dd><span t-field="lease.deposit_refunded_amount"/></dd></div>
+                        <div t-if="lease.moveout_damage_charges"><dt>Damages</dt><dd><span t-field="lease.moveout_damage_charges"/></dd></div>
+                    </dl>
+                    <p t-else="" class="o_rp_muted_line mt-3">Refundable at move-out, less any damage or unpaid dues.</p>
+                </div>
+                <div class="o_rp_card o_rp_info_card">
+                    <div class="o_rp_info_card_head"><span class="o_rp_row_icon"><i class="oi" data-icon="event_upcoming"/></span><h3>Term</h3></div>
+                    <dl class="o_rp_kv">
+                        <div><dt>Duration</dt><dd><t t-out="lease.duration_months"/> months</dd></div>
+                        <div><dt>Notice period</dt><dd><t t-out="lease.notice_period_days"/> days</dd></div>
+                        <div t-if="lease.escalation_percent"><dt>Rent increase</dt><dd><t t-out="'%g' % lease.escalation_percent"/>% every <t t-out="lease.escalation_every_months"/> months</dd></div>
+                        <div t-if="lease.next_escalation_date and lease.state in ('active', 'expiring')"><dt>Next increase</dt><dd><span t-field="lease.next_escalation_date"/></dd></div>
+                        <div t-if="lease.renewed_from_id"><dt>Renewal of</dt><dd t-out="lease.renewed_from_id.name"/></div>
+                    </dl>
+                </div>
+                <div t-if="lease.electricity_billing != 'none'" class="o_rp_card o_rp_info_card">
+                    <div class="o_rp_info_card_head"><span class="o_rp_row_icon"><i class="oi" data-icon="flash_on"/></span><h3>Electricity</h3></div>
+                    <dl class="o_rp_kv">
+                        <div><dt>Billing</dt><dd><span t-field="lease.electricity_billing"/></dd></div>
+                        <div t-if="lease.electricity_billing == 'metered'"><dt>Rate</dt><dd><t t-out="'%g' % lease.electricity_rate"/> / kWh</dd></div>
+                        <div t-if="lease.electricity_billing == 'fixed'"><dt>Amount</dt><dd><span t-field="lease.electricity_fixed_amount"/> / month</dd></div>
+                        <div t-if="lease.unit_id.meter_number"><dt>Meter</dt><dd t-out="lease.unit_id.meter_number"/></div>
+                        <div t-if="last_reading"><dt>Last reading</dt><dd><t t-out="'%g' % last_reading.current_reading"/> (<t t-out="last_reading.period_start.strftime('%b %Y')"/>)</dd></div>
+                    </dl>
+                </div>
+            </section>
+
+            <div class="o_rp_two_col">
+                <!-- Timeline -->
+                <section class="o_rp_card o_rp_detail">
+                    <div class="o_rp_card_head"><h3 class="o_rp_card_heading"><i class="oi" data-icon="schedule"/> Lease timeline</h3></div>
+                    <ol class="o_rp_lease_timeline">
+                        <li t-foreach="timeline" t-as="event" t-attf-class="o_rp_tl_{{ event['state'] }}">
+                            <span class="o_rp_tl_dot"><i class="oi" t-att-data-icon="event['icon']"/></span>
+                            <div class="o_rp_tl_body">
+                                <div class="o_rp_tl_title">
+                                    <strong t-out="event['title']"/>
+                                    <span t-if="event['state'] == 'next'" class="o_rp_status_pill o_rp_status_info">Next</span>
                                 </div>
-                                <div class="col-md-6">
-                                    <p><strong>Rent:</strong> <span t-field="lease.rent_amount"/> (<span t-field="lease.billing_frequency"/>)</p>
-                                    <p t-if="lease.maintenance_charge"><strong>Maintenance:</strong> <span t-field="lease.maintenance_charge"/></p>
-                                    <p><strong>Electricity:</strong> <span t-field="lease.electricity_billing"/>
-                                        <t t-if="lease.electricity_billing == 'metered'"> at <span t-out="lease.electricity_rate"/> per kWh</t></p>
-                                    <p><strong>Deposit:</strong> <span t-field="lease.deposit_amount"/> (<span t-field="lease.deposit_status"/>)</p>
-                                    <p t-if="lease.next_invoice_date"><strong>Next due date:</strong> <span t-field="lease.next_invoice_date"/></p>
-                                </div>
+                                <small><t t-out="event['date']" t-options="{'widget': 'date'}"/> · <t t-out="event['text']"/></small>
                             </div>
+                        </li>
+                    </ol>
+                </section>
+
+                <div class="d-flex flex-column gap-3">
+                    <!-- Documents -->
+                    <section class="o_rp_card o_rp_detail">
+                        <div class="o_rp_card_head"><h3 class="o_rp_card_heading"><i class="oi" data-icon="description"/> Documents</h3></div>
+                        <ul class="o_rp_rows">
+                            <li>
+                                <a t-attf-href="/my/leases/{{ lease.id }}/agreement" class="o_rp_row_link">
+                                    <span class="o_rp_row_icon"><i class="oi" data-icon="picture_as_pdf"/></span>
+                                    <span class="o_rp_row_main"><strong>Lease agreement</strong>
+                                        <small>Current version · <t t-out="lease.name"/></small></span>
+                                    <i class="oi o_rp_muted_icon" data-icon="download"/>
+                                </a>
+                            </li>
+                            <li t-if="lease.agreement_attachment_id">
+                                <a t-attf-href="/my/leases/{{ lease.id }}/signed-copy" class="o_rp_row_link">
+                                    <span class="o_rp_row_icon"><i class="oi" data-icon="verified"/></span>
+                                    <span class="o_rp_row_main"><strong>Signed copy</strong>
+                                        <small>Uploaded · <t t-out="lease.agreement_attachment_id.name"/></small></span>
+                                    <i class="oi o_rp_muted_icon" data-icon="download"/>
+                                </a>
+                            </li>
+                        </ul>
+                    </section>
+                    <!-- Help -->
+                    <section t-if="lease.manager_id" class="o_rp_card o_rp_detail">
+                        <div class="o_rp_card_head"><h3 class="o_rp_card_heading"><i class="oi" data-icon="support"/> Your property manager</h3></div>
+                        <div class="d-flex align-items-center gap-3">
+                            <span class="o_rp_initials" t-out="''.join(part[0] for part in (lease.manager_id.name or '?').split()[:2]).upper()"/>
+                            <div><strong t-out="lease.manager_id.name"/><div class="text-muted small" t-out="lease.property_id.name"/></div>
                         </div>
-                    </div>
+                        <div class="d-flex gap-2 mt-3">
+                            <a t-if="lease.manager_id.phone" t-attf-href="tel:{{ lease.manager_id.phone }}" class="o_rp_outline_btn flex-fill"><i class="oi" data-icon="phone"/> Call</a>
+                            <a t-if="lease.manager_id.email" t-attf-href="mailto:{{ lease.manager_id.email }}" class="o_rp_outline_btn flex-fill"><i class="oi" data-icon="mail"/> Email</a>
+                        </div>
+                    </section>
                 </div>
-                <div t-if="lease.electricity_billing == 'metered'" class="col-12 col-lg-8 order-lg-last mt-3">
-                    <t t-set="readings" t-value="lease.electricity_reading_ids.filtered(lambda r: r.state in ('confirmed', 'invoiced'))"/>
-                    <h5>Electricity</h5>
-                    <p t-if="not readings" class="text-muted">No meter reading yet.</p>
-                    <t t-else="" t-call="portal.portal_table">
-                        <thead>
-                            <tr>
-                                <th>Period</th>
-                                <th class="text-end">Previous</th>
-                                <th class="text-end">Current</th>
-                                <th class="text-end">kWh</th>
-                                <th class="text-end">Amount</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr t-foreach="readings" t-as="reading">
-                                <td><span t-field="reading.period_start"/> - <span t-field="reading.period_end"/></td>
-                                <td class="text-end" t-out="reading.previous_reading"/>
-                                <td class="text-end" t-out="reading.current_reading"/>
-                                <td class="text-end" t-out="reading.consumption"/>
-                                <td class="text-end"><span t-field="reading.amount"/></td>
-                            </tr>
-                        </tbody>
-                    </t>
+            </div>
+
+            <!-- Invoices of this lease -->
+            <section class="o_rp_card o_rp_detail">
+                <div class="o_rp_card_head">
+                    <h3 class="o_rp_card_heading"><i class="oi" data-icon="receipt_long"/> Invoices for this lease</h3>
+                    <a href="/my/rent-invoices" class="o_rp_link">All invoices <i class="oi" data-icon="arrow_forward"/></a>
                 </div>
-                <div class="col-12 col-lg-4 mt-3 mt-lg-0">
-                    <div class="d-grid gap-2">
-                        <a class="btn btn-primary" t-attf-href="/my/leases/#{lease.id}/agreement?access_token=#{lease.access_token or ''}">
-                            <i class="oi me-1" data-icon="download"/> Download Agreement
+                <t t-call="rent_management.tenant_invoice_rows" rows="lease_invoices[:8]"/>
+            </section>
+        </t>
+    </template>
+
+    <!-- Invoices: list in the tenant design; the invoice page itself is portal_tenant_invoice -->
+    <template id="portal_my_rent_invoices" name="My Invoices">
+        <t t-call="rent_management.tenant_shell" page_title.translate="Invoices"
+           page_subtitle.translate="Every invoice and credit note in one place. Open one to see it in full or pay online.">
+            <t t-set="money" t-value="{'widget': 'monetary', 'display_currency': currency}"/>
+
+            <!-- Summary -->
+            <section class="o_rp_stats">
+                <div class="o_rp_stat_card">
+                    <span class="o_rp_stat_text">
+                        <span class="o_rp_stat_number" t-out="outstanding_amount" t-options="money"/>
+                        <span class="o_rp_stat_caption">Outstanding · <t t-out="outstanding_count"/> invoice(s)</span>
+                    </span>
+                    <span class="o_rp_stat_badge o_rp_tint_primary"><i class="oi" data-icon="payments"/></span>
+                </div>
+                <div t-attf-class="o_rp_stat_card {{ overdue_count and 'o_rp_stat_card_alert' or '' }}">
+                    <span class="o_rp_stat_text">
+                        <span class="o_rp_stat_number" t-out="overdue_total" t-options="money"/>
+                        <span class="o_rp_stat_caption">
+                            <t t-if="overdue_count"><i class="oi o_rp_text_danger" data-icon="warning"/> Overdue · <t t-out="overdue_count"/> invoice(s)</t>
+                            <t t-else=""><i class="oi o_rp_text_good" data-icon="check_circle"/> Nothing overdue</t>
+                        </span>
+                        <a t-if="can_pay_overdue" href="/my/invoices/overdue" class="o_rp_pill_btn o_rp_pill_btn_danger mt-2">
+                            <i class="oi" data-icon="credit_card"/> Pay all overdue
                         </a>
-                        <a class="btn btn-secondary" href="/my/rent-invoices">Rent Invoices</a>
-                        <a t-if="lease.state in ('active', 'expiring')" class="btn btn-secondary" href="/my/maintenance/new">Report a Problem</a>
-                    </div>
+                    </span>
+                    <span class="o_rp_stat_badge o_rp_tint_danger"><i class="oi" data-icon="schedule"/></span>
                 </div>
+                <div class="o_rp_stat_card">
+                    <span class="o_rp_stat_text">
+                        <span class="o_rp_stat_number" t-out="paid_year_total" t-options="money"/>
+                        <span class="o_rp_stat_caption">Paid this year</span>
+                    </span>
+                    <span class="o_rp_stat_badge o_rp_tint_good"><i class="oi" data-icon="check_circle"/></span>
+                </div>
+            </section>
+
+            <!-- Filters and search -->
+            <div class="o_rp_toolbar">
+                <nav class="o_rp_tabs" aria-label="Filter invoices">
+                    <a t-foreach="filter_tabs" t-as="tab"
+                       t-attf-href="/my/rent-invoices?filterby={{ tab[0] }}{{ search and '&amp;search=' + search or '' }}"
+                       t-attf-class="o_rp_tab {{ tab[0] == filterby and 'active' or '' }} {{ tab[0] == 'overdue' and tab[2] and 'o_rp_tab_alert' or '' }}">
+                        <t t-out="tab[1]"/> <span class="o_rp_tab_count" t-out="tab[2]"/>
+                    </a>
+                </nav>
+                <form class="o_rp_search" action="/my/rent-invoices" method="get" role="search">
+                    <input type="hidden" name="filterby" t-att-value="filterby"/>
+                    <i class="oi" data-icon="search"/>
+                    <input type="search" name="search" t-att-value="search" placeholder="Search invoice number..." aria-label="Search invoices"/>
+                </form>
+            </div>
+
+            <!-- Invoices by month -->
+            <t t-if="invoice_groups">
+                <section t-foreach="invoice_groups" t-as="group" class="o_rp_month">
+                    <div class="o_rp_month_title"><span t-out="group[0]"/><small><t t-out="len(group[1])"/> document(s)</small></div>
+                    <div class="o_rp_card o_rp_invoice_list">
+                        <t t-foreach="group[1]" t-as="invoice">
+                            <t t-set="is_refund" t-value="invoice.move_type == 'out_refund'"/>
+                            <t t-set="is_paid" t-value="invoice.payment_state in ('paid', 'in_payment', 'reversed')"/>
+                            <t t-set="is_overdue" t-value="not is_refund and not is_paid and invoice.invoice_date_due and invoice.invoice_date_due &lt; today"/>
+                            <t t-set="days" t-value="invoice.invoice_date_due and (invoice.invoice_date_due - today).days or 0"/>
+                            <a t-att-href="invoice.get_portal_url()" class="o_rp_invoice_row">
+                                <span t-attf-class="o_rp_invoice_icon o_rp_type_{{ is_refund and 'refund' or (invoice.rent_invoice_type or 'other') }}">
+                                    <i class="oi" t-att-data-icon="is_refund and 'undo' or {'rent': 'home', 'electricity': 'flash_on', 'deposit': 'account_balance', 'late_fee': 'schedule', 'maintenance': 'build', 'damage': 'build'}.get(invoice.rent_invoice_type, 'receipt_long')"/>
+                                </span>
+                                <span class="o_rp_invoice_main">
+                                    <strong t-out="invoice.name"/>
+                                    <span class="o_rp_invoice_meta">
+                                        <t t-if="is_refund">Credit note</t>
+                                        <t t-elif="invoice.rent_invoice_type"><span t-field="invoice.rent_invoice_type"/></t>
+                                        <t t-else="">Invoice</t>
+                                        <t t-if="invoice.rent_lease_id"> · <t t-out="invoice.rent_lease_id.unit_id.name"/></t>
+                                        · issued <span t-field="invoice.invoice_date"/>
+                                    </span>
+                                </span>
+                                <span class="o_rp_invoice_due">
+                                    <t t-if="is_refund or is_paid"><small>Due</small><span t-field="invoice.invoice_date_due"/></t>
+                                    <t t-elif="is_overdue"><small class="o_rp_text_danger"><t t-out="-days"/> days late</small><span t-field="invoice.invoice_date_due"/></t>
+                                    <t t-elif="days == 0"><small class="o_rp_text_warning">Due today</small><span t-field="invoice.invoice_date_due"/></t>
+                                    <t t-else=""><small>Due in <t t-out="days"/> days</small><span t-field="invoice.invoice_date_due"/></t>
+                                </span>
+                                <span class="o_rp_invoice_amount">
+                                    <strong t-out="-invoice.amount_total if is_refund else invoice.amount_total" t-options="{'widget': 'monetary', 'display_currency': invoice.currency_id}"/>
+                                    <small t-if="not is_refund and not is_paid and invoice.amount_residual != invoice.amount_total">
+                                        <t t-out="invoice.amount_residual" t-options="{'widget': 'monetary', 'display_currency': invoice.currency_id}"/> left
+                                    </small>
+                                </span>
+                                <span class="o_rp_invoice_status">
+                                    <t t-if="is_refund"><span class="o_rp_status_pill o_rp_status_muted"><i class="oi" data-icon="undo"/> Credit note</span></t>
+                                    <t t-elif="is_paid"><span class="o_rp_status_pill o_rp_status_good"><i class="oi" data-icon="check_circle"/> Paid</span></t>
+                                    <t t-elif="is_overdue"><span class="o_rp_status_pill o_rp_status_danger"><i class="oi" data-icon="warning"/> Overdue</span></t>
+                                    <t t-elif="invoice.payment_state == 'partial'"><span class="o_rp_status_pill o_rp_status_warning"><i class="oi" data-icon="hourglass_bottom"/> Partly paid</span></t>
+                                    <t t-else=""><span class="o_rp_status_pill o_rp_status_warning"><i class="oi" data-icon="schedule"/> To pay</span></t>
+                                </span>
+                                <span class="o_rp_invoice_action">
+                                    <span t-if="not is_refund and not is_paid" class="o_rp_pay_chip">Pay <i class="oi" data-icon="arrow_forward"/></span>
+                                    <i t-else="" class="oi o_rp_muted_icon" data-icon="chevron_right"/>
+                                </span>
+                            </a>
+                        </t>
+                    </div>
+                </section>
+                <div t-if="pager and pager['page_count'] > 1" class="d-flex justify-content-center">
+                    <t t-call="portal.pager"/>
+                </div>
+            </t>
+            <div t-else="" class="o_rp_card o_rp_empty_state">
+                <i class="oi" data-icon="receipt_long"/>
+                <h4 t-if="search or filterby != 'all'">No matching invoice</h4>
+                <h4 t-else="">No invoice yet</h4>
+                <p class="text-muted">
+                    <t t-if="search or filterby != 'all'"><a href="/my/rent-invoices" class="o_rp_link">Show all invoices</a></t>
+                    <t t-else="">Your invoices will appear here as soon as they are issued.</t>
+                </p>
             </div>
         </t>
     </template>
 
-    <!-- Rent invoices: detail and online payment use the standard invoice portal -->
-    <template id="portal_my_rent_invoices" name="My Rent Invoices">
-        <t t-call="portal.portal_layout">
-            <t t-call="portal.portal_searchbar" breadcrumbs_searchbar="True" title.translate="Rent Invoices"/>
-            <p t-if="not invoices" class="alert alert-warning">There is no rent invoice for your account.</p>
-            <t t-if="invoices" t-call="portal.portal_table">
-                <thead>
-                    <tr>
-                        <th>Invoice #</th>
-                        <th>Lease</th>
-                        <th class="d-none d-md-table-cell">Invoice Date</th>
-                        <th>Due Date</th>
-                        <th class="text-end">Amount Due</th>
-                        <th>Status</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr t-foreach="invoices" t-as="invoice">
-                        <td><a t-att-href="invoice.get_portal_url()" t-out="invoice.name"/></td>
-                        <td t-out="invoice.invoice_origin"/>
-                        <td class="d-none d-md-table-cell"><span t-field="invoice.invoice_date"/></td>
-                        <td><span t-field="invoice.invoice_date_due"/></td>
-                        <td class="text-end"><span t-field="invoice.amount_residual"/></td>
-                        <td>
-                            <span t-if="invoice.payment_state in ('paid', 'in_payment', 'reversed')" class="badge rounded-pill text-bg-success">Paid</span>
-                            <a t-else="" t-att-href="invoice.get_portal_url()" class="btn btn-sm btn-primary">Pay Now</a>
-                        </td>
-                    </tr>
-                </tbody>
-            </t>
-        </t>
+    <!-- Category icons of maintenance requests -->
+    <template id="tenant_category_icon" name="Maintenance Category Icon">
+        <i class="oi" t-att-data-icon="{'plumbing': 'water_drop', 'electrical': 'flash_on', 'cleaning': 'brush', 'appliance': 'ac_unit'}.get(category, 'more_horiz')"/>
     </template>
 
-    <!-- Maintenance -->
+    <template id="tenant_request_status" name="Maintenance Request Status">
+        <span t-attf-class="o_rp_status_pill {{ {'done': 'o_rp_status_good', 'in_progress': 'o_rp_status_warning', 'cancelled': 'o_rp_status_muted'}.get(rec.state, 'o_rp_status_info') }}">
+            <i class="oi" t-att-data-icon="{'done': 'check_circle', 'in_progress': 'build', 'cancelled': 'close'}.get(rec.state, 'schedule')"/>
+            <span t-field="rec.state"/>
+        </span>
+    </template>
+
     <template id="portal_my_maintenance" name="My Maintenance Requests">
-        <t t-call="portal.portal_layout">
-            <t t-call="portal.portal_searchbar" breadcrumbs_searchbar="True" title.translate="Maintenance Requests"/>
-            <div class="my-3">
-                <a href="/my/maintenance/new" class="btn btn-primary"><i class="oi me-1" data-icon="add"/> New Request</a>
+        <t t-call="rent_management.tenant_shell" page_title.translate="My requests"
+           page_subtitle.translate="Follow the repairs you reported, from request to done.">
+            <div class="d-flex justify-content-end mb-3">
+                <a href="/my/maintenance/new" class="o_rp_primary_btn"><i class="oi" data-icon="add"/> Report a problem</a>
             </div>
-            <p t-if="not maintenance_requests" class="alert alert-info">You have not reported any problem.</p>
-            <t t-if="maintenance_requests" t-call="portal.portal_table">
-                <thead>
-                    <tr>
-                        <th>Reference</th>
-                        <th>Unit</th>
-                        <th>Category</th>
-                        <th class="d-none d-md-table-cell">Reported On</th>
-                        <th>Status</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr t-foreach="maintenance_requests" t-as="maintenance">
-                        <td><a t-att-href="maintenance.get_portal_url()" t-out="maintenance.name"/></td>
-                        <td t-out="maintenance.unit_id.display_name"/>
-                        <td><span t-field="maintenance.category"/></td>
-                        <td class="d-none d-md-table-cell"><span t-field="maintenance.create_date" t-options="{'widget': 'date'}"/></td>
-                        <td><span class="badge rounded-pill text-bg-secondary" t-field="maintenance.state"/></td>
-                    </tr>
-                </tbody>
-            </t>
+            <section class="o_rp_card o_rp_detail">
+                <ul t-if="maintenance_requests" class="o_rp_rows">
+                    <li t-foreach="maintenance_requests" t-as="rec">
+                        <a t-att-href="rec.get_portal_url()" class="o_rp_row_link">
+                            <span class="o_rp_row_icon"><t t-call="rent_management.tenant_category_icon" category="rec.category"/></span>
+                            <span class="o_rp_row_main">
+                                <strong><span t-field="rec.category"/> <small class="text-muted" t-out="rec.name"/></strong>
+                                <small><t t-out="rec.unit_id.display_name"/> · <span t-field="rec.create_date" t-options="{'widget': 'date'}"/></small>
+                            </span>
+                            <span class="o_rp_row_end"><t t-call="rent_management.tenant_request_status"/></span>
+                        </a>
+                    </li>
+                </ul>
+                <div t-else="" class="o_rp_empty_state">
+                    <i class="oi" data-icon="build"/>
+                    <h4>No request yet</h4>
+                    <p class="text-muted">Something broken at home? Tell us and we will fix it.</p>
+                    <a href="/my/maintenance/new" class="o_rp_primary_btn"><i class="oi" data-icon="add"/> Report a problem</a>
+                </div>
+                <div t-if="pager and pager['page_count'] > 1" class="mt-3 d-flex justify-content-center">
+                    <t t-call="portal.pager"/>
+                </div>
+            </section>
         </t>
     </template>
 
     <template id="portal_maintenance_page" name="Maintenance Request">
-        <t t-call="portal.portal_layout">
-            <div class="card mt-3">
-                <div class="card-header d-flex align-items-center">
-                    <h4 class="mb-0" t-out="maintenance_request.name"/>
-                    <span class="badge rounded-pill text-bg-secondary ms-auto" t-field="maintenance_request.state"/>
-                </div>
-                <div class="card-body">
-                    <p><strong>Unit:</strong> <span t-out="maintenance_request.unit_id.display_name"/></p>
-                    <p><strong>Category:</strong> <span t-field="maintenance_request.category"/></p>
-                    <p><strong>Reported on:</strong> <span t-field="maintenance_request.create_date"/></p>
-                    <div t-field="maintenance_request.description"/>
-                    <div t-if="maintenance_request.image_ids" class="d-flex flex-wrap gap-2 mt-3">
-                        <t t-foreach="maintenance_request.image_ids" t-as="photo">
-                            <img t-attf-src="/web/image/#{photo.id}"
-                                 class="img-thumbnail" style="max-height: 160px;" t-att-alt="photo.name"/>
-                        </t>
-                    </div>
-                </div>
-            </div>
-            <div class="mt-4">
-                <t t-call="portal.message_thread">
-                    <t t-set="object" t-value="maintenance_request"/>
+        <t t-call="rent_management.tenant_shell" page_title="maintenance_request.name" page_subtitle="maintenance_request.unit_id.display_name">
+            <t t-set="rec" t-value="maintenance_request"/>
+            <a href="/my/maintenance" class="o_rp_back"><i class="oi" data-icon="arrow_back"/> My requests</a>
+
+            <!-- Status tracker -->
+            <section class="o_rp_card o_rp_detail">
+                <t t-if="rec.state == 'cancelled'">
+                    <div class="o_rp_alert_item o_rp_alert_info mb-0"><i class="oi" data-icon="close"/>
+                        <div><strong>Cancelled</strong><div class="text-muted small">This request was cancelled.</div></div></div>
                 </t>
+                <ol t-else="" class="o_rp_tracker">
+                    <t t-set="steps" t-value="[('new', 'Reported', 'schedule'), ('in_progress', 'In progress', 'build'), ('done', 'Fixed', 'check_circle')]"/>
+                    <t t-set="current" t-value="['new', 'in_progress', 'done'].index(rec.state)"/>
+                    <li t-foreach="steps" t-as="step" t-attf-class="{{ step_index &lt; current and 'done' or '' }} {{ step_index == current and 'current' or '' }}">
+                        <span class="o_rp_tracker_dot"><i class="oi" t-att-data-icon="step_index &lt;= current and step[2] or 'circle'"/></span>
+                        <span class="o_rp_tracker_label" t-out="step[1]"/>
+                    </li>
+                </ol>
+            </section>
+
+            <div class="o_rp_two_col">
+                <section class="o_rp_card o_rp_detail">
+                    <div class="o_rp_card_head">
+                        <h3 class="o_rp_card_heading">
+                            <span class="o_rp_row_icon"><t t-call="rent_management.tenant_category_icon" category="rec.category"/></span>
+                            What's wrong
+                        </h3>
+                        <t t-call="rent_management.tenant_request_status"/>
+                    </div>
+                    <div class="o_rp_description" t-field="rec.description"/>
+                    <div t-if="rec.image_ids" class="o_rp_gallery">
+                        <a t-foreach="rec.image_ids" t-as="photo" t-attf-href="/web/image/{{ photo.id }}" target="_blank">
+                            <img t-attf-src="/web/image/{{ photo.id }}/300x300?crop=1" t-att-alt="photo.name"/>
+                        </a>
+                    </div>
+                </section>
+                <section class="o_rp_card o_rp_detail">
+                    <div class="o_rp_card_head"><h3 class="o_rp_card_heading"><i class="oi" data-icon="info"/> Details</h3></div>
+                    <dl class="o_rp_facts o_rp_facts_stack">
+                        <div><dt>Unit</dt><dd t-out="rec.unit_id.display_name"/></div>
+                        <div><dt>Category</dt><dd><span t-field="rec.category"/></dd></div>
+                        <div><dt>Priority</dt><dd><span t-field="rec.priority"/></dd></div>
+                        <div><dt>Reported on</dt><dd><span t-field="rec.create_date"/></dd></div>
+                        <div t-if="rec.assigned_to"><dt>Handled by</dt><dd t-out="rec.assigned_to.name"/></div>
+                    </dl>
+                </section>
             </div>
+
+            <section class="o_rp_card o_rp_detail">
+                <div class="o_rp_card_head"><h3 class="o_rp_card_heading"><i class="oi" data-icon="forum"/> Messages</h3></div>
+                <t t-call="portal.message_thread" object="rec" hide_header="True"/>
+            </section>
         </t>
     </template>
 
-    <template id="portal_maintenance_new" name="New Maintenance Request">
-        <t t-call="portal.portal_layout">
-            <h3 class="mt-3">Report a Problem</h3>
-            <p t-if="not leases" class="alert alert-warning">You need an active lease to report a problem.</p>
-            <form t-else="" action="/my/maintenance/new" method="post" enctype="multipart/form-data" class="mt-3">
-                <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
-                <div t-if="error" class="alert alert-danger" t-out="error"/>
-                <div class="mb-3">
-                    <label class="form-label" for="lease_id">Unit</label>
-                    <select name="lease_id" id="lease_id" class="form-select" required="required">
-                        <t t-foreach="leases" t-as="lease">
-                            <option t-att-value="lease.id" t-att-selected="str(lease.id) == post.get('lease_id')"
-                                    t-out="lease.unit_id.display_name"/>
-                        </t>
-                    </select>
-                </div>
-                <div class="mb-3">
-                    <label class="form-label" for="category">Category</label>
-                    <select name="category" id="category" class="form-select" required="required">
-                        <t t-foreach="categories" t-as="category">
-                            <option t-att-value="category[0]" t-att-selected="category[0] == post.get('category')" t-out="category[1]"/>
-                        </t>
-                    </select>
-                </div>
-                <div class="mb-3">
-                    <label class="form-label" for="description">Description</label>
-                    <textarea name="description" id="description" class="form-control" rows="5" required="required"
-                              placeholder="What is the problem? Where is it?" t-out="post.get('description', '')"/>
-                </div>
-                <div class="mb-3">
-                    <label class="form-label" for="photos">Photos</label>
-                    <input type="file" name="photos" id="photos" class="form-control" accept="image/*" multiple="multiple"/>
-                    <div class="form-text">Up to 5 images, 10 MB each.</div>
-                </div>
-                <button type="submit" class="btn btn-primary">Submit Request</button>
-            </form>
+    <template id="portal_maintenance_new" name="Report a Problem">
+        <t t-call="rent_management.tenant_shell" page_title.translate="Report a problem"
+           page_subtitle.translate="Tell us what is wrong. Your property manager is notified right away.">
+
+            <div t-if="not running_leases" class="o_rp_card o_rp_empty_state">
+                <i class="oi" data-icon="home"/>
+                <h4>No active lease</h4>
+                <p class="text-muted">You can report a problem once your lease is active.</p>
+            </div>
+            <div t-else="" class="o_rp_report">
+                <form action="/my/maintenance/new" method="post" enctype="multipart/form-data" class="o_rp_report_form">
+                    <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+                    <div t-if="error" class="o_rp_alert_item o_rp_alert_danger"><i class="oi" data-icon="warning"/>
+                        <div><strong>Please check the form</strong><div class="small" t-out="error"/></div></div>
+
+                    <!-- 1. Where -->
+                    <section class="o_rp_card o_rp_step">
+                        <h3 class="o_rp_step_title"><span class="o_rp_step_num">1</span> Where is the problem?</h3>
+                        <div class="o_rp_choice_grid o_rp_choice_grid_wide">
+                            <t t-foreach="running_leases" t-as="option">
+                                <input type="radio" name="lease_id" class="o_rp_choice_input" t-att-id="'lease_%s' % option.id"
+                                       t-att-value="option.id" required="required"
+                                       t-att-checked="(str(option.id) == post.get('lease_id') or (not post.get('lease_id') and option_first)) and 'checked' or None"/>
+                                <label class="o_rp_choice o_rp_choice_row" t-att-for="'lease_%s' % option.id">
+                                    <span class="o_rp_choice_icon"><i class="oi" data-icon="home"/></span>
+                                    <span><strong t-out="option.unit_id.name"/><small t-out="option.property_id.name"/></span>
+                                </label>
+                            </t>
+                        </div>
+                    </section>
+
+                    <!-- 2. What -->
+                    <section class="o_rp_card o_rp_step">
+                        <h3 class="o_rp_step_title"><span class="o_rp_step_num">2</span> What kind of problem?</h3>
+                        <div class="o_rp_choice_grid">
+                            <t t-foreach="categories" t-as="category_option">
+                                <input type="radio" name="category" class="o_rp_choice_input" t-att-id="'cat_%s' % category_option[0]"
+                                       t-att-value="category_option[0]" required="required"
+                                       t-att-checked="category_option[0] == post.get('category') and 'checked' or None"/>
+                                <label class="o_rp_choice" t-att-for="'cat_%s' % category_option[0]">
+                                    <span class="o_rp_choice_icon"><t t-call="rent_management.tenant_category_icon" category="category_option[0]"/></span>
+                                    <strong t-out="category_option[1]"/>
+                                </label>
+                            </t>
+                        </div>
+                    </section>
+
+                    <!-- 3. Urgency -->
+                    <section class="o_rp_card o_rp_step">
+                        <h3 class="o_rp_step_title"><span class="o_rp_step_num">3</span> How urgent is it?</h3>
+                        <div class="o_rp_segment">
+                            <t t-foreach="priorities" t-as="priority_option">
+                                <input type="radio" name="priority" class="o_rp_choice_input" t-att-id="'prio_%s' % priority_option[0]"
+                                       t-att-value="priority_option[0]"
+                                       t-att-checked="(priority_option[0] == (post.get('priority') or '1')) and 'checked' or None"/>
+                                <label t-attf-class="o_rp_segment_option o_rp_prio_{{ priority_option[0] }}" t-att-for="'prio_%s' % priority_option[0]">
+                                    <i class="oi" t-att-data-icon="{'0': 'arrow_downward', '1': 'remove', '2': 'arrow_upward', '3': 'priority_high'}[priority_option[0]]"/>
+                                    <t t-out="priority_option[1]"/>
+                                </label>
+                            </t>
+                        </div>
+                        <p class="o_rp_hint"><i class="oi" data-icon="info"/> Choose <strong>Urgent</strong> for water leaks, no power or anything unsafe.</p>
+                    </section>
+
+                    <!-- 4. Description and photos -->
+                    <section class="o_rp_card o_rp_step">
+                        <h3 class="o_rp_step_title"><span class="o_rp_step_num">4</span> Describe it</h3>
+                        <textarea name="description" class="o_rp_textarea" rows="5" required="required"
+                                  placeholder="What happened, where exactly, since when? E.g. The kitchen sink is leaking under the cabinet since this morning."
+                                  t-out="post.get('description', '')"/>
+                        <label class="o_rp_dropzone" for="o_rp_photos">
+                            <input type="file" name="photos" id="o_rp_photos" accept="image/*" multiple="multiple" capture="environment"/>
+                            <span class="o_rp_dropzone_icon"><i class="oi" data-icon="photo_camera"/></span>
+                            <strong>Add photos</strong>
+                            <span class="text-muted small">Take a picture or drop images here. Up to 5 images, 10 MB each.</span>
+                        </label>
+                        <div class="o_rp_previews" aria-live="polite"/>
+                    </section>
+
+                    <button type="submit" class="o_rp_primary_btn o_rp_submit"><i class="oi" data-icon="send"/> Send request</button>
+                </form>
+
+                <aside class="o_rp_report_side">
+                    <section class="o_rp_card o_rp_detail">
+                        <div class="o_rp_card_head"><h3 class="o_rp_card_heading"><i class="oi" data-icon="schedule"/> What happens next</h3></div>
+                        <ol class="o_rp_next_steps">
+                            <li><strong>We receive it</strong><span>Your property manager is notified immediately.</span></li>
+                            <li><strong>We plan the repair</strong><span>A technician is assigned and contacts you if needed.</span></li>
+                            <li><strong>It gets fixed</strong><span>You can follow every step and chat with us on the request.</span></li>
+                        </ol>
+                    </section>
+                    <section class="o_rp_card o_rp_detail">
+                        <div class="o_rp_card_head">
+                            <h3 class="o_rp_card_heading"><i class="oi" data-icon="assignment"/> Your recent requests</h3>
+                            <a href="/my/maintenance" class="o_rp_link">All</a>
+                        </div>
+                        <ul t-if="recent_requests" class="o_rp_rows">
+                            <li t-foreach="recent_requests" t-as="rec">
+                                <a t-att-href="rec.get_portal_url()" class="o_rp_row_link">
+                                    <span class="o_rp_row_main"><strong t-field="rec.category"/>
+                                        <small><span t-field="rec.create_date" t-options="{'widget': 'date'}"/></small></span>
+                                    <t t-call="rent_management.tenant_request_status"/>
+                                </a>
+                            </li>
+                        </ul>
+                        <div t-else="" class="o_rp_empty">No request yet</div>
+                    </section>
+                </aside>
+            </div>
         </t>
     </template>
 </odoo>

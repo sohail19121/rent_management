@@ -31,7 +31,7 @@
         <field name="email_from">{{ (object.company_id.email_formatted or user.email_formatted) }}</field>
         <field name="partner_to">{{ object.partner_id.id }}</field>
         <field name="description">Sent to the tenant when a rent invoice is generated</field>
-        <field name="report_template_ids" eval="[Command.link(ref('account.account_invoices'))]"/>
+        <field name="report_template_ids" eval="[Command.link(ref('rent_management.action_report_rent_invoice'))]"/>
         <field name="body_html" type="html">
 <div style="margin: 0px; padding: 0px; font-size: 13px;">
     <p>Dear <t t-out="object.partner_id.name or ''">Tenant</t>,</p>

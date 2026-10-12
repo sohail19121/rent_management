@@ -1,0 +1,285 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="action_report_rent_invoice" model="ir.actions.report">
+        <field name="name">Invoice (Modern)</field>
+        <field name="model">account.move</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">rent_management.report_rent_invoice</field>
+        <field name="paperformat_id" ref="paperformat_rent_invoice"/>
+        <field name="print_report_name">'%s - %s' % (object.name, object.partner_id.name)</field>
+        <field name="binding_model_id" ref="account.model_account_move"/>
+        <field name="binding_type">report</field>
+    </record>
+
+    <!--
+        Modern invoice, styled like the tenant portal. The PDF engine (wkhtmltopdf) has no CSS grid,
+        variables or color-mix: layout uses tables, brand colors are computed in Python.
+    -->
+    <template id="report_rent_invoice_document">
+        <t t-set="v" t-value="o._rent_report_values()"/>
+        <t t-set="money" t-value="{'widget': 'monetary', 'display_currency': o.currency_id}"/>
+        <t t-set="company" t-value="o.company_id"/>
+        <t t-set="on_brand" t-value="'background-color: %s; color: %s;' % (v['brand'], v['brand_text'])"/>
+        <t t-set="lease" t-value="v['lease']"/>
+
+        <div class="footer o_rinv_footer">
+            <div class="o_rinv_footer_rule" t-attf-style="background-color: {{ v['brand'] }};"/>
+            <table class="o_ignore_layout_styling o_rinv_table">
+                <tr>
+                    <td>
+                        <strong t-out="company.name"/>
+                        <t t-if="company.email"><span class="o_rinv_sep">|</span><t t-out="company.email"/></t>
+                        <t t-if="company.phone"><span class="o_rinv_sep">|</span><t t-out="company.phone"/></t>
+                        <t t-if="company.website"><span class="o_rinv_sep">|</span><t t-out="company.website"/></t>
+                    </td>
+                    <td class="text-end o_rinv_nowrap">
+                        <span class="o_rinv_page_pill" t-attf-style="background-color: {{ v['brand_soft'] }}; color: {{ v['brand'] }};">
+                            <t t-out="o.name"/> · Page <span class="page"/> of <span class="topage"/>
+                        </span>
+                    </td>
+                </tr>
+            </table>
+        </div>
+
+        <div class="article o_rinv" t-att-data-oe-model="o._name" t-att-data-oe-id="o.id"
+             t-att-data-oe-lang="o.env.context.get('lang')">
+
+            <!-- Branded header card -->
+            <table class="o_ignore_layout_styling o_rinv_table o_rinv_hero_head" t-att-style="on_brand">
+                <tr>
+                    <td class="o_rinv_hero_company">
+                        <table class="o_ignore_layout_styling o_rinv_table">
+                            <tr>
+                                <td t-if="company.logo" class="o_rinv_logo_tile_cell">
+                                    <div class="o_rinv_logo_tile"><img t-att-src="image_data_uri(company.logo)" alt="Logo"/></div>
+                                </td>
+                                <td class="o_rinv_hero_company_text">
+                                    <div class="o_rinv_hero_company_name" t-out="company.name"/>
+                                    <t t-set="street_line" t-value="', '.join(filter(None, [company.street, company.street2]))"/>
+                                    <t t-set="city_line" t-value="', '.join(filter(None, [' '.join(filter(None, [company.city, company.state_id.name, company.zip])), company.country_id.name]))"/>
+                                    <div class="o_rinv_hero_soft">
+                                        <t t-if="street_line"><t t-out="street_line"/><br/></t>
+                                        <t t-if="city_line"><t t-out="city_line"/><br/></t>
+                                        <t t-if="company.vat">Tax ID <t t-out="company.vat"/></t>
+                                    </div>
+                                </td>
+                            </tr>
+                        </table>
+                    </td>
+                    <td class="o_rinv_hero_title">
+                        <div class="o_rinv_hero_kind"><t t-if="v['is_refund']">Credit note</t><t t-elif="o.amount_tax">Tax invoice</t><t t-else="">Invoice</t></div>
+                        <div class="o_rinv_hero_number" t-out="o.name"/>
+                        <span t-attf-class="o_rinv_status o_rinv_status_{{ v['status'] }}" t-out="v['status_label']"/>
+                    </td>
+                </tr>
+            </table>
+
+            <!-- Detail cards -->
+            <table class="o_ignore_layout_styling o_rinv_table o_rinv_cards">
+                <tr>
+                    <td class="o_rinv_card" t-attf-style="box-shadow: inset 4px 0 0 {{ v['brand'] }};">
+                        <div>
+                            <div class="o_rinv_card_label" t-attf-style="color: {{ v['brand'] }};">Billed to</div>
+                            <div class="o_rinv_card_title" t-out="o.partner_id.name"/>
+                            <t t-set="partner_lines" t-value="list(filter(None, [
+                                ', '.join(filter(None, [o.partner_id.street, o.partner_id.street2])),
+                                ' '.join(filter(None, [o.partner_id.city, o.partner_id.zip])),
+                                o.partner_id.email, o.partner_id.phone]))"/>
+                            <div class="o_rinv_muted">
+                                <t t-foreach="partner_lines" t-as="partner_line"><t t-out="partner_line"/><br t-if="not partner_line_last"/></t>
+                            </div>
+                        </div>
+                    </td>
+                    <td class="o_rinv_gap"/>
+                    <td class="o_rinv_card" t-attf-style="box-shadow: inset 4px 0 0 {{ v['brand'] }};">
+                        <div>
+                            <div class="o_rinv_card_label" t-attf-style="color: {{ v['brand'] }};">Property</div>
+                            <t t-if="lease">
+                                <div class="o_rinv_card_title"><t t-out="lease.unit_id.name"/> · <t t-out="lease.property_id.name"/></div>
+                                <div class="o_rinv_muted">
+                                    <t t-out="', '.join(filter(None, [lease.property_id.street, lease.property_id.city, lease.property_id.zip]))"/>
+                                    <br/>Lease <t t-out="lease.name"/>
+                                    <t t-if="lease.unit_id.meter_number"><br/>Meter <t t-out="lease.unit_id.meter_number"/></t>
+                                </div>
+                            </t>
+                            <div t-else="" class="o_rinv_muted">-</div>
+                        </div>
+                    </td>
+                    <td class="o_rinv_gap"/>
+                    <td class="o_rinv_card" t-attf-style="box-shadow: inset 4px 0 0 {{ v['brand'] }};">
+                        <div>
+                            <div class="o_rinv_card_label" t-attf-style="color: {{ v['brand'] }};">Invoice details</div>
+                            <table class="o_ignore_layout_styling o_rinv_table o_rinv_kv">
+                                <tr><td>Issued</td><td class="text-end"><strong t-field="o.invoice_date"/></td></tr>
+                                <tr t-if="o.invoice_date_due"><td>Due</td><td class="text-end"><strong t-field="o.invoice_date_due"/></td></tr>
+                                <tr t-if="o.invoice_origin"><td>Reference</td><td class="text-end"><strong t-out="o.invoice_origin"/></td></tr>
+                                <tr><td>Currency</td><td class="text-end"><strong t-out="o.currency_id.name"/></td></tr>
+                            </table>
+                        </div>
+                    </td>
+                </tr>
+            </table>
+
+            <!-- Amount hero + QR / seal -->
+            <table class="o_ignore_layout_styling o_rinv_table o_rinv_amount_row">
+                <tr>
+                    <td class="o_rinv_amount_card" t-attf-style="background-color: {{ v['brand_soft'] }};">
+                        <div>
+                            <div class="o_rinv_card_label" t-attf-style="color: {{ v['brand'] }};">
+                                <t t-if="v['is_refund']">Credit amount</t>
+                                <t t-elif="v['paid']">Paid in full</t>
+                                <t t-else="">Amount due</t>
+                            </div>
+                            <div class="o_rinv_amount" t-out="o.amount_total if (v['paid'] or v['is_refund']) else o.amount_residual" t-options="money"/>
+                            <div t-if="o.invoice_date_due and not v['is_refund']" class="o_rinv_due">
+                                <t t-if="v['paid']">Settled · was due <strong t-field="o.invoice_date_due"/></t>
+                                <t t-else="">
+                                    Due <strong t-field="o.invoice_date_due"/>
+                                    <span t-if="v['status'] == 'overdue'" class="o_rinv_critical"> · <t t-out="-v['days']"/> days overdue</span>
+                                    <span t-elif="v['days'] &gt; 0"> · in <t t-out="v['days']"/> days</span>
+                                    <span t-else=""> · today</span>
+                                </t>
+                            </div>
+                            <t t-if="v['status'] == 'partial' or (v['status'] == 'overdue' and v['paid_amount'])">
+                                <div class="o_rinv_progress" t-attf-style="background-color: {{ v['brand_mid'] }};">
+                                    <div class="o_rinv_progress_fill" t-attf-style="width: {{ v['paid_pct'] }}%; background-color: {{ v['brand'] }};"/>
+                                </div>
+                                <div class="o_rinv_muted o_rinv_small">
+                                    <t t-out="v['paid_amount']" t-options="money"/> paid of <t t-out="o.amount_total" t-options="money"/> (<t t-out="v['paid_pct']"/>%)
+                                </div>
+                            </t>
+                        </div>
+                    </td>
+                    <td t-if="v['pay_qr'] or (v['paid'] and not v['is_refund'])" class="o_rinv_gap"/>
+                    <td t-if="v['pay_qr'] or (v['paid'] and not v['is_refund'])" class="o_rinv_side_cell"
+                        t-attf-style="box-shadow: inset 0 0 0 2px {{ v['brand_mid'] }};">
+                        <div t-if="v['pay_qr']" class="o_rinv_qr_card">
+                            <img t-att-src="v['pay_qr']" alt="Pay online"/>
+                            <div class="o_rinv_qr_title" t-attf-style="color: {{ v['brand'] }};">Scan to pay</div>
+                            <div class="o_rinv_muted o_rinv_small">Opens this invoice online</div>
+                        </div>
+                        <div t-elif="v['paid'] and not v['is_refund']" class="o_rinv_seal">
+                            <div class="o_rinv_seal_ring">
+                                <div class="o_rinv_seal_check">&#10003;</div>
+                                <div class="o_rinv_seal_text">PAID</div>
+                            </div>
+                        </div>
+                    </td>
+                </tr>
+            </table>
+
+            <!-- Lines -->
+            <table class="o_ignore_layout_styling o_rinv_lines">
+                <thead>
+                    <tr t-att-style="on_brand">
+                        <th class="o_rinv_col_index">#</th>
+                        <th>Description</th>
+                        <th class="text-end">Qty</th>
+                        <th class="text-end">Unit price</th>
+                        <th t-if="o.amount_tax" class="text-end">Taxes</th>
+                        <th class="text-end">Amount</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <t t-set="line_number" t-value="0"/>
+                    <t t-foreach="v['lines']" t-as="line">
+                        <tr t-if="line.display_type == 'line_section'" class="o_rinv_section">
+                            <td t-att-colspan="6 if o.amount_tax else 5" t-attf-style="color: {{ v['brand'] }};" t-out="line.name"/>
+                        </tr>
+                        <tr t-elif="line.display_type == 'line_note'" class="o_rinv_note">
+                            <td/>
+                            <td t-att-colspan="5 if o.amount_tax else 4" t-out="line.name"/>
+                        </tr>
+                        <t t-else="">
+                            <t t-set="line_number" t-value="line_number + 1"/>
+                            <tr t-att-style="line_number % 2 == 0 and 'background-color: %s;' % v['brand_faint'] or None">
+                                <td class="o_rinv_col_index o_rinv_muted" t-out="'%02d' % line_number"/>
+                                <td>
+                                    <div class="o_rinv_line_name" t-out="line.product_id.name or line.name"/>
+                                    <div t-if="line.product_id and line.name != line.product_id.name" class="o_rinv_muted o_rinv_small" t-out="line.name"/>
+                                </td>
+                                <td class="text-end o_rinv_nowrap" t-out="'%g' % line.quantity"/>
+                                <td class="text-end o_rinv_nowrap" t-out="line.price_unit" t-options="money"/>
+                                <td t-if="o.amount_tax" class="text-end o_rinv_muted o_rinv_small" t-out="', '.join(line.tax_ids.mapped('name'))"/>
+                                <td class="text-end o_rinv_nowrap"><strong t-out="line.price_subtotal" t-options="money"/></td>
+                            </tr>
+                        </t>
+                    </t>
+                </tbody>
+            </table>
+
+            <!-- Payment info + totals -->
+            <table class="o_ignore_layout_styling o_rinv_table o_rinv_bottom">
+                <tr>
+                    <td class="o_rinv_pay">
+                        <div t-if="not v['is_refund'] and not v['paid']" class="o_rinv_info_block">
+                            <div class="o_rinv_card_label" t-attf-style="color: {{ v['brand'] }};">How to pay</div>
+                            <table class="o_ignore_layout_styling o_rinv_table o_rinv_kv">
+                                <tr><td>Payment reference</td><td class="text-end"><strong class="o_rinv_mono" t-out="o.payment_reference or o.name"/></td></tr>
+                                <tr t-if="o.partner_bank_id"><td>Bank account</td><td class="text-end"><strong t-out="o.partner_bank_id.display_name"/></td></tr>
+                                <tr t-if="o.partner_bank_id.bank_bic"><td>BIC / IFSC</td><td class="text-end"><strong t-out="o.partner_bank_id.bank_bic"/></td></tr>
+                                <tr t-if="v['pay_qr']"><td>Online</td><td class="text-end"><strong>Scan the QR code above</strong></td></tr>
+                            </table>
+                        </div>
+                        <div t-if="v['payments']" class="o_rinv_info_block">
+                            <div class="o_rinv_card_label" t-attf-style="color: {{ v['brand'] }};">Payments received</div>
+                            <table class="o_ignore_layout_styling o_rinv_table o_rinv_kv">
+                                <tr t-foreach="v['payments']" t-as="payment">
+                                    <td><span class="o_rinv_dot"/> <t t-out="payment['date']" t-options="{'widget': 'date'}"/>
+                                        <span class="o_rinv_muted"><t t-if="payment.get('journal_name')"> · <t t-out="payment['journal_name']"/></t></span></td>
+                                    <td class="text-end o_rinv_good"><strong t-out="payment['amount']" t-options="money"/></td>
+                                </tr>
+                            </table>
+                        </div>
+                    </td>
+                    <td class="o_rinv_totals">
+                        <div class="o_rinv_totals_card">
+                            <table class="o_ignore_layout_styling o_rinv_table">
+                                <tr><td>Subtotal</td><td class="text-end" t-out="o.amount_untaxed" t-options="money"/></tr>
+                                <tr t-if="o.amount_tax"><td>Taxes</td><td class="text-end" t-out="o.amount_tax" t-options="money"/></tr>
+                                <tr class="o_rinv_total"><td>Total</td><td class="text-end" t-out="o.amount_total" t-options="money"/></tr>
+                                <tr t-if="v['paid_amount'] and not v['is_refund']" class="o_rinv_paid_line">
+                                    <td>Paid</td><td class="text-end">- <t t-out="v['paid_amount']" t-options="money"/></td>
+                                </tr>
+                            </table>
+                        </div>
+                        <table t-if="not v['is_refund']" class="o_ignore_layout_styling o_rinv_table o_rinv_due_box" t-att-style="on_brand">
+                            <tr><td>Amount due</td><td class="text-end" t-out="o.amount_residual" t-options="money"/></tr>
+                        </table>
+                    </td>
+                </tr>
+            </table>
+
+            <!-- Notes and closing -->
+            <div t-if="o.narration" class="o_rinv_notes">
+                <div class="o_rinv_card_label" t-attf-style="color: {{ v['brand'] }};">Notes</div>
+                <div t-field="o.narration"/>
+            </div>
+            <div t-if="o.invoice_payment_term_id and o.invoice_payment_term_id.note" class="o_rinv_notes">
+                <div class="o_rinv_card_label" t-attf-style="color: {{ v['brand'] }};">Payment terms</div>
+                <div t-field="o.invoice_payment_term_id.note"/>
+            </div>
+            <table class="o_ignore_layout_styling o_rinv_table o_rinv_closing">
+                <tr>
+                    <td>
+                        <div class="o_rinv_thanks_title" t-attf-style="color: {{ v['brand'] }};">Thank you for being with us!</div>
+                        <div class="o_rinv_muted o_rinv_small">Questions about this invoice? Reply to the email it came with or contact
+                            <t t-out="company.email or company.name"/>.</div>
+                    </td>
+                    <td class="o_rinv_sign">
+                        <div class="o_rinv_sign_line"/>
+                        <div class="o_rinv_muted o_rinv_small">For <t t-out="company.name"/></div>
+                    </td>
+                </tr>
+            </table>
+        </div>
+    </template>
+
+    <template id="report_rent_invoice">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="o">
+                <t t-call="rent_management.report_rent_invoice_document" t-lang="o.partner_id.lang"/>
+            </t>
+        </t>
+    </template>
+</odoo>

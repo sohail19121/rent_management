@@ -169,6 +169,10 @@ class RentLease(models.Model):
         for lease in self:
             lease.access_url = f'/my/leases/{lease.id}'
 
+    def _get_report_base_filename(self):
+        self.ensure_one()
+        return f'Lease Agreement - {self.name}'
+
     # ------------------------------------------------------------
     # Onchange / constraints
     # ------------------------------------------------------------

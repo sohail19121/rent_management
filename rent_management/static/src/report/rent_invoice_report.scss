@@ -1,0 +1,642 @@
+// Premium invoice PDF. wkhtmltopdf (old WebKit): tables for layout, no grid / CSS variables /
+// color-mix; brand colors come inline from the template.
+$o-rinv-text: #1f1d24;
+$o-rinv-muted: #6b6875;
+$o-rinv-border: #e9e6ee;
+$o-rinv-good: #0ca30c;
+$o-rinv-good-text: #006300;
+$o-rinv-critical: #d03b3b;
+
+// Reset: the company report styles border every table part; this design draws its own lines.
+.o_rinv * {
+    border: 0 none !important;
+}
+
+.o_rinv td,
+.o_rinv th,
+.o_rinv tr {
+    background-color: transparent;
+}
+
+.o_rinv {
+    color: $o-rinv-text;
+    font-size: 12.5px;
+    line-height: 1.5;
+}
+
+.o_rinv_table {
+    width: 100%;
+    border-collapse: collapse;
+
+    td {
+        padding: 0;
+        vertical-align: top;
+    }
+}
+
+.o_rinv_muted {
+    color: $o-rinv-muted;
+}
+
+.o_rinv_small {
+    font-size: 11px;
+}
+
+.o_rinv_nowrap {
+    white-space: nowrap;
+}
+
+.o_rinv_good {
+    color: $o-rinv-good-text;
+}
+
+.o_rinv_critical {
+    color: $o-rinv-critical;
+    font-weight: bold;
+}
+
+.o_rinv_mono {
+    font-family: monospace;
+    letter-spacing: 0.04em;
+}
+
+.o_rinv_card_label {
+    margin-bottom: 6px;
+    font-size: 9.5px;
+    font-weight: bold;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+}
+
+// Branded header card --------------------------------------------------------------------
+.o_rinv_hero_head {
+    margin-bottom: 18px;
+    border-radius: 16px;
+
+    > tbody > tr > td,
+    > tr > td {
+        padding: 24px 26px;
+        vertical-align: middle;
+    }
+}
+
+.o_rinv_logo_tile_cell {
+    width: 1%;
+    padding-right: 16px !important;
+    vertical-align: middle !important;
+}
+
+.o_rinv_logo_tile {
+    padding: 10px 12px;
+    border-radius: 12px;
+    background-color: #ffffff;
+
+    img {
+        display: block;
+        max-width: 130px;
+        max-height: 46px;
+    }
+}
+
+.o_rinv_hero_company_text {
+    vertical-align: middle !important;
+}
+
+.o_rinv_hero_company_name {
+    font-size: 17px;
+    font-weight: bold;
+}
+
+.o_rinv_hero_soft {
+    font-size: 11px;
+    opacity: 0.8;
+}
+
+.o_rinv_hero_title {
+    width: 40%;
+    text-align: right;
+}
+
+.o_rinv_hero_kind {
+    font-size: 10px;
+    font-weight: bold;
+    letter-spacing: 0.24em;
+    text-transform: uppercase;
+    opacity: 0.75;
+}
+
+.o_rinv_hero_number {
+    margin: 2px 0 10px;
+    font-size: 26px;
+    font-weight: bold;
+    letter-spacing: -0.01em;
+}
+
+.o_rinv_status {
+    display: inline-block;
+    padding: 4px 14px;
+    border-radius: 14px;
+    background-color: #ffffff;
+    font-size: 10px;
+    font-weight: bold;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+}
+
+.o_rinv_status_paid {
+    color: $o-rinv-good-text;
+}
+
+.o_rinv_status_due,
+.o_rinv_status_partial {
+    color: #8a5c00;
+}
+
+.o_rinv_status_overdue {
+    color: $o-rinv-critical;
+}
+
+.o_rinv_status_refund {
+    color: $o-rinv-muted;
+}
+
+// Detail cards ---------------------------------------------------------------------------------
+.o_rinv_cards {
+    margin-bottom: 14px;
+}
+
+// Cards are table cells: cells of a row share one height. Spacer cells make the gaps.
+.o_rinv_gap {
+    width: 12px;
+}
+
+.o_rinv .o_rinv_cards td.o_rinv_card {
+    width: 32%;
+    padding: 12px 14px 12px 18px !important;
+    border-radius: 10px;
+    background-color: #f8f7fa;
+}
+
+.o_rinv_card_title {
+    margin-bottom: 2px;
+    font-size: 13.5px;
+    font-weight: bold;
+}
+
+.o_rinv_kv td {
+    padding: 2px 0 !important;
+    color: $o-rinv-muted;
+
+    strong {
+        color: $o-rinv-text;
+    }
+}
+
+// Amount hero ---------------------------------------------------------------------------------------
+.o_rinv_amount_row {
+    margin-bottom: 18px;
+}
+
+.o_rinv .o_rinv_amount_row td.o_rinv_amount_card {
+    padding: 16px 20px !important;
+    border-radius: 14px;
+    vertical-align: middle;
+}
+
+.o_rinv_amount {
+    font-size: 34px;
+    font-weight: bold;
+    line-height: 1.1;
+    letter-spacing: -0.02em;
+}
+
+.o_rinv_due {
+    margin-top: 4px;
+    color: $o-rinv-muted;
+}
+
+.o_rinv_progress {
+    height: 8px;
+    margin: 10px 0 4px;
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.o_rinv_progress_fill {
+    height: 8px;
+    border-radius: 4px;
+}
+
+.o_rinv .o_rinv_amount_row td.o_rinv_side_cell {
+    width: 140px;
+    padding: 10px 8px !important;
+    border-radius: 14px;
+    text-align: center;
+    vertical-align: middle;
+}
+
+.o_rinv_qr_card {
+    text-align: center;
+
+    img {
+        width: 74px;
+        height: 74px;
+    }
+}
+
+.o_rinv_qr_title {
+    font-size: 12px;
+    font-weight: bold;
+}
+
+.o_rinv_seal {
+    text-align: center;
+}
+
+.o_rinv .o_rinv_seal_ring {
+    display: inline-block;
+    width: 96px;
+    height: 96px;
+    border: 4px double $o-rinv-good !important;
+    border-radius: 60px;
+    color: $o-rinv-good;
+    transform: rotate(-10deg);
+    -webkit-transform: rotate(-10deg);
+}
+
+.o_rinv_seal_check {
+    margin-top: 12px;
+    font-size: 26px;
+    line-height: 1;
+}
+
+.o_rinv_seal_text {
+    font-size: 17px;
+    font-weight: bold;
+    letter-spacing: 0.2em;
+}
+
+// Lines ----------------------------------------------------------------------------------------------------
+.o_rinv_lines {
+    width: 100%;
+    margin-bottom: 18px;
+    border-collapse: separate;
+    border-spacing: 0;
+
+    th {
+        padding: 11px 12px;
+        font-size: 9.5px;
+        font-weight: bold;
+        letter-spacing: 0.12em;
+        text-align: left;
+        text-transform: uppercase;
+
+        &:first-child {
+            border-radius: 10px 0 0 10px;
+        }
+
+        &:last-child {
+            border-radius: 0 10px 10px 0;
+        }
+    }
+
+    td {
+        padding: 12px;
+        vertical-align: top;
+    }
+
+    tbody tr {
+        page-break-inside: avoid;
+    }
+}
+
+.o_rinv .o_rinv_lines tbody td {
+    border-bottom: 1px solid $o-rinv-border !important;
+}
+
+.o_rinv_col_index {
+    width: 30px;
+    font-size: 11px;
+}
+
+.o_rinv_line_name {
+    font-weight: bold;
+}
+
+.o_rinv_section td {
+    padding-top: 16px !important;
+    font-size: 10px;
+    font-weight: bold;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+}
+
+.o_rinv_note td {
+    color: $o-rinv-muted;
+    font-style: italic;
+}
+
+// Bottom: payment info + totals ------------------------------------------------------------------------
+.o_rinv_bottom {
+    page-break-inside: avoid;
+}
+
+.o_rinv_pay {
+    width: 54%;
+    padding-right: 22px !important;
+}
+
+.o_rinv_info_block {
+    margin-bottom: 14px;
+    padding: 12px 14px;
+    border-radius: 10px;
+    background-color: #f8f7fa;
+}
+
+.o_rinv_dot {
+    display: inline-block;
+    width: 7px;
+    height: 7px;
+    margin-right: 4px;
+    border-radius: 4px;
+    background-color: $o-rinv-good;
+}
+
+.o_rinv_totals_card {
+    padding: 4px 16px;
+
+    td {
+        padding: 6px 0 !important;
+        color: $o-rinv-muted;
+    }
+}
+
+.o_rinv .o_rinv_total td {
+    padding-top: 10px !important;
+    border-top: 1px solid $o-rinv-border !important;
+    color: $o-rinv-text !important;
+    font-size: 15px;
+    font-weight: bold;
+}
+
+.o_rinv_paid_line td {
+    color: $o-rinv-good-text !important;
+}
+
+.o_rinv_due_box {
+    margin-top: 8px;
+    border-radius: 12px;
+
+    td {
+        padding: 14px 16px !important;
+        font-size: 16px;
+        font-weight: bold;
+    }
+}
+
+.o_rinv .o_rinv_notes {
+    margin-top: 18px;
+    padding-top: 12px;
+    border-top: 1px dashed $o-rinv-border !important;
+    color: $o-rinv-muted;
+    font-size: 11.5px;
+}
+
+.o_rinv_closing {
+    margin-top: 26px;
+    page-break-inside: avoid;
+
+    td {
+        vertical-align: bottom !important;
+    }
+}
+
+.o_rinv_thanks_title {
+    margin-bottom: 2px;
+    font-size: 15px;
+    font-weight: bold;
+}
+
+.o_rinv_sign {
+    width: 200px;
+    text-align: center;
+}
+
+.o_rinv .o_rinv_sign_line {
+    height: 34px;
+    margin-bottom: 4px;
+    border-bottom: 1px solid #b9b5c0 !important;
+}
+
+// Footer (repeated on every page) -------------------------------------------------------------------------
+.o_rinv_footer {
+    color: $o-rinv-muted;
+    font-size: 9.5px;
+
+    table,
+    td {
+        border: 0 none !important;
+    }
+
+    td {
+        vertical-align: middle;
+    }
+}
+
+.o_rinv_footer_rule {
+    height: 3px;
+    margin-bottom: 8px;
+    border-radius: 2px;
+}
+
+.o_rinv_sep {
+    margin: 0 6px;
+    color: #c4c0ca;
+}
+
+.o_rinv_page_pill {
+    display: inline-block;
+    padding: 3px 10px;
+    border-radius: 10px;
+    font-weight: bold;
+}
+
+// Rounded card cells need separated borders (collapsed tables ignore cell radius).
+.o_rinv .o_rinv_cards,
+.o_rinv .o_rinv_amount_row {
+    border-collapse: separate !important;
+    border-spacing: 0;
+}
+
+// Lease agreement --------------------------------------------------------------------------------------------
+.o_rlease {
+    font-size: 12px;
+}
+
+.o_rlease_intro {
+    margin: 4px 0 18px;
+    padding: 14px 18px;
+    border-radius: 12px;
+    background-color: #f8f7fa;
+    font-size: 12.5px;
+    line-height: 1.6;
+}
+
+.o_rlease_section_title {
+    margin: 18px 0 10px;
+    font-size: 11px;
+    font-weight: bold;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    page-break-after: avoid;
+}
+
+.o_rlease_initials {
+    color: $o-rinv-muted;
+}
+
+.o_rinv .o_rinv_cards td.o_rlease_premises {
+    width: 100%;
+    padding: 16px 18px 16px 22px !important;
+}
+
+.o_rlease_premises_main {
+    padding-right: 24px !important;
+}
+
+.o_rlease_premises_name {
+    margin-bottom: 2px;
+    font-size: 16px;
+    font-weight: bold;
+}
+
+.o_rlease_premises_facts {
+    width: 42%;
+}
+
+.o_rlease_chips {
+    margin-top: 10px;
+}
+
+.o_rlease_chip {
+    display: inline-block;
+    margin: 0 4px 4px 0;
+    padding: 2px 10px;
+    border-radius: 10px;
+    font-size: 10.5px;
+    font-weight: bold;
+}
+
+.o_rlease_band {
+    margin-bottom: 14px;
+    border-radius: 14px;
+
+    td {
+        width: 25%;
+        padding: 16px 18px !important;
+        vertical-align: middle !important;
+    }
+}
+
+.o_rlease_band_label {
+    font-size: 9.5px;
+    font-weight: bold;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    opacity: 0.75;
+}
+
+.o_rlease_band_value {
+    margin-top: 2px;
+    font-size: 19px;
+    font-weight: bold;
+    line-height: 1.2;
+}
+
+.o_rlease_band_sub {
+    font-size: 10.5px;
+    opacity: 0.8;
+}
+
+.o_rlease_table {
+    margin-bottom: 6px;
+}
+
+.o_rlease_total_row td {
+    border-bottom: 0 none !important;
+}
+
+.o_rlease_dates {
+    margin-bottom: 6px;
+
+    td {
+        width: 20%;
+        padding: 10px 10px 0 0 !important;
+    }
+}
+
+.o_rlease_date {
+    font-size: 13px;
+    font-weight: bold;
+}
+
+.o_rlease_date_title {
+    font-weight: bold;
+}
+
+.o_rlease_clauses {
+    margin: 0;
+    padding-left: 22px;
+
+    li {
+        margin-bottom: 8px;
+        padding-left: 4px;
+        line-height: 1.55;
+        page-break-inside: avoid;
+    }
+}
+
+.o_rinv .o_rlease_extra {
+    margin-top: 12px;
+    padding: 12px 16px;
+    border-radius: 10px;
+    background-color: #f8f7fa;
+}
+
+.o_rlease_signatures {
+    margin-top: 22px;
+    page-break-inside: avoid;
+}
+
+.o_rlease_sign_table td {
+    width: 33.33%;
+    padding-right: 12px !important;
+
+    &:last-child {
+        padding-right: 0 !important;
+    }
+}
+
+.o_rlease_sign_box {
+    padding: 14px 16px;
+    border-radius: 12px;
+}
+
+.o_rinv .o_rlease_sign_line {
+    height: 46px;
+    margin-bottom: 6px;
+    border-bottom: 1px solid #a9a4b0 !important;
+}
+
+.o_rlease_sign_name {
+    font-weight: bold;
+}
+
+.o_rlease_signed_note {
+    margin-top: 10px;
+    font-weight: bold;
+}
+
+.o_rlease_keep {
+    page-break-inside: avoid;
+}

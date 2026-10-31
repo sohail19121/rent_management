@@ -1,60 +1,298 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
+    <!--
+        Premium lease agreement. Same building blocks as the modern invoice (rent_invoice_report.scss):
+        wkhtmltopdf-safe tables, brand colors computed in Python.
+    -->
     <template id="report_lease_agreement_document">
-        <t t-set="o" t-value="lease"/>
-        <t t-call="web.external_layout">
-            <t t-set="lease" t-value="lease.with_context(lang=lease.tenant_id.lang)"/>
-            <div class="page">
-                <h2 class="text-center">Lease Agreement <span t-field="lease.name"/></h2>
-                <p class="mt-4">
-                    This lease agreement is made between <strong t-out="(lease.property_id.owner_id or lease.company_id.partner_id).name"/>
-                    (the "Landlord") and <strong t-field="lease.tenant_id"/> (the "Tenant").
-                </p>
-                <h4 class="mt-4">1. Premises</h4>
-                <p>
-                    Unit <strong t-field="lease.unit_id.name"/> (<span t-field="lease.unit_id.unit_type"/>,
-                    floor <span t-out="lease.unit_id.floor or '-'"/>) of <strong t-field="lease.property_id"/>,
-                    <span t-out="', '.join(filter(None, [lease.property_id.street, lease.property_id.city, lease.property_id.zip]))"/>.
-                </p>
-                <h4>2. Term</h4>
-                <p>From <strong t-field="lease.start_date"/> to <strong t-field="lease.end_date"/>
-                    (<span t-field="lease.duration_months"/> months). Notice period: <span t-field="lease.notice_period_days"/> days.</p>
-                <h4>3. Rent and charges</h4>
-                <table class="table table-sm">
+        <t t-set="a" t-value="lease._rent_agreement_values()"/>
+        <t t-set="money" t-value="{'widget': 'monetary', 'display_currency': lease.currency_id}"/>
+        <t t-set="company" t-value="lease.company_id"/>
+        <t t-set="on_brand" t-value="'background-color: %s; color: %s;' % (a['brand'], a['brand_text'])"/>
+        <t t-set="unit" t-value="lease.unit_id"/>
+        <t t-set="prop" t-value="lease.property_id"/>
+
+        <div class="footer o_rinv_footer">
+            <div class="o_rinv_footer_rule" t-attf-style="background-color: {{ a['brand'] }};"/>
+            <table class="o_ignore_layout_styling o_rinv_table">
+                <tr>
+                    <td class="o_rlease_initials">Landlord initials ________ <span class="o_rinv_sep">|</span> Tenant initials ________</td>
+                    <td class="text-end o_rinv_nowrap">
+                        <span class="o_rinv_page_pill" t-attf-style="background-color: {{ a['brand_soft'] }}; color: {{ a['brand'] }};">
+                            <t t-out="lease.name"/> · Page <span class="page"/> of <span class="topage"/>
+                        </span>
+                    </td>
+                </tr>
+            </table>
+        </div>
+
+        <div class="article o_rinv o_rlease" t-att-data-oe-model="lease._name" t-att-data-oe-id="lease.id"
+             t-att-data-oe-lang="lease.env.context.get('lang')">
+
+            <!-- Branded header -->
+            <table class="o_ignore_layout_styling o_rinv_table o_rinv_hero_head" t-att-style="on_brand">
+                <tr>
+                    <td class="o_rinv_hero_company">
+                        <table class="o_ignore_layout_styling o_rinv_table">
+                            <tr>
+                                <td t-if="company.logo" class="o_rinv_logo_tile_cell">
+                                    <div class="o_rinv_logo_tile"><img t-att-src="image_data_uri(company.logo)" alt="Logo"/></div>
+                                </td>
+                                <td class="o_rinv_hero_company_text">
+                                    <div class="o_rinv_hero_company_name" t-out="company.name"/>
+                                    <div class="o_rinv_hero_soft">
+                                        <t t-out="', '.join(filter(None, [company.street, company.city, company.country_id.name]))"/>
+                                        <t t-if="company.phone"><br/><t t-out="company.phone"/></t>
+                                    </div>
+                                </td>
+                            </tr>
+                        </table>
+                    </td>
+                    <td class="o_rinv_hero_title">
+                        <div class="o_rinv_hero_kind"><t t-out="a['kind']"/> lease agreement</div>
+                        <div class="o_rinv_hero_number" t-out="lease.name"/>
+                        <span t-attf-class="o_rinv_status {{ lease.signed and 'o_rinv_status_paid' or 'o_rinv_status_due' }}">
+                            <t t-if="lease.signed">Signed</t><t t-else=""><span t-field="lease.state"/></t>
+                        </span>
+                    </td>
+                </tr>
+            </table>
+
+            <!-- Opening statement -->
+            <div class="o_rlease_intro">
+                This Lease Agreement (the "<strong>Agreement</strong>") is made on
+                <strong t-out="lease.create_date.date()" t-options="{'widget': 'date'}"/> between
+                <strong t-out="a['landlord'].name"/> (the "<strong>Landlord</strong>") and
+                <strong t-out="a['tenant'].name"/> (the "<strong>Tenant</strong>"), for the premises described below,
+                on the terms and conditions set out in this Agreement.
+            </div>
+
+            <!-- Parties -->
+            <div class="o_rlease_section_title" t-attf-style="color: {{ a['brand'] }};">1 · The parties</div>
+            <table class="o_ignore_layout_styling o_rinv_table o_rinv_cards">
+                <tr>
+                    <td class="o_rinv_card" t-attf-style="box-shadow: inset 4px 0 0 {{ a['brand'] }};">
+                        <div class="o_rinv_card_label" t-attf-style="color: {{ a['brand'] }};">Landlord</div>
+                        <div class="o_rinv_card_title" t-out="a['landlord'].name"/>
+                        <div class="o_rinv_muted o_rinv_small">
+                            <t t-foreach="list(filter(None, [', '.join(filter(None, [a['landlord'].street, a['landlord'].city])), a['landlord'].email, a['landlord'].phone]))"
+                               t-as="item"><t t-out="item"/><br t-if="not item_last"/></t>
+                        </div>
+                    </td>
+                    <td class="o_rinv_gap"/>
+                    <td class="o_rinv_card" t-attf-style="box-shadow: inset 4px 0 0 {{ a['brand'] }};">
+                        <div class="o_rinv_card_label" t-attf-style="color: {{ a['brand'] }};">Tenant</div>
+                        <div class="o_rinv_card_title" t-out="a['tenant'].name"/>
+                        <div class="o_rinv_muted o_rinv_small">
+                            <t t-foreach="list(filter(None, [', '.join(filter(None, [a['tenant'].street, a['tenant'].city])), a['tenant'].email, a['tenant'].phone]))"
+                               t-as="item"><t t-out="item"/><br t-if="not item_last"/></t>
+                            <t t-if="a['id_type']"><br/><t t-out="a['id_type']"/> <t t-out="a['id_masked']"/>
+                                <span t-if="a['kyc_verified']" class="o_rinv_good"> · verified</span></t>
+                        </div>
+                    </td>
+                    <td class="o_rinv_gap"/>
+                    <td class="o_rinv_card" t-attf-style="box-shadow: inset 4px 0 0 {{ a['brand'] }};">
+                        <div class="o_rinv_card_label" t-attf-style="color: {{ a['brand'] }};">Managed by</div>
+                        <div class="o_rinv_card_title" t-out="a['manager'].name or company.name"/>
+                        <div class="o_rinv_muted o_rinv_small">
+                            For <t t-out="company.name"/>
+                            <t t-if="a['manager'].email"><br/><t t-out="a['manager'].email"/></t>
+                            <t t-if="a['manager'].phone"><br/><t t-out="a['manager'].phone"/></t>
+                        </div>
+                    </td>
+                </tr>
+            </table>
+
+            <!-- Premises -->
+            <div class="o_rlease_section_title" t-attf-style="color: {{ a['brand'] }};">2 · The premises</div>
+            <table class="o_ignore_layout_styling o_rinv_table o_rinv_cards">
+                <tr>
+                    <td class="o_rinv_card o_rlease_premises" t-attf-style="background-color: {{ a['brand_faint'] }}; box-shadow: inset 4px 0 0 {{ a['brand'] }};">
+                        <table class="o_ignore_layout_styling o_rinv_table">
+                            <tr>
+                                <td class="o_rlease_premises_main">
+                                    <div class="o_rlease_premises_name"><t t-out="unit.name"/> · <t t-out="prop.name"/></div>
+                                    <div class="o_rinv_muted"><t t-out="', '.join(filter(None, [prop.street, prop.street2, prop.city, prop.state_id.name, prop.zip, prop.country_id.name]))"/></div>
+                                    <div t-if="prop.amenity_ids" class="o_rlease_chips">
+                                        <span t-foreach="prop.amenity_ids" t-as="amenity" class="o_rlease_chip"
+                                              t-attf-style="background-color: {{ a['brand_soft'] }}; color: {{ a['brand'] }};" t-out="amenity.name"/>
+                                    </div>
+                                </td>
+                                <td class="o_rlease_premises_facts">
+                                    <table class="o_ignore_layout_styling o_rinv_table o_rinv_kv">
+                                        <tr><td>Type</td><td class="text-end"><strong t-field="unit.unit_type"/></td></tr>
+                                        <tr t-if="unit.floor"><td>Floor</td><td class="text-end"><strong t-out="unit.floor"/></td></tr>
+                                        <tr t-if="unit.area_sqft"><td>Area</td><td class="text-end"><strong><t t-out="'%g' % unit.area_sqft"/> sq ft</strong></td></tr>
+                                        <tr t-if="unit.bedrooms"><td>Bedrooms</td><td class="text-end"><strong t-out="unit.bedrooms"/></td></tr>
+                                        <tr><td>Furnishing</td><td class="text-end"><strong t-field="unit.furnishing"/></td></tr>
+                                        <tr t-if="unit.meter_number"><td>Electricity meter</td><td class="text-end"><strong t-out="unit.meter_number"/></td></tr>
+                                    </table>
+                                </td>
+                            </tr>
+                        </table>
+                    </td>
+                </tr>
+            </table>
+
+            <!-- Key terms band -->
+            <div class="o_rlease_section_title" t-attf-style="color: {{ a['brand'] }};">3 · Key terms</div>
+            <table class="o_ignore_layout_styling o_rinv_table o_rlease_band" t-att-style="on_brand">
+                <tr>
+                    <td>
+                        <div class="o_rlease_band_label">Monthly rent</div>
+                        <div class="o_rlease_band_value" t-out="lease.rent_amount" t-options="money"/>
+                    </td>
+                    <td>
+                        <div class="o_rlease_band_label">Security deposit</div>
+                        <div class="o_rlease_band_value" t-out="lease.deposit_amount" t-options="money"/>
+                        <div t-if="a['deposit_months']" class="o_rlease_band_sub"><t t-out="'%g' % a['deposit_months']"/> month(s) of rent</div>
+                    </td>
+                    <td>
+                        <div class="o_rlease_band_label">Term</div>
+                        <div class="o_rlease_band_value"><t t-out="lease.duration_months"/> months</div>
+                        <div class="o_rlease_band_sub"><span t-field="lease.start_date"/> to <span t-field="lease.end_date"/></div>
+                    </td>
+                    <td>
+                        <div class="o_rlease_band_label">Rent due</div>
+                        <div class="o_rlease_band_value">Day <t t-out="lease.billing_day"/></div>
+                        <div class="o_rlease_band_sub"><span t-field="lease.billing_frequency"/></div>
+                    </td>
+                </tr>
+            </table>
+
+            <!-- Rent & charges -->
+            <table class="o_ignore_layout_styling o_rinv_lines o_rlease_table">
+                <thead>
+                    <tr t-att-style="on_brand">
+                        <th>Rent and charges</th>
+                        <th>Details</th>
+                        <th class="text-end">Per month</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Rent</strong></td>
+                        <td class="o_rinv_muted">Payable <t t-out="dict(lease._fields['billing_frequency']._description_selection(lease.env))[lease.billing_frequency].lower()"/>, by day <t t-out="lease.billing_day"/> of the period</td>
+                        <td class="text-end"><strong t-out="lease.rent_amount" t-options="money"/></td>
+                    </tr>
+                    <tr t-if="lease.maintenance_charge">
+                        <td><strong>Maintenance charge</strong></td>
+                        <td class="o_rinv_muted">Common areas and building upkeep</td>
+                        <td class="text-end"><strong t-out="lease.maintenance_charge" t-options="money"/></td>
+                    </tr>
+                    <tr t-if="lease.electricity_billing != 'none'">
+                        <td><strong>Electricity</strong></td>
+                        <td class="o_rinv_muted">
+                            <t t-if="lease.electricity_billing == 'metered'">Metered at <t t-out="'%g' % lease.electricity_rate"/> per kWh, billed monthly in arrears</t>
+                            <t t-else="">Fixed amount</t>
+                        </td>
+                        <td class="text-end"><strong>
+                            <t t-if="lease.electricity_billing == 'fixed'" t-out="lease.electricity_fixed_amount" t-options="money"/>
+                            <t t-else="">As consumed</t>
+                        </strong></td>
+                    </tr>
+                    <tr class="o_rlease_total_row" t-attf-style="background-color: {{ a['brand_soft'] }};">
+                        <td colspan="2"><strong>Total fixed monthly amount</strong></td>
+                        <td class="text-end"><strong t-out="a['monthly_total']" t-options="money"/></td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <!-- Escalation schedule -->
+            <t t-if="a['schedule']">
+                <div class="o_rlease_section_title" t-attf-style="color: {{ a['brand'] }};">4 · Rent schedule</div>
+                <table class="o_ignore_layout_styling o_rinv_lines o_rlease_table">
+                    <thead>
+                        <tr t-att-style="on_brand">
+                            <th class="o_rinv_col_index">#</th>
+                            <th>Period</th>
+                            <th class="text-end">Monthly rent</th>
+                        </tr>
+                    </thead>
                     <tbody>
-                        <tr><td>Rent</td><td class="text-end"><span t-field="lease.rent_amount"/> (<span t-field="lease.billing_frequency"/>, due on day <span t-field="lease.billing_day"/>)</td></tr>
-                        <tr><td>Maintenance charge</td><td class="text-end"><span t-field="lease.maintenance_charge"/></td></tr>
-                        <tr t-if="lease.electricity_billing != 'none'"><td>Electricity</td>
-                            <td class="text-end">
-                                <t t-if="lease.electricity_billing == 'metered'">Metered at <span t-out="lease.electricity_rate"/> per kWh, billed monthly in arrears</t>
-                                <t t-else=""><span t-field="lease.electricity_fixed_amount"/> per month</t>
-                            </td></tr>
-                        <tr><td>Security deposit</td><td class="text-end"><span t-field="lease.deposit_amount"/></td></tr>
-                        <tr t-if="lease.late_fee_value"><td>Late fee (after <span t-field="lease.grace_days"/> days of grace)</td>
-                            <td class="text-end">
-                                <t t-if="lease.late_fee_type == 'percent'"><span t-out="lease.late_fee_value"/> % of the amount due</t>
-                                <t t-else=""><span t-out="lease.late_fee_value" t-options="{'widget': 'monetary', 'display_currency': lease.currency_id}"/></t>
-                            </td></tr>
-                        <tr t-if="lease.escalation_percent"><td>Rent escalation</td>
-                            <td class="text-end"><span t-out="lease.escalation_percent"/> % every <span t-field="lease.escalation_every_months"/> months</td></tr>
+                        <tr t-foreach="a['schedule']" t-as="period"
+                            t-att-style="period_index % 2 and 'background-color: %s;' % a['brand_faint'] or None">
+                            <td class="o_rinv_col_index o_rinv_muted" t-out="'%02d' % (period_index + 1)"/>
+                            <td><span t-out="period['start']" t-options="{'widget': 'date'}"/> to <span t-out="period['end']" t-options="{'widget': 'date'}"/>
+                                <span t-if="period_index" class="o_rinv_muted o_rinv_small"> · +<t t-out="'%g' % lease.escalation_percent"/>%</span></td>
+                            <td class="text-end"><strong t-out="period['rent']" t-options="money"/></td>
+                        </tr>
                     </tbody>
                 </table>
-                <div t-if="lease.notes" class="mt-3">
-                    <h4>4. Additional terms</h4>
-                    <div t-field="lease.notes"/>
-                </div>
-                <div class="row mt-5 pt-5">
-                    <div class="col-6 text-center">
-                        <p>______________________________</p>
-                        <p>Landlord</p>
-                    </div>
-                    <div class="col-6 text-center">
-                        <p>______________________________</p>
-                        <p>Tenant: <span t-field="lease.tenant_id.name"/></p>
-                    </div>
-                </div>
+            </t>
+
+            <!-- Key dates (kept with its title on one page) -->
+            <div class="o_rlease_keep">
+            <div class="o_rlease_section_title" t-attf-style="color: {{ a['brand'] }};">
+                <t t-out="a['schedule'] and '5' or '4'"/> · Key dates
             </div>
-        </t>
+            <table class="o_ignore_layout_styling o_rinv_table o_rlease_dates">
+                <tr>
+                    <t t-foreach="a['timeline'][:5]" t-as="event">
+                        <td t-attf-style="border-top: 3px solid {{ a['brand'] if event['state'] == 'done' else a['brand_mid'] }} !important;">
+                            <div class="o_rlease_date" t-out="event['date']" t-options="{'widget': 'date'}"/>
+                            <div class="o_rlease_date_title" t-out="event['title']"/>
+                            <div class="o_rinv_muted o_rinv_small" t-out="event['text']"/>
+                        </td>
+                    </t>
+                </tr>
+            </table>
+            </div>
+
+            <!-- Terms and conditions -->
+            <div class="o_rlease_section_title o_rlease_page_break_avoid" t-attf-style="color: {{ a['brand'] }};">
+                <t t-out="a['schedule'] and '6' or '5'"/> · Terms and conditions
+            </div>
+            <ol class="o_rlease_clauses">
+                <li><strong>Term.</strong> The lease runs from <t t-out="lease.start_date" t-options="{'widget': 'date'}"/> to
+                    <t t-out="lease.end_date" t-options="{'widget': 'date'}"/> (<t t-out="lease.duration_months"/> months), unless renewed or terminated earlier as set out below.</li>
+                <li><strong>Rent and payment.</strong> The Tenant pays <t t-out="lease.rent_amount" t-options="money"/> per month,
+                    invoiced <t t-out="dict(lease._fields['billing_frequency']._description_selection(lease.env))[lease.billing_frequency].lower()"/> and due by day <t t-out="lease.billing_day"/>.
+                    Invoices can be paid online from the tenant portal or by bank transfer quoting the invoice reference.</li>
+                <li t-if="lease.late_fee_value"><strong>Late payment.</strong> Rent unpaid <t t-out="lease.grace_days"/> days after its due date bears a late fee of
+                    <t t-if="lease.late_fee_type == 'percent'"><t t-out="'%g' % lease.late_fee_value"/>% of the amount due</t>
+                    <t t-else="" t-out="lease.late_fee_value" t-options="money"/>, charged once per invoice.</li>
+                <li t-if="lease.escalation_percent"><strong>Rent increase.</strong> The rent increases by <t t-out="'%g' % lease.escalation_percent"/>%
+                    every <t t-out="lease.escalation_every_months"/> months, as shown in the rent schedule.</li>
+                <li><strong>Security deposit.</strong> The Tenant pays a refundable security deposit of <t t-out="lease.deposit_amount" t-options="money"/>.
+                    It is held by the Landlord and refunded at move-out, less any damage beyond normal wear and tear and any unpaid amount.</li>
+                <li><strong>Utilities.</strong>
+                    <t t-if="lease.electricity_billing == 'metered'">Electricity is billed monthly from meter <t t-out="unit.meter_number or ''"/> readings at <t t-out="'%g' % lease.electricity_rate"/> per kWh.</t>
+                    <t t-elif="lease.electricity_billing == 'fixed'">Electricity is charged at a fixed <t t-out="lease.electricity_fixed_amount" t-options="money"/> per month.</t>
+                    <t t-else="">Electricity is included in the rent.</t>
+                    <t t-if="lease.maintenance_charge"> A maintenance charge of <t t-out="lease.maintenance_charge" t-options="money"/> per month covers the upkeep of common areas.</t></li>
+                <li><strong>Maintenance and repairs.</strong> The Tenant keeps the premises clean and in good condition and reports any defect promptly through the
+                    tenant portal. Repairs caused by the Tenant's misuse may be charged to the Tenant.</li>
+                <li><strong>Use of the premises.</strong> The premises are used as a <t t-out="a['kind'].lower()"/> property only. The Tenant may not sublet or make
+                    structural changes without the Landlord's written consent.</li>
+                <li><strong>Notice and termination.</strong> Either party gives at least <t t-out="lease.notice_period_days"/> days' written notice before ending the lease.
+                    At move-out the premises are inspected and the deposit is settled.</li>
+                <li><strong>Renewal.</strong> The lease may be renewed by mutual agreement before its end date, on terms then agreed in writing.</li>
+            </ol>
+            <div t-if="lease.notes" class="o_rlease_extra">
+                <div class="o_rinv_card_label" t-attf-style="color: {{ a['brand'] }};">Additional terms</div>
+                <div t-field="lease.notes"/>
+            </div>
+
+            <!-- Signatures -->
+            <div class="o_rlease_signatures">
+                <div class="o_rlease_section_title" t-attf-style="color: {{ a['brand'] }};">Signatures</div>
+                <p class="o_rinv_muted o_rinv_small">By signing below, the parties confirm they have read and accept this Agreement.</p>
+                <table class="o_ignore_layout_styling o_rinv_table o_rlease_sign_table">
+                    <tr>
+                        <td t-foreach="[('Landlord', a['landlord'].name), ('Tenant', a['tenant'].name), ('Witness', '')]" t-as="signer">
+                            <div class="o_rlease_sign_box" t-attf-style="background-color: {{ a['brand_faint'] }};">
+                                <div class="o_rinv_card_label" t-attf-style="color: {{ a['brand'] }};" t-out="signer[0]"/>
+                                <div class="o_rlease_sign_line"/>
+                                <div class="o_rlease_sign_name"><t t-out="signer[1] or 'Name'"/></div>
+                                <div class="o_rinv_muted o_rinv_small">Date: ____ / ____ / ________</div>
+                            </div>
+                        </td>
+                    </tr>
+                </table>
+                <p t-if="lease.signed" class="o_rlease_signed_note o_rinv_good">&#10003; This agreement is recorded as signed.</p>
+            </div>
+        </div>
     </template>
 
     <template id="report_lease_agreement">

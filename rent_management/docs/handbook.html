@@ -1,0 +1,1649 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Rent Management – User Handbook</title>
+<style>
+/* Rent Management handbook: light and dark themes, one accent color per section (--c). */
+:root, [data-theme="light"] {
+    --bg: #f4f2f7;
+    --surface: #ffffff;
+    --surface-2: #faf9fc;
+    --ink: #17141c;
+    --ink-2: #3a3641;
+    --muted: #6c6877;
+    --line: rgba(23, 20, 28, .08);
+    --line-2: rgba(23, 20, 28, .14);
+    --brand: #714B67;
+    --brand-2: #a2638f;
+    --brand-ink: #5a3a52;
+    --brand-soft: #f4edf2;
+    --shadow-sm: 0 1px 2px rgba(23, 20, 28, .05);
+    --shadow: 0 1px 2px rgba(23, 20, 28, .04), 0 12px 32px -14px rgba(23, 20, 28, .16);
+    --shadow-lg: 0 2px 4px rgba(23, 20, 28, .04), 0 28px 60px -20px rgba(60, 30, 55, .35);
+    --g1: #714B67; --g2: #4f5bd5; --g3: #0e8686; --g4: #148157;
+    --g5: #b06a00; --g6: #c0436b; --g7: #1f6fb8; --g8: #5b6475;
+    --green: #148157; --blue: #1f6fb8; --orange: #a86400; --red: #b8322f; --grey: #5b6475; --purple: #714B67;
+    --topbar: rgba(255, 255, 255, .78);
+    color-scheme: light;
+}
+[data-theme="dark"] {
+    --bg: #0e0c12;
+    --surface: #17141d;
+    --surface-2: #1d1a24;
+    --ink: #f1ecf5;
+    --ink-2: #d2cbd9;
+    --muted: #9b94a6;
+    --line: rgba(255, 255, 255, .08);
+    --line-2: rgba(255, 255, 255, .14);
+    --brand: #cf93bd;
+    --brand-2: #e7b2d6;
+    --brand-ink: #ecc9e1;
+    --brand-soft: rgba(207, 147, 189, .12);
+    --shadow-sm: none;
+    --shadow: 0 1px 0 rgba(255, 255, 255, .03) inset, 0 16px 40px -18px rgba(0, 0, 0, .7);
+    --shadow-lg: 0 30px 70px -24px rgba(0, 0, 0, .8);
+    --g1: #d29ac2; --g2: #8f98ff; --g3: #4cc9c3; --g4: #4fcf94;
+    --g5: #f0aa45; --g6: #f37ea2; --g7: #6db3f5; --g8: #a5adbd;
+    --green: #4fcf94; --blue: #6db3f5; --orange: #f0aa45; --red: #f07a76; --grey: #a5adbd; --purple: #d29ac2;
+    --topbar: rgba(14, 12, 18, .72);
+    color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; scroll-padding-top: 84px; }
+body {
+    margin: 0;
+    font: 16px/1.72 "Inter", "SF Pro Text", "Segoe UI Variable Text", "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    color: var(--ink-2);
+    background: var(--bg);
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+    transition: background .25s, color .25s;
+}
+a { color: var(--brand); text-decoration-thickness: 1px; text-underline-offset: 3px; }
+h1, h2, h3, h4 { color: var(--ink); line-height: 1.2; letter-spacing: -.02em; margin: 0 0 .5em; }
+h2 { font-size: 2rem; font-weight: 750; }
+h3 { font-size: 1.22rem; font-weight: 700; margin-top: 2.1em; display: flex; align-items: center; gap: 10px; }
+h3::before { content: ""; width: 4px; height: 1.05em; border-radius: 4px; background: var(--c, var(--brand)); }
+h4 { font-size: 1rem; margin-top: 1.4em; }
+p { margin: 0 0 1em; }
+b, strong { color: var(--ink); font-weight: 650; }
+ul { padding-left: 1.2em; }
+li { margin-bottom: .35em; }
+li::marker { color: var(--c, var(--brand)); }
+code {
+    font-family: "JetBrains Mono", "SF Mono", Consolas, monospace; font-size: .84em;
+    padding: 2px 7px; border-radius: 6px; background: var(--brand-soft); color: var(--brand-ink);
+}
+kbd {
+    font: 600 .72rem/1 "SF Mono", Consolas, monospace; padding: 4px 7px; border-radius: 6px;
+    border: 1px solid var(--line-2); border-bottom-width: 2px; color: var(--muted); background: var(--surface);
+}
+svg.ic { width: 1.15em; height: 1.15em; flex: none; vertical-align: -0.2em; }
+::selection { background: color-mix(in srgb, var(--brand) 25%, transparent); }
+
+/* Progress + top bar ----------------------------------------------------------- */
+.progress {
+    position: fixed; top: 0; left: 0; z-index: 40; height: 3px; width: 0;
+    background: linear-gradient(90deg, var(--g1), var(--g2), var(--g3));
+    transition: width .1s linear;
+}
+.topbar {
+    position: sticky; top: 0; z-index: 30;
+    display: flex; align-items: center; gap: 12px;
+    height: 68px; padding: 0 22px;
+    background: var(--topbar);
+    backdrop-filter: saturate(1.6) blur(18px); -webkit-backdrop-filter: saturate(1.6) blur(18px);
+    border-bottom: 1px solid var(--line);
+}
+.brand { display: flex; align-items: center; gap: 12px; text-decoration: none; }
+.brand-mark {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 40px; height: 40px; border-radius: 12px; color: #fff;
+    background: linear-gradient(140deg, #8a5a7e, #4f3348);
+    box-shadow: 0 6px 16px -6px rgba(113, 75, 103, .7), inset 0 1px 0 rgba(255, 255, 255, .25);
+}
+.brand-mark svg.ic { width: 20px; height: 20px; }
+.brand-mark.sm { width: 26px; height: 26px; border-radius: 8px; margin-right: 10px; vertical-align: middle; }
+.brand-mark.sm svg.ic { width: 14px; height: 14px; }
+.brand-text { display: flex; flex-direction: column; line-height: 1.15; }
+.brand-text strong { color: var(--ink); font-size: 1rem; letter-spacing: -.01em; }
+.brand-text small { color: var(--muted); font-size: .78rem; }
+.spacer { flex: 1; }
+.now-reading {
+    max-width: 340px; overflow: hidden; white-space: nowrap; text-overflow: ellipsis;
+    font-size: .85rem; color: var(--muted); opacity: 0; transition: opacity .2s;
+}
+.now-reading.show { opacity: 1; }
+.now-reading b { color: var(--ink); }
+.icon-btn, .pill-btn {
+    display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+    height: 40px; border-radius: 11px; border: 1px solid var(--line-2);
+    background: var(--surface); color: var(--ink); cursor: pointer;
+    font: 600 .88rem/1 inherit; transition: .15s;
+}
+.icon-btn { width: 40px; }
+.pill-btn { padding: 0 16px; }
+.icon-btn:hover, .pill-btn:hover { border-color: var(--brand); color: var(--brand); }
+.menu-toggle { display: none; }
+[data-theme="light"] .only-dark, [data-theme="dark"] .only-light { display: none; }
+
+/* Layout + sidebar ------------------------------------------------------------- */
+.layout { display: grid; grid-template-columns: 300px minmax(0, 1fr); max-width: 1480px; margin: 0 auto; }
+nav.toc {
+    position: sticky; top: 68px; align-self: start;
+    height: calc(100vh - 68px); overflow-y: auto; scrollbar-width: thin;
+    padding: 22px 16px 32px 22px;
+}
+.search {
+    display: flex; align-items: center; gap: 8px; margin-bottom: 14px; padding: 0 10px 0 12px;
+    height: 42px; border-radius: 12px; border: 1px solid var(--line-2); background: var(--surface);
+    color: var(--muted); box-shadow: var(--shadow-sm); transition: .15s;
+}
+.search:focus-within { border-color: var(--brand); box-shadow: 0 0 0 4px color-mix(in srgb, var(--brand) 14%, transparent); }
+.search input { flex: 1; min-width: 0; border: 0; outline: 0; background: transparent; color: var(--ink); font: inherit; font-size: .9rem; }
+.toc a {
+    position: relative; display: flex; align-items: center; gap: 10px; padding: 6px 10px; margin: 1px 0;
+    border-radius: 9px; color: var(--ink-2); text-decoration: none; font-size: .9rem; line-height: 1.35;
+    transition: background .12s, color .12s;
+}
+.toc a .n { font: 600 .72rem/1 "SF Mono", Consolas, monospace; color: var(--muted); min-width: 20px; }
+.toc a:hover { background: var(--surface); color: var(--ink); }
+.toc a.active { background: var(--surface); color: var(--ink); font-weight: 600; box-shadow: var(--shadow-sm), 0 0 0 1px var(--line); }
+.toc a.active::before {
+    content: ""; position: absolute; left: -10px; top: 8px; bottom: 8px; width: 3px; border-radius: 3px; background: var(--c, var(--brand));
+}
+.toc a.active .n { color: var(--c, var(--brand)); }
+.toc-home { font-weight: 600; color: var(--brand) !important; }
+.toc-home svg.ic { color: var(--brand); }
+.toc .group {
+    display: flex; align-items: center; gap: 8px;
+    margin: 20px 0 6px 10px; font-size: .7rem; font-weight: 700; letter-spacing: .09em; text-transform: uppercase; color: var(--muted);
+}
+.toc .group::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: var(--c); }
+.toc-foot { margin: 26px 10px 0; font-size: .75rem; color: var(--muted); }
+main { padding: 30px 40px 80px 28px; min-width: 0; }
+
+/* Cover ----------------------------------------------------------------------- */
+.cover {
+    position: relative; overflow: hidden; isolation: isolate;
+    display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr); gap: 40px; align-items: center;
+    border-radius: 28px; padding: 64px 56px; color: #fff;
+    background:
+        radial-gradient(700px 420px at 0% 0%, rgba(178, 104, 155, .55), transparent 60%),
+        radial-gradient(560px 380px at 100% 10%, rgba(91, 103, 230, .38), transparent 60%),
+        radial-gradient(600px 360px at 70% 120%, rgba(22, 160, 150, .30), transparent 60%),
+        #1a1220;
+    box-shadow: var(--shadow-lg);
+}
+.cover-grid {
+    position: absolute; inset: 0; z-index: -1; opacity: .5;
+    background-image: linear-gradient(rgba(255, 255, 255, .05) 1px, transparent 1px), linear-gradient(90deg, rgba(255, 255, 255, .05) 1px, transparent 1px);
+    background-size: 44px 44px;
+    mask-image: radial-gradient(ellipse at 30% 40%, #000 20%, transparent 75%);
+}
+.cover-eyebrow {
+    display: inline-flex; align-items: center; gap: 8px; padding: 6px 14px 6px 10px; border-radius: 999px;
+    background: rgba(255, 255, 255, .09); border: 1px solid rgba(255, 255, 255, .14);
+    font-size: .8rem; font-weight: 600; color: rgba(255, 255, 255, .85); letter-spacing: .01em;
+}
+.cover-eyebrow svg.ic { color: #f3c1e2; }
+.cover h1 { color: #fff; font-size: 3.4rem; line-height: 1.05; letter-spacing: -.035em; font-weight: 800; margin: 22px 0 18px; }
+.cover h1 span {
+    background: linear-gradient(90deg, #f6cde8, #c3c8ff 55%, #9eeee6);
+    -webkit-background-clip: text; background-clip: text; color: transparent;
+}
+.cover p { max-width: 560px; font-size: 1.08rem; color: rgba(255, 255, 255, .74); }
+.cover-actions { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 30px; }
+.cta {
+    display: inline-flex; align-items: center; gap: 8px; height: 48px; padding: 0 22px; border-radius: 14px;
+    background: #fff; color: #2a1b27; font-weight: 700; text-decoration: none; transition: .18s;
+    box-shadow: 0 10px 24px -10px rgba(0, 0, 0, .6);
+}
+.cta:hover { transform: translateY(-2px); }
+.cta.ghost { background: rgba(255, 255, 255, .08); color: #fff; border: 1px solid rgba(255, 255, 255, .2); box-shadow: none; }
+
+/* Product mock on the cover */
+.mock {
+    border-radius: 18px; overflow: hidden; color: #1f1d24;
+    background: #fff; border: 1px solid rgba(255, 255, 255, .5);
+    box-shadow: 0 40px 80px -30px rgba(0, 0, 0, .75), 0 0 0 8px rgba(255, 255, 255, .06);
+    transform: perspective(1400px) rotateY(-9deg) rotateX(4deg); transform-origin: left center;
+}
+.mock-bar { display: flex; align-items: center; gap: 6px; height: 34px; padding: 0 14px; background: #f4f2f6; border-bottom: 1px solid #ebe8ee; }
+.mock-bar i { width: 10px; height: 10px; border-radius: 50%; background: #e2dde6; }
+.mock-bar i:nth-child(1) { background: #ff6159; } .mock-bar i:nth-child(2) { background: #ffbd2e; } .mock-bar i:nth-child(3) { background: #28c941; }
+.mock-bar span { margin-left: 10px; font-size: .72rem; font-weight: 700; color: #6c6877; }
+.mock-body { padding: 18px; display: grid; gap: 12px; font-size: .8rem; }
+.mock-head { display: flex; justify-content: space-between; align-items: center; }
+.mock-head small { display: block; color: #8a8594; font-size: .68rem; font-weight: 700; letter-spacing: .04em; }
+.mock-head b { color: #1f1d24; font-size: .95rem; }
+.mock-pill { padding: 3px 10px; border-radius: 999px; font-size: .68rem; font-weight: 700; }
+.mock-pill.ok { background: #e3f4ec; color: #148157; }
+.mock-pill.warn { background: #fdf0dc; color: #a86400; }
+.mock-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+.mock-stats div { padding: 10px; border-radius: 10px; background: #f8f6fa; border: 1px solid #efecf2; }
+.mock-stats small { display: block; color: #8a8594; font-size: .66rem; }
+.mock-stats b { color: #1f1d24; font-size: .9rem; }
+.mock-stats b.ok-t { color: #148157; }
+.mock-inv { padding: 12px; border-radius: 12px; border: 1px solid #efecf2; }
+.mock-inv-row { display: flex; justify-content: space-between; align-items: center; font-weight: 600; }
+.mock-inv-row.muted { color: #8a8594; font-weight: 500; font-size: .72rem; }
+.mock-track { height: 6px; margin: 10px 0 6px; border-radius: 6px; background: #f0ecf2; overflow: hidden; }
+.mock-track i { display: block; height: 100%; border-radius: 6px; background: linear-gradient(90deg, #714B67, #a2638f); }
+.mock-jobs { display: grid; gap: 6px; padding: 12px; border-radius: 12px; background: #1a1220; color: #e9e3ee; font-size: .74rem; }
+.mock-jobs div { display: flex; align-items: center; gap: 8px; }
+.mock-jobs em { margin-left: auto; font-style: normal; color: #a69cb0; font-family: Consolas, monospace; }
+.mock-jobs .dot { width: 7px; height: 7px; border-radius: 50%; background: #4fcf94; box-shadow: 0 0 0 3px rgba(79, 207, 148, .2); }
+
+/* Stats, start path, index ------------------------------------------------------ */
+.stats {
+    display: grid; grid-template-columns: repeat(5, 1fr); margin: 22px 0;
+    background: var(--surface); border: 1px solid var(--line); border-radius: 20px; box-shadow: var(--shadow);
+}
+.stats div { padding: 20px 22px; display: flex; flex-direction: column; }
+.stats div + div { border-left: 1px solid var(--line); }
+.stats b { font-size: 2rem; line-height: 1.1; letter-spacing: -.03em; font-weight: 800;
+    background: linear-gradient(120deg, var(--g1), var(--g2)); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.stats span { color: var(--muted); font-size: .86rem; }
+.path-start { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-bottom: 22px; }
+.path-start a {
+    display: flex; align-items: center; gap: 14px; padding: 16px 18px; border-radius: 16px; text-decoration: none;
+    background: var(--surface); border: 1px solid var(--line); box-shadow: var(--shadow-sm); color: var(--ink-2); transition: .18s;
+}
+.path-start a:hover { border-color: var(--c); transform: translateY(-2px); box-shadow: var(--shadow); }
+.path-start a > svg.ic { margin-left: auto; color: var(--c); }
+.ps-n {
+    display: inline-flex; align-items: center; justify-content: center; flex: none; width: 36px; height: 36px; border-radius: 11px;
+    background: var(--c); color: #fff; font-weight: 800;
+}
+.path-start b { display: block; color: var(--ink); font-size: .95rem; }
+.path-start small { color: var(--muted); font-size: .8rem; }
+.index-group {
+    display: flex; align-items: center; gap: 10px; margin: 34px 0 14px;
+    font-size: .76rem; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; color: var(--ink);
+}
+.index-group span { width: 22px; height: 4px; border-radius: 4px; background: var(--c); }
+.index-group::after { content: ""; flex: 1; height: 1px; background: var(--line); }
+.cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 14px; }
+.card {
+    position: relative; display: flex; flex-direction: column; padding: 18px 18px 16px; border-radius: 18px; overflow: hidden;
+    background: var(--surface); border: 1px solid var(--line); box-shadow: var(--shadow-sm);
+    color: var(--ink-2); text-decoration: none; transition: transform .2s, box-shadow .2s, border-color .2s;
+}
+.card::before {
+    content: ""; position: absolute; inset: 0 0 auto; height: 90px; opacity: 0; transition: opacity .2s;
+    background: radial-gradient(260px 90px at 0 0, color-mix(in srgb, var(--c) 16%, transparent), transparent);
+}
+.card:hover { transform: translateY(-3px); box-shadow: var(--shadow); border-color: color-mix(in srgb, var(--c) 45%, transparent); }
+.card:hover::before { opacity: 1; }
+.card-top { position: relative; display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
+.card-icon {
+    display: inline-flex; align-items: center; justify-content: center; width: 42px; height: 42px; border-radius: 12px;
+    background: color-mix(in srgb, var(--c) 13%, transparent); color: var(--c);
+}
+.card-icon svg.ic { width: 21px; height: 21px; }
+.card-num { font: 700 .76rem/1 "SF Mono", Consolas, monospace; color: var(--muted); }
+.card b { position: relative; color: var(--ink); font-size: 1rem; margin-bottom: 4px; }
+.card small { position: relative; color: var(--muted); line-height: 1.5; font-size: .86rem; }
+.card-go {
+    position: relative; display: inline-flex; align-items: center; gap: 6px; margin-top: 14px;
+    font-size: .8rem; font-weight: 700; color: var(--c); opacity: .0; transform: translateX(-4px); transition: .2s;
+}
+.card:hover .card-go { opacity: 1; transform: none; }
+
+/* Chapters --------------------------------------------------------------------- */
+section.chapter {
+    position: relative; overflow: hidden;
+    background: var(--surface); border: 1px solid var(--line); border-radius: 26px; box-shadow: var(--shadow);
+    padding: 44px 52px 30px; margin-bottom: 30px;
+}
+section.chapter::before {
+    content: ""; position: absolute; inset: 0 0 auto; height: 220px; pointer-events: none;
+    background: radial-gradient(520px 200px at 0 0, color-mix(in srgb, var(--c) 10%, transparent), transparent 70%);
+}
+.chapter-head { position: relative; display: flex; align-items: center; gap: 18px; margin-bottom: 22px; }
+.ch-icon {
+    display: inline-flex; align-items: center; justify-content: center; flex: none; width: 58px; height: 58px; border-radius: 17px;
+    color: #fff; background: linear-gradient(145deg, color-mix(in srgb, var(--c) 82%, white), var(--c));
+    box-shadow: 0 12px 24px -10px color-mix(in srgb, var(--c) 75%, transparent), inset 0 1px 0 rgba(255, 255, 255, .3);
+}
+.ch-icon svg.ic { width: 27px; height: 27px; }
+.eyebrow { font-size: .74rem; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; color: var(--c); margin-bottom: 4px; }
+.chapter-head h2 { margin: 0; }
+.lead { position: relative; font-size: 1.12rem; color: var(--muted); max-width: 820px; }
+
+/* UI-like tokens ---------------------------------------------------------------- */
+.path { display: inline-flex; flex-wrap: wrap; align-items: center; gap: 3px; font-size: .86rem; vertical-align: middle; }
+.path span {
+    padding: 2px 9px; border-radius: 7px; white-space: nowrap; font-weight: 600;
+    background: var(--surface-2); color: var(--ink); border: 1px solid var(--line-2);
+}
+.path i { font-style: normal; color: var(--muted); }
+.btn {
+    display: inline-block; padding: 1px 11px; border-radius: 7px; font-size: .84rem; font-weight: 650; white-space: nowrap;
+    border: 1px solid var(--line-2); color: var(--ink); background: var(--surface-2); box-shadow: var(--shadow-sm);
+}
+.btn.primary { background: #714B67; border-color: #714B67; color: #fff; }
+.tag {
+    display: inline-flex; align-items: center; gap: 6px; padding: 1px 10px; border-radius: 999px;
+    font-size: .78rem; font-weight: 700; white-space: nowrap; vertical-align: 1px;
+    color: var(--t); background: color-mix(in srgb, var(--t) 13%, transparent);
+}
+.tag::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
+.t-grey { --t: var(--grey); } .t-blue { --t: var(--blue); } .t-green { --t: var(--green); }
+.t-orange { --t: var(--orange); } .t-red { --t: var(--red); } .t-purple { --t: var(--purple); }
+
+/* Callouts --------------------------------------------------------------------- */
+.callout {
+    position: relative; display: flex; gap: 14px; padding: 16px 20px; border-radius: 16px; margin: 18px 0;
+    background: color-mix(in srgb, var(--k) 7%, var(--surface)); border: 1px solid color-mix(in srgb, var(--k) 22%, transparent);
+}
+.callout .callout-ic {
+    width: 34px; height: 34px; padding: 7px; border-radius: 10px; margin-top: 1px;
+    color: var(--k); background: color-mix(in srgb, var(--k) 15%, transparent);
+}
+.callout p:last-child, .callout ul:last-child { margin-bottom: 0; }
+.callout ul { margin-top: 0; }
+.tip { --k: var(--green); } .note { --k: var(--blue); } .warn { --k: var(--orange); } .auto { --k: var(--purple); }
+.legend { margin-top: 0; }
+
+/* Steps ------------------------------------------------------------------------ */
+ol.steps { counter-reset: s; list-style: none; padding: 0; margin: 14px 0 20px; }
+ol.steps > li { position: relative; padding: 4px 0 16px 52px; margin: 0; counter-increment: s; }
+ol.steps > li::before {
+    content: counter(s); position: absolute; left: 0; top: 0; width: 34px; height: 34px; border-radius: 11px;
+    display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: .88rem; color: #fff;
+    background: linear-gradient(145deg, color-mix(in srgb, var(--c, var(--brand)) 80%, white), var(--c, var(--brand)));
+    box-shadow: 0 6px 14px -6px color-mix(in srgb, var(--c, var(--brand)) 80%, transparent);
+}
+ol.steps > li:not(:last-child)::after {
+    content: ""; position: absolute; left: 16px; top: 40px; bottom: 4px; width: 2px; border-radius: 2px;
+    background: linear-gradient(var(--line-2), transparent);
+}
+
+/* Tables ----------------------------------------------------------------------- */
+.table-wrap {
+    overflow-x: auto; margin: 16px 0 22px; border-radius: 16px;
+    border: 1px solid var(--line); background: var(--surface); box-shadow: var(--shadow-sm);
+}
+table { width: 100%; border-collapse: collapse; font-size: .92rem; }
+th {
+    text-align: left; font-size: .72rem; font-weight: 800; letter-spacing: .07em; text-transform: uppercase;
+    color: var(--muted); background: var(--surface-2); padding: 12px 16px; border-bottom: 1px solid var(--line);
+}
+td { padding: 13px 16px; border-bottom: 1px solid var(--line); vertical-align: top; }
+tr:last-child td { border-bottom: 0; }
+tbody tr, table tr { transition: background .12s; }
+table tr:hover td { background: color-mix(in srgb, var(--c, var(--brand)) 4%, transparent); }
+td:first-child b { color: var(--ink); }
+td.nowrap { white-space: nowrap; }
+
+/* Flow, states, grids ------------------------------------------------------------ */
+.flow { display: flex; flex-wrap: wrap; align-items: stretch; gap: 10px; margin: 20px 0; }
+.flow .box {
+    flex: 1 1 140px; padding: 16px; border-radius: 16px; text-align: left; font-size: .86rem; color: var(--muted);
+    background: var(--surface-2); border: 1px solid var(--line); position: relative;
+}
+.flow .box b { display: block; color: var(--ink); font-size: .98rem; margin-bottom: 2px; }
+.flow .box::before { content: ""; display: block; width: 26px; height: 4px; border-radius: 4px; background: var(--c, var(--brand)); margin-bottom: 10px; }
+.flow .arrow { display: flex; align-items: center; color: var(--muted); font-weight: 800; }
+.states {
+    display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin: 16px 0; padding: 14px 16px;
+    border-radius: 14px; background: var(--surface-2); border: 1px dashed var(--line-2);
+}
+.states .arr { color: var(--muted); }
+.grid2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(270px, 1fr)); gap: 16px; margin: 18px 0; }
+.panel {
+    border-radius: 18px; padding: 20px 22px; background: var(--surface-2); border: 1px solid var(--line);
+    border-top: 3px solid var(--c, var(--brand));
+}
+.panel h4 { margin-top: 0; font-size: 1.02rem; }
+.panel ul { margin: 0; padding-left: 18px; }
+
+/* Timeline --------------------------------------------------------------------- */
+.timeline { position: relative; margin: 24px 0; padding-left: 34px; }
+.timeline::before { content: ""; position: absolute; left: 11px; top: 8px; bottom: 8px; width: 2px; background: linear-gradient(var(--c, var(--brand)), var(--line)); }
+.timeline .ev {
+    position: relative; margin-bottom: 12px; padding: 14px 18px; border-radius: 14px;
+    background: var(--surface-2); border: 1px solid var(--line);
+}
+.timeline .ev p { margin: 4px 0 0; }
+.timeline .ev::before {
+    content: ""; position: absolute; left: -30px; top: 18px; width: 14px; height: 14px; border-radius: 50%;
+    background: var(--surface); border: 3px solid var(--c, var(--brand));
+}
+.timeline .ev.auto-ev::before { background: var(--c, var(--brand)); box-shadow: 0 0 0 4px color-mix(in srgb, var(--c, var(--brand)) 18%, transparent); }
+.timeline .date { font-weight: 800; color: var(--ink); letter-spacing: -.01em; }
+.timeline .who { margin-left: 8px; }
+
+/* Calculation ------------------------------------------------------------------ */
+.calc {
+    font-family: "JetBrains Mono", "SF Mono", Consolas, monospace; font-size: .88rem; line-height: 1.9;
+    padding: 20px 24px; border-radius: 16px; overflow-x: auto; color: var(--ink-2);
+    background: var(--surface-2); border: 1px solid var(--line);
+    background-image: linear-gradient(90deg, color-mix(in srgb, var(--c, var(--brand)) 60%, transparent) 0 4px, transparent 4px);
+}
+.calc b { color: var(--c, var(--brand)); }
+
+/* FAQ -------------------------------------------------------------------------- */
+.faq details {
+    border-radius: 14px; margin-bottom: 10px; background: var(--surface-2); border: 1px solid var(--line); transition: .15s;
+}
+.faq details[open] { background: var(--surface); box-shadow: var(--shadow); border-color: color-mix(in srgb, var(--c) 35%, transparent); }
+.faq summary {
+    cursor: pointer; padding: 15px 18px; font-weight: 650; color: var(--ink); list-style: none;
+    display: flex; align-items: center; gap: 12px;
+}
+.faq summary::-webkit-details-marker { display: none; }
+.faq summary::before {
+    content: "+"; flex: none; display: inline-flex; align-items: center; justify-content: center;
+    width: 24px; height: 24px; border-radius: 8px; font-weight: 800; color: var(--c);
+    background: color-mix(in srgb, var(--c) 13%, transparent); transition: transform .2s;
+}
+.faq details[open] summary::before { content: "–"; }
+.faq details > div { padding: 0 20px 16px 54px; color: var(--muted); }
+
+/* Chapter navigation, back to top, footer ---------------------------------------- */
+.chapter-nav { position: relative; display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 34px; padding-top: 22px; border-top: 1px solid var(--line); }
+.chapter-nav a {
+    display: flex; flex-direction: column; gap: 2px; padding: 14px 18px; border-radius: 14px; text-decoration: none;
+    border: 1px solid var(--line); background: var(--surface-2); transition: .15s;
+}
+.chapter-nav a:hover { border-color: var(--brand); transform: translateY(-1px); }
+.chapter-nav a.next { text-align: right; grid-column: 2; }
+.chapter-nav small { display: inline-flex; align-items: center; gap: 6px; font-size: .74rem; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); }
+.chapter-nav a.next small { justify-content: flex-end; }
+.chapter-nav b { color: var(--ink); font-size: .95rem; }
+.to-top {
+    position: fixed; right: 26px; bottom: 26px; z-index: 25; width: 48px; height: 48px; border-radius: 15px; border: 0; cursor: pointer;
+    display: inline-flex; align-items: center; justify-content: center; color: #fff;
+    background: linear-gradient(140deg, #8a5a7e, #4f3348); box-shadow: 0 14px 30px -10px rgba(79, 51, 72, .8);
+    opacity: 0; transform: translateY(12px); pointer-events: none; transition: .25s;
+}
+.to-top.show { opacity: 1; transform: none; pointer-events: auto; }
+.to-top svg.ic { width: 20px; height: 20px; }
+.footer { text-align: center; color: var(--muted); font-size: .85rem; padding: 18px 0 30px; }
+
+/* Responsive ------------------------------------------------------------------- */
+@media (max-width: 1180px) {
+    .cover { grid-template-columns: 1fr; padding: 48px 36px; }
+    .mock { transform: none; max-width: 520px; }
+    .stats { grid-template-columns: repeat(3, 1fr); }
+    .stats div:nth-child(4) { border-left: 0; }
+    .stats div:nth-child(n+4) { border-top: 1px solid var(--line); }
+    .now-reading { display: none; }
+}
+@media (max-width: 1000px) {
+    .layout { grid-template-columns: 1fr; }
+    nav.toc { display: none; position: fixed; inset: 68px 0 0 0; z-index: 28; background: var(--bg); height: auto; padding: 20px; }
+    nav.toc.open { display: block; }
+    .menu-toggle { display: inline-flex; }
+    main { padding: 18px 14px 60px; }
+    section.chapter { padding: 30px 22px 22px; border-radius: 20px; }
+    .path-start { grid-template-columns: 1fr; }
+    .pill-btn span { display: none; }
+    .pill-btn { width: 40px; padding: 0; }
+}
+@media (max-width: 640px) {
+    .cover { padding: 36px 22px; border-radius: 22px; }
+    .cover h1 { font-size: 2.3rem; }
+    .stats { grid-template-columns: repeat(2, 1fr); }
+    .stats div { border: 0 !important; }
+    h2 { font-size: 1.55rem; }
+    .chapter-head { gap: 14px; }
+    .ch-icon { width: 48px; height: 48px; border-radius: 14px; }
+    .brand-text small { display: none; }
+}
+
+/* Print: always light, one chapter per page ------------------------------------- */
+@media print {
+    :root, [data-theme] { --bg: #fff; --surface: #fff; --surface-2: #faf9fc; --ink: #17141c; --ink-2: #333; --muted: #666; --line: #e6e3ea; --line-2: #d8d4dd; }
+    * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    .topbar, nav.toc, .chapter-nav, .to-top, .progress, .card-go, .cover-actions { display: none !important; }
+    .layout { display: block; }
+    main { padding: 0; }
+    body { background: #fff; font-size: 11.5pt; }
+    section.chapter { box-shadow: none; border: 0; padding: 0; margin: 0; page-break-before: always; }
+    section.chapter::before { display: none; }
+    .cover { box-shadow: none; }
+    .mock { transform: none; }
+    .card, .stats, .table-wrap, .callout, .timeline .ev, .faq details { box-shadow: none; break-inside: avoid; }
+    .faq details > div { display: block !important; }
+}
+
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><symbol id="i-compass" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/></symbol><symbol id="i-calendar" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></symbol><symbol id="i-users" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></symbol><symbol id="i-sliders" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 21v-7M4 10V3M12 21v-9M12 8V3M20 21v-5M20 12V3M1 14h6M9 8h6M17 16h6"/></symbol><symbol id="i-map" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"/><path d="M8 2v16M16 6v16"/></symbol><symbol id="i-building" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="2" width="16" height="20" rx="2"/><path d="M9 22v-4h6v4M8 6h.01M12 6h.01M16 6h.01M8 10h.01M12 10h.01M16 10h.01M8 14h.01M12 14h.01M16 14h.01"/></symbol><symbol id="i-home" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></symbol><symbol id="i-user" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></symbol><symbol id="i-file" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M16 13H8M16 17H8M10 9H8"/></symbol><symbol id="i-edit" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4z"/></symbol><symbol id="i-shield" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="M9 12l2 2 4-4"/></symbol><symbol id="i-refresh" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M23 4v6h-6M1 20v-6h6"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></symbol><symbol id="i-logout" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5M21 12H9"/></symbol><symbol id="i-receipt" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 2v20l3-2 3 2 3-2 3 2 3-2 1 .7V2l-1 .7L16 1l-3 2-3-2-3 2-3-1z"/><path d="M8 8h8M8 12h8M8 16h5"/></symbol><symbol id="i-card" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="4" width="22" height="16" rx="2"/><path d="M1 10h22M5 15h4"/></symbol><symbol id="i-clock" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></symbol><symbol id="i-trending" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></symbol><symbol id="i-zap" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></symbol><symbol id="i-tool" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></symbol><symbol id="i-cpu" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="16" height="16" rx="2"/><rect x="9" y="9" width="6" height="6"/><path d="M9 1v3M15 1v3M9 20v3M15 20v3M20 9h3M20 14h3M1 9h3M1 14h3"/></symbol><symbol id="i-pointer" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3l7.07 16.97 2.51-7.39 7.39-2.51z"/><path d="M13 13l6 6"/></symbol><symbol id="i-mail" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M22 6l-10 7L2 6"/></symbol><symbol id="i-globe" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></symbol><symbol id="i-lock" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></symbol><symbol id="i-grid" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="9" rx="1"/><rect x="14" y="3" width="7" height="5" rx="1"/><rect x="14" y="12" width="7" height="9" rx="1"/><rect x="3" y="16" width="7" height="5" rx="1"/></symbol><symbol id="i-bars" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20V10M18 20V4M6 20v-4"/></symbol><symbol id="i-checklist" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></symbol><symbol id="i-help" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3M12 17h.01"/></symbol><symbol id="i-alert" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><path d="M12 9v4M12 17h.01"/></symbol><symbol id="i-bulb" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18h6M10 22h4"/><path d="M12 2a7 7 0 0 0-4 12.7V17h8v-2.3A7 7 0 0 0 12 2z"/></symbol><symbol id="i-book" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></symbol><symbol id="i-info" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></symbol><symbol id="i-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></symbol><symbol id="i-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></symbol><symbol id="i-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></symbol><symbol id="i-printer" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9V2h12v7M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></symbol><symbol id="i-search" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></symbol><symbol id="i-up" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M5 12l7-7 7 7"/></symbol><symbol id="i-right" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></symbol><symbol id="i-left" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></symbol><symbol id="i-star" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></symbol><symbol id="i-menu" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12h18M3 6h18M3 18h18"/></symbol><symbol id="i-sparkle" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.9 5.1L19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9z"/><path d="M19 15l.9 2.1L22 18l-2.1.9L19 21l-.9-2.1L16 18l2.1-.9z"/></symbol></svg>
+
+<div class="progress" id="progress"></div>
+<header class="topbar">
+    <button class="icon-btn menu-toggle" aria-label="Contents" onclick="document.querySelector('nav.toc').classList.toggle('open')"><svg class="ic" aria-hidden="true"><use href="#i-menu"/></svg></button>
+    <a class="brand" href="#index"><span class="brand-mark"><svg class="ic" aria-hidden="true"><use href="#i-home"/></svg></span>
+        <span class="brand-text"><strong>Rent Management</strong><small>User Handbook</small></span></a>
+    <span class="spacer"></span>
+    <span class="now-reading" id="nowReading"></span>
+    <button class="icon-btn" id="themeToggle" aria-label="Switch light / dark"><svg class="ic only-light" aria-hidden="true"><use href="#i-moon"/></svg><svg class="ic only-dark" aria-hidden="true"><use href="#i-sun"/></svg></button>
+    <button class="pill-btn" onclick="window.print()"><svg class="ic" aria-hidden="true"><use href="#i-printer"/></svg><span>Print / PDF</span></button>
+</header>
+
+<div class="layout">
+<nav class="toc" id="toc">
+<label class="search"><svg class="ic" aria-hidden="true"><use href="#i-search"/></svg><input type="search" id="tocSearch" placeholder="Search the handbook" aria-label="Search the handbook"><kbd>/</kbd></label>
+<a href="#index" class="toc-home"><svg class="ic" aria-hidden="true"><use href="#i-star"/></svg><span>Index – start here</span></a>
+<div class="group" style="--c: var(--g1)">Getting started</div>
+<a href="#overview" style="--c: var(--g1)"><span class="n">01</span>The system at a glance</a>
+<a href="#story" style="--c: var(--g1)"><span class="n">02</span>A full year, step by step</a>
+<a href="#roles" style="--c: var(--g1)"><span class="n">03</span>Users and access rights</a>
+<a href="#setup" style="--c: var(--g1)"><span class="n">04</span>First-time setup</a>
+<a href="#map" style="--c: var(--g1)"><span class="n">05</span>Where to find everything</a>
+<div class="group" style="--c: var(--g2)">Your portfolio</div>
+<a href="#properties" style="--c: var(--g2)"><span class="n">06</span>Properties</a>
+<a href="#units" style="--c: var(--g2)"><span class="n">07</span>Units</a>
+<a href="#tenants" style="--c: var(--g2)"><span class="n">08</span>Tenants and owners</a>
+<div class="group" style="--c: var(--g3)">Leases</div>
+<a href="#leases" style="--c: var(--g3)"><span class="n">09</span>Leases: life cycle</a>
+<a href="#lease-form" style="--c: var(--g3)"><span class="n">10</span>Filling in a lease</a>
+<a href="#deposit" style="--c: var(--g3)"><span class="n">11</span>Security deposit</a>
+<a href="#renewal" style="--c: var(--g3)"><span class="n">12</span>Renewing a lease</a>
+<a href="#moveout" style="--c: var(--g3)"><span class="n">13</span>Move-out and settlement</a>
+<div class="group" style="--c: var(--g4)">Money</div>
+<a href="#billing" style="--c: var(--g4)"><span class="n">14</span>Rent invoices</a>
+<a href="#payments" style="--c: var(--g4)"><span class="n">15</span>Recording payments</a>
+<a href="#latefees" style="--c: var(--g4)"><span class="n">16</span>Late fees</a>
+<a href="#escalation" style="--c: var(--g4)"><span class="n">17</span>Rent escalation</a>
+<a href="#electricity" style="--c: var(--g4)"><span class="n">18</span>Electricity billing</a>
+<div class="group" style="--c: var(--g5)">Operations</div>
+<a href="#maintenance" style="--c: var(--g5)"><span class="n">19</span>Maintenance requests</a>
+<a href="#automation" style="--c: var(--g5)"><span class="n">20</span>Automatic jobs (schedulers)</a>
+<a href="#manual" style="--c: var(--g5)"><span class="n">21</span>Doing it by hand</a>
+<a href="#emails" style="--c: var(--g5)"><span class="n">22</span>Emails to tenants</a>
+<div class="group" style="--c: var(--g6)">Tenants online</div>
+<a href="#portal" style="--c: var(--g6)"><span class="n">23</span>The tenant portal</a>
+<a href="#login" style="--c: var(--g6)"><span class="n">24</span>The login page</a>
+<div class="group" style="--c: var(--g7)">Insight</div>
+<a href="#dashboard" style="--c: var(--g7)"><span class="n">25</span>Dashboard</a>
+<a href="#reports" style="--c: var(--g7)"><span class="n">26</span>Reports and printouts</a>
+<div class="group" style="--c: var(--g8)">Reference</div>
+<a href="#routine" style="--c: var(--g8)"><span class="n">27</span>Daily / monthly routine</a>
+<a href="#howto" style="--c: var(--g8)"><span class="n">28</span>"How do I…?"</a>
+<a href="#errors" style="--c: var(--g8)"><span class="n">29</span>Messages and what they mean</a>
+<a href="#limits" style="--c: var(--g8)"><span class="n">30</span>Good to know</a>
+<a href="#glossary" style="--c: var(--g8)"><span class="n">31</span>Glossary</a>
+<div class="toc-foot">Rent Management · User Handbook</div></nav>
+
+<main>
+
+<!-- ================================================================= INDEX -->
+<div id="index">
+    <div class="cover">
+        <div class="cover-grid"></div>
+        <div class="cover-text">
+            <span class="cover-eyebrow"><svg class="ic" aria-hidden="true"><use href="#i-sparkle"/></svg> Official user guide · Odoo 20</span>
+            <h1>Run every rental,<br><span>from lease to last bill.</span></h1>
+            <p>The complete handbook for the Rent Management system. It covers every screen and button, what the system does on its own each night, and how to do each of those things yourself, without needing a demo.</p>
+            <div class="cover-actions">
+                <a class="cta" href="#overview">Start reading <svg class="ic" aria-hidden="true"><use href="#i-right"/></svg></a>
+                <a class="cta ghost" href="#story">See a full year in 5 minutes</a>
+            </div>
+        </div>
+        <div class="mock" aria-hidden="true">
+            <div class="mock-bar"><i></i><i></i><i></i><span>Rent Management</span></div>
+            <div class="mock-body">
+                <div class="mock-head"><div><small>LEASE/2026/0007</small><b>Sunrise Apartments / A-101</b></div><span class="mock-pill ok">Active</span></div>
+                <div class="mock-stats">
+                    <div><small>Monthly rent</small><b>₹15,000</b></div>
+                    <div><small>Next invoice</small><b>1 May</b></div>
+                    <div><small>Deposit</small><b class="ok-t">Received</b></div>
+                </div>
+                <div class="mock-inv">
+                    <div class="mock-inv-row"><span>INV/2026/0412 · May rent</span><span class="mock-pill warn">Due in 3 days</span></div>
+                    <div class="mock-track"><i style="width:62%"></i></div>
+                    <div class="mock-inv-row muted"><span>Paid ₹9,300</span><span>Left ₹5,700</span></div>
+                </div>
+                <div class="mock-jobs">
+                    <div><span class="dot"></span>Rent invoices generated<em>06:30</em></div>
+                    <div><span class="dot"></span>Reminders sent<em>11:30</em></div>
+                    <div><span class="dot"></span>Meter readings prepared<em>05:45</em></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="stats">
+        <div><b>31</b><span>chapters</span></div>
+        <div><b>7</b><span>automatic nightly jobs</span></div>
+        <div><b>6</b><span>emails to tenants</span></div>
+        <div><b>6</b><span>PDF documents</span></div>
+        <div><b>3</b><span>staff roles</span></div>
+    </div>
+
+    <div class="path-start">
+        <a href="#overview" style="--c: var(--g1)"><span class="ps-n">1</span><span><b>Understand the idea</b><small>Chapter 1 · 2 minutes</small></span><svg class="ic" aria-hidden="true"><use href="#i-right"/></svg></a>
+        <a href="#story" style="--c: var(--g3)"><span class="ps-n">2</span><span><b>Follow one tenant's year</b><small>Chapter 2 · 5 minutes</small></span><svg class="ic" aria-hidden="true"><use href="#i-right"/></svg></a>
+        <a href="#setup" style="--c: var(--g4)"><span class="ps-n">3</span><span><b>Set up your company</b><small>Chapter 4 · checklist</small></span><svg class="ic" aria-hidden="true"><use href="#i-right"/></svg></a>
+    </div>
+
+    <div class="callout note legend"><svg class="ic callout-ic" aria-hidden="true"><use href="#i-info"/></svg><div>
+        <p><b>How to read this guide.</b> <span class="path"><span>Rent Management</span><i>›</i><span>Leases</span></span> is a menu path to click,
+            <span class="btn primary">Confirm</span> is a button on screen, and <span class="tag t-green">Active</span> is a status.</p>
+    </div></div>
+
+    <div class="index-group" style="--c: var(--g1)"><span></span>Getting started</div><div class="cards"><a class="card" href="#overview" style="--c: var(--g1)"><span class="card-top"><span class="card-icon"><svg class="ic" aria-hidden="true"><use href="#i-compass"/></svg></span><span class="card-num">01</span></span><b>The system at a glance</b><small>What the app does and how the pieces fit together.</small><span class="card-go">Open <svg class="ic" aria-hidden="true"><use href="#i-right"/></svg></span></a><a class="card" href="#story" style="--c: var(--g1)"><span class="card-top"><span class="card-icon"><svg class="ic" aria-hidden="true"><use href="#i-calendar"/></svg></span><span class="card-num">02</span></span><b>A full year, step by step</b><small>One tenant from move-in to move-out, with dates.</small><span class="card-go">Open <svg class="ic" aria-hidden="true"><use href="#i-right"/></svg></span></a><a class="card" href="#roles" style="--c: var(--g1)"><span class="card-top"><span class="card-icon"><svg class="ic" aria-hidden="true"><use href="#i-users"/></svg></span><span class="card-num">03</span></span><b>Users and access rights</b><small>Property Manager, Rent Accountant and Rent Administrator.</small><span class="card-go">Open <svg class="ic" aria-hidden="true"><use href="#i-right"/></svg></span></a><a class="card" href="#setup" style="--c: var(--g1)"><span class="card-top"><span class="card-icon"><svg class="ic" aria-hidden="true"><use href="#i-sliders"/></svg></span><span class="card-num">04</span></span><b>First-time setup</b><small>A checklist to complete before entering the first lease.</small><span class="card-go">Open <svg class="ic" aria-hidden="true"><use href="#i-right"/></svg></span></a><a class="card" href="#map" style="--c: var(--g1)"><span class="card-top"><span class="card-icon"><svg class="ic" aria-hidden="true"><use href="#i-map"/></svg></span><span class="card-num">05</span></span><b>Where to find everything</b><small>Every menu, and what you get there.</small><span class="card-go">Open <svg class="ic" aria-hidden="true"><use href="#i-right"/></svg></span></a></div><div class="index-group" style="--c: var(--g2)"><span></span>Your portfolio</div><div class="cards"><a class="card" href="#properties" style="--c: var(--g2)"><span class="card-top"><span class="card-icon"><svg class="ic" aria-hidden="true"><use href="#i-building"/></svg></span><span class="card-num">06</span></span><b>Properties</b><small>Buildings, addresses, owners, managers, occupancy.</small><span class="card-go">Open <svg class="ic" aria-hidden="true"><use href="#i-right"/></svg></span></a><a class="card" href="#units" style="--c: var(--g2)"><span class="card-top"><span class="card-icon"><svg class="ic" aria-hidden="true"><use href="#i-home"/></svg></span><span class="card-num">07</span></span><b>Units</b><small>Flats, shops and offices; statuses; meter QR labels.</small><span class="card-go">Open <svg class="ic" aria-hidden="true"><use href="#i-right"/></svg></span></a><a class="card" href="#tenants" style="--c: var(--g2)"><span class="card-top"><span class="card-icon"><svg class="ic" aria-hidden="true"><use href="#i-user"/></svg></span><span class="card-num">08</span></span><b>Tenants and owners</b><small>Contact details, KYC, emergency contact, portal access.</small><span class="card-go">Open <svg class="ic" aria-hidden="true"><use href="#i-right"/></svg></span></a></div><div class="index-group" style="--c: var(--g3)"><span></span>Leases</div><div class="cards"><a class="card" href="#leases" style="--c: var(--g3)"><span class="card-top"><span class="card-icon"><svg class="ic" aria-hidden="true"><use href="#i-file"/></svg></span><span class="card-num">09</span></span><b>Leases: life cycle</b><small>Draft → Confirmed → Active → Expiring → Ended.</small><span class="card-go">Open <svg class="ic" aria-hidden="true"><use href="#i-right"/></svg></span></a><a class="card" href="#lease-form" style="--c: var(--g3)"><span class="card-top"><span class="card-icon"><svg class="ic" aria-hidden="true"><use href="#i-edit"/></svg></span><span class="card-num">10</span></span><b>Filling in a lease</b><small>Every tab and field of the lease form.</small><span class="card-go">Open <svg class="ic" aria-hidden="true"><use href="#i-right"/></svg></span></a><a class="card" href="#deposit" style="--c: var(--g3)"><span class="card-top"><span class="card-icon"><svg class="ic" aria-hidden="true"><use href="#i-shield"/></svg></span><span class="card-num">11</span></span><b>Security deposit</b><small>Invoicing, tracking and refunding the deposit.</small><span class="card-go">Open <svg class="ic" aria-hidden="true"><use href="#i-right"/></svg></span></a><a class="card" href="#renewal" style="--c: var(--g3)"><span class="card-top"><span class="card-icon"><svg class="ic" aria-hidden="true"><use href="#i-refresh"/></svg></span><span class="card-num">12</span></span><b>Renewing a lease</b><small>Continue with the same tenant for another term.</small><span class="card-go">Open <svg class="ic" aria-hidden="true"><use href="#i-right"/></svg></span></a><a class="card" href="#moveout" style="--c: var(--g3)"><span class="card-top"><span class="card-icon"><svg class="ic" aria-hidden="true"><use href="#i-logout"/></svg></span><span class="card-num">13</span></span><b>Move-out and settlement</b><small>Final bills, damages and the deposit refund.</small><span class="card-go">Open <svg class="ic" aria-hidden="true"><use href="#i-right"/></svg></span></a></div><div class="index-group" style="--c: var(--g4)"><span></span>Money</div><div class="cards"><a class="card" href="#billing" style="--c: var(--g4)"><span class="card-top"><span class="card-icon"><svg class="ic" aria-hidden="true"><use href="#i-receipt"/></svg></span><span class="card-num">14</span></span><b>Rent invoices</b><small>How and when rent is billed, and what each invoice contains.</small><span class="card-go">Open <svg class="ic" aria-hidden="true"><use href="#i-right"/></svg></span></a><a class="card" href="#payments" style="--c: var(--g4)"><span class="card-top"><span class="card-icon"><svg class="ic" aria-hidden="true"><use href="#i-card"/></svg></span><span class="card-num">15</span></span><b>Recording payments</b><small>Cash, bank transfer, online payment, receipts.</small><span class="card-go">Open <svg class="ic" aria-hidden="true"><use href="#i-right"/></svg></span></a><a class="card" href="#latefees" style="--c: var(--g4)"><span class="card-top"><span class="card-icon"><svg class="ic" aria-hidden="true"><use href="#i-clock"/></svg></span><span class="card-num">16</span></span><b>Late fees</b><small>Grace days, fixed or percentage fees.</small><span class="card-go">Open <svg class="ic" aria-hidden="true"><use href="#i-right"/></svg></span></a><a class="card" href="#escalation" style="--c: var(--g4)"><span class="card-top"><span class="card-icon"><svg class="ic" aria-hidden="true"><use href="#i-trending"/></svg></span><span class="card-num">17</span></span><b>Rent escalation</b><small>Automatic yearly (or periodic) rent increases.</small><span class="card-go">Open <svg class="ic" aria-hidden="true"><use href="#i-right"/></svg></span></a><a class="card" href="#electricity" style="--c: var(--g4)"><span class="card-top"><span class="card-icon"><svg class="ic" aria-hidden="true"><use href="#i-zap"/></svg></span><span class="card-num">18</span></span><b>Electricity billing</b><small>Included, fixed or metered; reading meters with a phone.</small><span class="card-go">Open <svg class="ic" aria-hidden="true"><use href="#i-right"/></svg></span></a></div><div class="index-group" style="--c: var(--g5)"><span></span>Operations</div><div class="cards"><a class="card" href="#maintenance" style="--c: var(--g5)"><span class="card-top"><span class="card-icon"><svg class="ic" aria-hidden="true"><use href="#i-tool"/></svg></span><span class="card-num">19</span></span><b>Maintenance requests</b><small>Repairs reported by tenants or staff; charging the tenant.</small><span class="card-go">Open <svg class="ic" aria-hidden="true"><use href="#i-right"/></svg></span></a><a class="card" href="#automation" style="--c: var(--g5)"><span class="card-top"><span class="card-icon"><svg class="ic" aria-hidden="true"><use href="#i-cpu"/></svg></span><span class="card-num">20</span></span><b>Automatic jobs (schedulers)</b><small>The 7 jobs that run every night: what they do and when.</small><span class="card-go">Open <svg class="ic" aria-hidden="true"><use href="#i-right"/></svg></span></a><a class="card" href="#manual" style="--c: var(--g5)"><span class="card-top"><span class="card-icon"><svg class="ic" aria-hidden="true"><use href="#i-pointer"/></svg></span><span class="card-num">21</span></span><b>Doing it by hand</b><small>How to do each automatic job yourself.</small><span class="card-go">Open <svg class="ic" aria-hidden="true"><use href="#i-right"/></svg></span></a><a class="card" href="#emails" style="--c: var(--g5)"><span class="card-top"><span class="card-icon"><svg class="ic" aria-hidden="true"><use href="#i-mail"/></svg></span><span class="card-num">22</span></span><b>Emails to tenants</b><small>Which email is sent, when, and with which attachment.</small><span class="card-go">Open <svg class="ic" aria-hidden="true"><use href="#i-right"/></svg></span></a></div><div class="index-group" style="--c: var(--g6)"><span></span>Tenants online</div><div class="cards"><a class="card" href="#portal" style="--c: var(--g6)"><span class="card-top"><span class="card-icon"><svg class="ic" aria-hidden="true"><use href="#i-globe"/></svg></span><span class="card-num">23</span></span><b>The tenant portal</b><small>What tenants see and can do online.</small><span class="card-go">Open <svg class="ic" aria-hidden="true"><use href="#i-right"/></svg></span></a><a class="card" href="#login" style="--c: var(--g6)"><span class="card-top"><span class="card-icon"><svg class="ic" aria-hidden="true"><use href="#i-lock"/></svg></span><span class="card-num">24</span></span><b>The login page</b><small>Signing in for staff and tenants.</small><span class="card-go">Open <svg class="ic" aria-hidden="true"><use href="#i-right"/></svg></span></a></div><div class="index-group" style="--c: var(--g7)"><span></span>Insight</div><div class="cards"><a class="card" href="#dashboard" style="--c: var(--g7)"><span class="card-top"><span class="card-icon"><svg class="ic" aria-hidden="true"><use href="#i-grid"/></svg></span><span class="card-num">25</span></span><b>Dashboard</b><small>Your business on one screen.</small><span class="card-go">Open <svg class="ic" aria-hidden="true"><use href="#i-right"/></svg></span></a><a class="card" href="#reports" style="--c: var(--g7)"><span class="card-top"><span class="card-icon"><svg class="ic" aria-hidden="true"><use href="#i-bars"/></svg></span><span class="card-num">26</span></span><b>Reports and printouts</b><small>Analysis screens and the PDF documents.</small><span class="card-go">Open <svg class="ic" aria-hidden="true"><use href="#i-right"/></svg></span></a></div><div class="index-group" style="--c: var(--g8)"><span></span>Reference</div><div class="cards"><a class="card" href="#routine" style="--c: var(--g8)"><span class="card-top"><span class="card-icon"><svg class="ic" aria-hidden="true"><use href="#i-checklist"/></svg></span><span class="card-num">27</span></span><b>Daily / monthly routine</b><small>A checklist for running the office.</small><span class="card-go">Open <svg class="ic" aria-hidden="true"><use href="#i-right"/></svg></span></a><a class="card" href="#howto" style="--c: var(--g8)"><span class="card-top"><span class="card-icon"><svg class="ic" aria-hidden="true"><use href="#i-help"/></svg></span><span class="card-num">28</span></span><b>"How do I…?"</b><small>Quick answers to everyday questions.</small><span class="card-go">Open <svg class="ic" aria-hidden="true"><use href="#i-right"/></svg></span></a><a class="card" href="#errors" style="--c: var(--g8)"><span class="card-top"><span class="card-icon"><svg class="ic" aria-hidden="true"><use href="#i-alert"/></svg></span><span class="card-num">29</span></span><b>Messages and what they mean</b><small>Every warning the system shows, and the fix.</small><span class="card-go">Open <svg class="ic" aria-hidden="true"><use href="#i-right"/></svg></span></a><a class="card" href="#limits" style="--c: var(--g8)"><span class="card-top"><span class="card-icon"><svg class="ic" aria-hidden="true"><use href="#i-bulb"/></svg></span><span class="card-num">30</span></span><b>Good to know</b><small>Rules and limits worth remembering.</small><span class="card-go">Open <svg class="ic" aria-hidden="true"><use href="#i-right"/></svg></span></a><a class="card" href="#glossary" style="--c: var(--g8)"><span class="card-top"><span class="card-icon"><svg class="ic" aria-hidden="true"><use href="#i-book"/></svg></span><span class="card-num">31</span></span><b>Glossary</b><small>The words used in the system, explained.</small><span class="card-go">Open <svg class="ic" aria-hidden="true"><use href="#i-right"/></svg></span></a></div>
+</div>
+
+<!-- ================================================================= 1 OVERVIEW -->
+<section class="chapter" id="overview" style="--c: var(--g1)"><div class="chapter-head"><div class="ch-icon"><svg class="ic" aria-hidden="true"><use href="#i-compass"/></svg></div><div><div class="eyebrow">Chapter 01 · Getting started</div><h2>The system at a glance</h2></div></div>
+    <p class="lead">Rent Management keeps track of your buildings, the units inside them and the tenants who rent
+        them. From the lease it bills rent automatically every period, follows up on payments, and handles the
+        deposit and the final settlement when a tenant leaves.</p>
+
+    <h3>The building blocks</h3>
+    <div class="flow">
+        <div class="box"><b>Property</b>A building or complex</div>
+        <div class="arrow">→</div>
+        <div class="box"><b>Unit</b>A flat, room, shop, office or warehouse in it</div>
+        <div class="arrow">→</div>
+        <div class="box"><b>Lease</b>Agreement between a tenant and a unit, with dates and rent</div>
+        <div class="arrow">→</div>
+        <div class="box"><b>Invoices</b>Rent, deposit, electricity, late fees, repairs</div>
+        <div class="arrow">→</div>
+        <div class="box"><b>Payments</b>Recorded by you, or paid online by the tenant</div>
+    </div>
+    <p>The <b>lease</b> sits at the centre. Once you activate it, the system does this on its own:</p>
+    <ul>
+        <li>creates the rent invoice before every due date and emails it to the tenant,</li>
+        <li>sends a reminder before the due date and a notice when the payment is late,</li>
+        <li>adds a late fee after the grace days you allowed,</li>
+        <li>increases the rent on its escalation date, if you set one,</li>
+        <li>prepares the monthly electricity reading for metered units,</li>
+        <li>warns you and the tenant when the lease is about to end, and closes it once the end date has passed.</li>
+    </ul>
+    <p>The <b>unit status</b> (Vacant, Reserved, Occupied) follows the lease. You never have to update it by hand.</p>
+
+    <h3>Who uses what</h3>
+    <div class="grid2">
+        <div class="panel"><h4>Your staff (back office)</h4>
+            <ul><li>Work in the <b>Rent Management</b> app inside Odoo.</li>
+                <li>Create properties, units, tenants and leases.</li>
+                <li>Record payments, handle repairs, settle move-outs.</li></ul></div>
+        <div class="panel"><h4>Your tenants (portal)</h4>
+            <ul><li>Sign in on the website with their own login.</li>
+                <li>See their lease, invoices and payments, and pay online.</li>
+                <li>Report repairs with photos and follow their progress.</li></ul></div>
+    </div>
+    <div class="callout tip"><svg class="ic callout-ic" aria-hidden="true"><use href="#i-check"/></svg><div>
+        The Rent Management app works on top of Odoo Accounting. Every invoice the app creates is a normal Odoo
+        customer invoice, so your accountant sees them in Accounting as well, with all the usual tools
+        (payments, bank reconciliation, credit notes, tax reports).
+    </div></div>
+    <nav class="chapter-nav"></nav>
+</section>
+
+<!-- ================================================================= 2 STORY -->
+<section class="chapter" id="story" style="--c: var(--g1)"><div class="chapter-head"><div class="ch-icon"><svg class="ic" aria-hidden="true"><use href="#i-calendar"/></svg></div><div><div class="eyebrow">Chapter 02 · Getting started</div><h2>A full year, step by step</h2></div></div>
+    <p class="lead">This chapter follows one tenant through a whole year, so you can see what <b>you</b> do and
+        what the <b>system</b> does by itself, in the order it happens.</p>
+    <p><b>The example:</b> <i>Sunrise Apartments</i>, unit <i>A-101</i>, rented to <i>Ravi Kumar</i>. Rent
+        ₹15,000 per month, due on the 1st. Security deposit ₹30,000. Late fee ₹500 after 5 grace days.
+        Electricity metered at ₹8 per kWh. Lease from 1 April 2026 to 31 March 2027. All settings are left at
+        their defaults (amounts are in your company currency).</p>
+    <p><span class="tag t-purple">You</span> = a step you take.
+       <span class="tag t-grey">Automatic</span> = the system does it overnight.</p>
+
+    <div class="timeline">
+        <div class="ev"><span class="date">25 March</span><span class="tag t-purple who">You</span>
+            <p>Create the lease for A-101 and Ravi (<a href="#lease-form">chapter 10</a>). Choosing the unit fills in
+            the rent, deposit and maintenance charge from the unit. The unit has a meter number, so electricity is
+            set to <i>Metered</i>. Click <span class="btn primary">Confirm</span>. Ravi gets the
+            <i>Lease Confirmation</i> email with the lease agreement PDF attached, and the unit becomes
+            <span class="tag t-blue">Reserved</span>.</p></div>
+        <div class="ev"><span class="date">25 March</span><span class="tag t-purple who">You (accountant)</span>
+            <p>Click <span class="btn">Invoice Deposit</span>. A ₹30,000 deposit invoice is created. When Ravi pays,
+            register the payment (<a href="#payments">chapter 15</a>) and the deposit status becomes
+            <span class="tag t-green">Received</span>.</p></div>
+        <div class="ev"><span class="date">1 April</span><span class="tag t-purple who">You</span>
+            <p>Ravi moves in. Click <span class="btn primary">Activate (Move-in)</span>. The lease becomes
+            <span class="tag t-green">Active</span>, the unit <span class="tag t-green">Occupied</span>, and the
+            first billing date is set to 1 April.</p></div>
+        <div class="ev auto-ev"><span class="date">Night of 1 April</span><span class="tag t-grey who">Automatic</span>
+            <p>The April rent invoice (₹15,000, due 1 April) is created, posted and emailed to Ravi with the
+            invoice PDF. The next billing date moves to 1 May.</p></div>
+        <div class="ev auto-ev"><span class="date">26 April</span><span class="tag t-grey who">Automatic</span>
+            <p>Invoices are created 5 days ahead, so the May rent invoice (due 1 May) is created and emailed today.</p></div>
+        <div class="ev auto-ev"><span class="date">28 April</span><span class="tag t-grey who">Automatic</span>
+            <p>The May invoice is due in 3 days and still unpaid, so Ravi receives the <i>Payment Reminder</i> email.</p></div>
+        <div class="ev auto-ev"><span class="date">1 May</span><span class="tag t-grey who">Automatic</span>
+            <p>April has ended, so an electricity reading for 1–30 April is created with status
+            <span class="tag t-blue">To Enter</span>. The property manager gets a to-do: <i>"Enter the electricity
+            meter reading"</i>.</p></div>
+        <div class="ev"><span class="date">2 May</span><span class="tag t-purple who">You</span>
+            <p>The manager scans the QR label on A-101's meter with their phone, types the reading (say 4,520),
+            optionally takes a photo, and saves. The reading is <span class="tag t-green">Confirmed</span>
+            (<a href="#electricity">chapter 18</a>).</p></div>
+        <div class="ev auto-ev"><span class="date">2 May</span><span class="tag t-grey who">Automatic</span>
+            <p>The May invoice is now overdue, so Ravi receives the <i>Overdue Notice</i> email (once per invoice).</p></div>
+        <div class="ev auto-ev"><span class="date">7 May</span><span class="tag t-grey who">Automatic</span>
+            <p>Still unpaid after the 5 grace days, so a separate ₹500 <i>Late Fee</i> invoice is created and noted
+            on the lease (<a href="#latefees">chapter 16</a>).</p></div>
+        <div class="ev"><span class="date">8 May</span><span class="tag t-purple who">You (accountant)</span>
+            <p>Ravi pays by bank transfer. Open the invoice and click <span class="btn primary">Register Payment</span>.
+            The invoice shows <span class="tag t-green">Paid</span>. If you need one, print a
+            <i>Rent Receipt</i>.</p></div>
+        <div class="ev auto-ev"><span class="date">27 May</span><span class="tag t-grey who">Automatic</span>
+            <p>The June invoice is created. It contains the June rent <b>plus</b> the April electricity reading
+            (electricity is billed one month behind, together with the next rent).</p></div>
+        <div class="ev"><span class="date">June → February</span>
+            <p>The same cycle repeats every month: invoice, reminder, reading, payment.</p></div>
+        <div class="ev auto-ev"><span class="date">1 March 2027</span><span class="tag t-grey who">Automatic</span>
+            <p>The lease ends within 30 days, so it becomes <span class="tag t-orange">Expiring</span>. Ravi gets the
+            <i>Lease Expiry Notice</i> email, and the manager gets a to-do: <i>"Lease ending: renew or plan
+            move-out"</i>.</p></div>
+        <div class="ev"><span class="date">March 2027</span><span class="tag t-purple who">You</span>
+            <p>Either click <span class="btn">Renew</span> to prepare the next term (<a href="#renewal">chapter 12</a>),
+            or, when Ravi leaves, click <span class="btn">Terminate / Move-out</span> and settle the deposit
+            (<a href="#moveout">chapter 13</a>).</p></div>
+        <div class="ev auto-ev"><span class="date">1 April 2027</span><span class="tag t-grey who">Automatic</span>
+            <p>If nothing was done, the end date has passed and the lease becomes <span class="tag t-grey">Expired</span>.
+            If a renewal is in place, it becomes <span class="tag t-purple">Renewed</span> instead.</p></div>
+    </div>
+    <div class="callout tip"><svg class="ic callout-ic" aria-hidden="true"><use href="#i-check"/></svg><div>
+        Over the whole year, you only had to <b>create and activate the lease</b>, <b>enter the meter
+        readings</b>, <b>record payments</b> and <b>decide what happens at the end</b>. The system took care of
+        everything else.
+    </div></div>
+    <nav class="chapter-nav"></nav>
+</section>
+
+<!-- ================================================================= 3 ROLES -->
+<section class="chapter" id="roles" style="--c: var(--g1)"><div class="chapter-head"><div class="ch-icon"><svg class="ic" aria-hidden="true"><use href="#i-users"/></svg></div><div><div class="eyebrow">Chapter 03 · Getting started</div><h2>Users and access rights</h2></div></div>
+    <p class="lead">Each staff member gets one of three Rent Management roles. Each role includes everything the
+        role above it can do.</p>
+    <div class="table-wrap"><table>
+        <tr><th>Role</th><th>Meant for</th><th>Can see and do</th><th>Cannot</th></tr>
+        <tr><td class="nowrap"><b>Property Manager</b></td><td>Building / site managers</td>
+            <td>Only the properties where <b>they are set as Property Manager</b>, plus the units, leases, meter
+                readings and repairs of those properties (and repairs assigned to them). Create and run leases,
+                enter meter readings, handle repairs, do move-outs.</td>
+            <td>See the <i>Rent Invoices</i> menu or the <i>Rent Collection</i> report; use
+                <span class="btn">Generate Invoice Now</span> or <span class="btn">Invoice Deposit</span>;
+                see money figures on the dashboard; change settings.</td></tr>
+        <tr><td class="nowrap"><b>Rent Accountant</b></td><td>Accounts team</td>
+            <td>Everything a manager can do, for <b>all</b> properties. Rent invoices, deposits, payments,
+                <i>Invoice Now</i> on readings, receipts, tenant statements, the collection report, money KPIs on
+                the dashboard. Also gets Odoo's invoicing rights.</td>
+            <td>Change the Rent Management configuration.</td></tr>
+        <tr><td class="nowrap"><b>Rent Administrator</b></td><td>Owner / head of office</td>
+            <td>Everything, including <span class="path"><span>Configuration</span></span> (Settings and
+                Amenities) and deleting records.</td><td>–</td></tr>
+    </table></div>
+
+    <h3>Giving a staff member access</h3>
+    <ol class="steps">
+        <li>Go to <span class="path"><span>Settings</span><i>›</i><span>Users &amp; Companies</span><i>›</i><span>Users</span></span> and open the user (or click <span class="btn">New</span>).</li>
+        <li>In the access rights, find <b>Rent Management</b> and pick <i>Property Manager</i>, <i>Rent Accountant</i> or <i>Rent Administrator</i>.</li>
+        <li>Save. The user now sees the <b>Rent Management</b> app on their home screen.</li>
+        <li>For property managers, open each of their properties and set them in the <b>Property Manager</b> field (<a href="#properties">chapter 6</a>). Until you do, they see nothing.</li>
+    </ol>
+    <div class="callout note"><svg class="ic callout-ic" aria-hidden="true"><use href="#i-info"/></svg><div>
+        Tenants are <b>not</b> staff users. They get <i>portal</i> access, which only shows their own lease,
+        invoices and repairs. See <a href="#tenants">chapter 8</a>.
+    </div></div>
+    <nav class="chapter-nav"></nav>
+</section>
+
+<!-- ================================================================= 4 SETUP -->
+<section class="chapter" id="setup" style="--c: var(--g1)"><div class="chapter-head"><div class="ch-icon"><svg class="ic" aria-hidden="true"><use href="#i-sliders"/></svg></div><div><div class="eyebrow">Chapter 04 · Getting started</div><h2>First-time setup</h2></div></div>
+    <p class="lead">Do this once, in this order, before you create the first lease.</p>
+    <ol class="steps">
+        <li><b>Company details and logo.</b> <span class="path"><span>Settings</span><i>›</i><span>Companies</span></span>:
+            name, address, logo, email, phone and bank account. They appear on every invoice, agreement and email.</li>
+        <li><b>Outgoing email.</b> Make sure Odoo can send email (your Odoo administrator sets up the outgoing mail
+            server). Without it, tenants receive no invoices or reminders.</li>
+        <li><b>Rent Management settings.</b> <span class="path"><span>Rent Management</span><i>›</i><span>Configuration</span><i>›</i><span>Settings</span></span>
+            (see the table below). The <b>Security Deposit Account</b> is required before you can invoice any deposit.</li>
+        <li><b>Staff users and roles</b> (<a href="#roles">chapter 3</a>).</li>
+        <li><b>Amenities</b> (optional). <span class="path"><span>Configuration</span><i>›</i><span>Amenities</span></span>:
+            lift, parking, power backup, Wi-Fi… These are tags you attach to properties, and tenants see them on the portal.</li>
+        <li><b>Owners</b> (optional). <span class="path"><span>Tenants</span><i>›</i><span>Property Owners</span></span>, if you manage buildings for other owners.</li>
+        <li><b>Properties</b>, then their <b>units</b> (<a href="#properties">chapters 6</a> and <a href="#units">7</a>). Enter each unit's rent, deposit and meter number.</li>
+        <li><b>Meter QR labels.</b> For metered units, print the QR labels and stick them on the meters (<a href="#electricity">chapter 18</a>).</li>
+        <li><b>Tenants</b>, then their <b>leases</b> (<a href="#tenants">chapters 8</a> and <a href="#lease-form">10</a>).</li>
+        <li><b>Online payment</b> (optional). To let tenants pay by card or UPI from the portal, your Odoo administrator
+            enables a payment provider in <span class="path"><span>Accounting</span><i>›</i><span>Configuration</span><i>›</i><span>Payment Providers</span></span>.</li>
+    </ol>
+
+    <h3 id="settings">The Settings screen, field by field</h3>
+    <div class="table-wrap"><table>
+        <tr><th>Setting</th><th>What it does</th><th>Default</th></tr>
+        <tr><td><b>Rent Income Account</b></td><td>Income account used on rent lines. If empty, the account of the "Rent" product is used.</td><td>empty</td></tr>
+        <tr><td><b>Security Deposit Account</b></td><td><b>Required for deposits.</b> A liability account where deposits are held, because the deposit is money you owe back to the tenant, not income.</td><td>empty</td></tr>
+        <tr><td><b>Rent Journal</b></td><td>Sales journal used for all lease invoices. If empty, the first sales journal is used.</td><td>empty</td></tr>
+        <tr><td><b>Late Fee Product</b></td><td>Product used on late-fee invoices.</td><td>"Late Fee"</td></tr>
+        <tr><td><b>Maintenance Charge Product</b></td><td>Product used for the monthly maintenance charge, repairs charged to tenants and damage charges.</td><td>"Maintenance Charge"</td></tr>
+        <tr><td><b>Default Electricity Rate</b></td><td>Rate per kWh pre-filled on new metered leases.</td><td>8.00</td></tr>
+        <tr><td><b>Invoice Days in Advance</b></td><td>How many days before the due date the rent invoice is created.</td><td>5 days</td></tr>
+        <tr><td><b>Reminder Days Before Due</b></td><td>When the payment reminder email is sent.</td><td>3 days</td></tr>
+        <tr><td><b>Send Overdue Notices</b></td><td>Whether to email tenants when an invoice becomes overdue.</td><td>On</td></tr>
+        <tr><td><b>Lease Expiry Notice</b></td><td>How many days before the end date a lease becomes "Expiring" and the alerts go out.</td><td>30 days</td></tr>
+    </table></div>
+    <div class="callout note"><svg class="ic callout-ic" aria-hidden="true"><use href="#i-info"/></svg><div>The Settings menu needs both the <i>Rent Administrator</i> role and Odoo administrator rights.</div></div>
+
+    <h3>Created for you on installation</h3>
+    <ul>
+        <li><b>Products</b> used on invoice lines: Rent, Maintenance Charge, Late Fee, Security Deposit, Electricity Charges (no tax by default; your accountant can add taxes).</li>
+        <li><b>Numbering:</b> properties <code>PROP/0001</code>, leases <code>LEASE/2026/0001</code> (restarts each year), repair requests <code>MR/00001</code>.</li>
+        <li><b>Six email templates</b> (<a href="#emails">chapter 22</a>) and <b>seven automatic jobs</b> (<a href="#automation">chapter 20</a>).</li>
+    </ul>
+    <nav class="chapter-nav"></nav>
+</section>
+
+<!-- ================================================================= 5 MAP -->
+<section class="chapter" id="map" style="--c: var(--g1)"><div class="chapter-head"><div class="ch-icon"><svg class="ic" aria-hidden="true"><use href="#i-map"/></svg></div><div><div class="eyebrow">Chapter 05 · Getting started</div><h2>Where to find everything</h2></div></div>
+    <p class="lead">Every menu of the Rent Management app, what you get there, and who sees it.</p>
+    <div class="table-wrap"><table>
+        <tr><th>Menu</th><th>What you get</th><th>Who</th></tr>
+        <tr><td><span class="path"><span>Dashboard</span></span></td><td>Key figures, charts, late tenants, leases ending, open repairs, readings to enter (<a href="#dashboard">ch. 25</a>).</td><td>All</td></tr>
+        <tr><td><span class="path"><span>Properties</span></span></td><td>Buildings with address, owner, manager, amenities and occupancy (<a href="#properties">ch. 6</a>).</td><td>All</td></tr>
+        <tr><td><span class="path"><span>Units</span></span></td><td>Every unit with its status, current tenant, rent and meter QR code (<a href="#units">ch. 7</a>).</td><td>All</td></tr>
+        <tr><td><span class="path"><span>Tenants</span><i>›</i><span>Tenants</span></span></td><td>Tenant contacts: KYC, emergency contact, leases, rent due (<a href="#tenants">ch. 8</a>).</td><td>All</td></tr>
+        <tr><td><span class="path"><span>Tenants</span><i>›</i><span>Property Owners</span></span></td><td>Owners of the properties you manage.</td><td>All</td></tr>
+        <tr><td><span class="path"><span>Leases</span></span></td><td>All lease agreements, as a list or a calendar of end dates (<a href="#leases">ch. 9</a>).</td><td>All</td></tr>
+        <tr><td><span class="path"><span>Maintenance</span></span></td><td>Repair requests on a board: New / In Progress / Done (<a href="#maintenance">ch. 19</a>).</td><td>All</td></tr>
+        <tr><td><span class="path"><span>Billing</span><i>›</i><span>Rent Invoices</span></span></td><td>Every invoice created from a lease (rent, deposit, refunds, late fees, repairs, damages, electricity) (<a href="#billing">ch. 14</a>).</td><td>Accountant +</td></tr>
+        <tr><td><span class="path"><span>Billing</span><i>›</i><span>Electricity Readings</span></span></td><td>Monthly meter readings to enter, confirm and invoice (<a href="#electricity">ch. 18</a>).</td><td>All</td></tr>
+        <tr><td><span class="path"><span>Reports</span><i>›</i><span>Rent Collection</span></span></td><td>Billed vs. outstanding per property and month (<a href="#reports">ch. 26</a>).</td><td>Accountant +</td></tr>
+        <tr><td><span class="path"><span>Reports</span><i>›</i><span>Occupancy</span></span></td><td>Units by status and property.</td><td>All</td></tr>
+        <tr><td><span class="path"><span>Reports</span><i>›</i><span>Electricity Consumption</span></span></td><td>kWh and amounts per unit and month.</td><td>All</td></tr>
+        <tr><td><span class="path"><span>Configuration</span><i>›</i><span>Settings</span></span></td><td>Accounts, products, timings, default rate (<a href="#settings">ch. 4</a>).</td><td>Administrator</td></tr>
+        <tr><td><span class="path"><span>Configuration</span><i>›</i><span>Amenities</span></span></td><td>The list of amenities you can attach to properties.</td><td>Administrator</td></tr>
+    </table></div>
+
+    <h3>Outside the Rent Management menu</h3>
+    <div class="table-wrap"><table>
+        <tr><th>What</th><th>Where</th></tr>
+        <tr><td>Your to-dos (enter reading, lease ending, repair assigned)</td><td>The <b>clock / activity icon</b> in the top bar of Odoo, and on each record's chatter.</td></tr>
+        <tr><td>Automatic jobs (schedulers)</td><td><span class="path"><span>Settings</span><i>›</i><span>Technical</span><i>›</i><span>Automation</span><i>›</i><span>Scheduled Actions</span></span>, search "Rent:" (developer mode, <a href="#automation">ch. 20</a>).</td></tr>
+        <tr><td>Email templates</td><td><span class="path"><span>Settings</span><i>›</i><span>Technical</span><i>›</i><span>Email</span><i>›</i><span>Templates</span></span>, search "Rent:" (developer mode).</td></tr>
+        <tr><td>Payments, bank, credit notes, tax reports</td><td>The <b>Accounting</b> / <b>Invoicing</b> app.</td></tr>
+        <tr><td>Tenant portal</td><td>Your website address followed by <code>/my/rent</code>, after the tenant signs in.</td></tr>
+    </table></div>
+    <div class="callout tip"><svg class="ic callout-ic" aria-hidden="true"><use href="#i-check"/></svg><div><b>Developer mode</b> (needed only for the Technical menu): <span class="path"><span>Settings</span></span>, scroll to the bottom and click <i>Activate the developer mode</i>.</div></div>
+    <nav class="chapter-nav"></nav>
+</section>
+
+<!-- ================================================================= 6 PROPERTIES -->
+<section class="chapter" id="properties" style="--c: var(--g2)"><div class="chapter-head"><div class="ch-icon"><svg class="ic" aria-hidden="true"><use href="#i-building"/></svg></div><div><div class="eyebrow">Chapter 06 · Your portfolio</div><h2>Properties</h2></div></div>
+    <p class="lead">A property is a building or complex. It groups units and decides which manager is responsible.</p>
+    <h3>Create a property</h3>
+    <ol class="steps">
+        <li><span class="path"><span>Rent Management</span><i>›</i><span>Properties</span></span> › <span class="btn primary">New</span>.</li>
+        <li>Enter the <b>name</b>, <b>type</b> (Residential, Commercial or Mixed Use), the <b>address</b> and a photo.</li>
+        <li>Choose the <b>Owner</b> (optional) and the <b>Property Manager</b>. The manager is the staff user who will see and run this property. It defaults to you.</li>
+        <li>Tick the <b>amenities</b> and add notes if useful. Save. A code such as <code>PROP/0001</code> is assigned automatically.</li>
+    </ol>
+    <h3>What the property screen shows</h3>
+    <ul>
+        <li>Buttons at the top: <b>Units</b> (all its units) and <b>Leases</b> (its running leases).</li>
+        <li><b>Occupancy:</b> number of units, occupied, vacant, and the occupancy percentage. These update themselves.</li>
+        <li>The <b>Units</b> tab, where you can add units directly.</li>
+    </ul>
+    <div class="callout note"><svg class="ic callout-ic" aria-hidden="true"><use href="#i-info"/></svg><div>To stop using a property without losing its history, <b>archive</b> it
+        (<span class="btn">⚙ Action</span> › <i>Archive</i>). Use the <i>Archived</i> filter to find it again.</div></div>
+    <nav class="chapter-nav"></nav>
+</section>
+
+<!-- ================================================================= 7 UNITS -->
+<section class="chapter" id="units" style="--c: var(--g2)"><div class="chapter-head"><div class="ch-icon"><svg class="ic" aria-hidden="true"><use href="#i-home"/></svg></div><div><div class="eyebrow">Chapter 07 · Your portfolio</div><h2>Units</h2></div></div>
+    <p class="lead">A unit is what you rent out: a flat, room, shop, office or warehouse.</p>
+    <h3>Create a unit</h3>
+    <ol class="steps">
+        <li><span class="path"><span>Units</span></span> › <span class="btn primary">New</span> (or from the property's <i>Units</i> tab).</li>
+        <li>Name (e.g. <i>A-101</i>; must be unique within the property), property, floor, type, area, bedrooms, furnishing.</li>
+        <li><b>Pricing:</b> base rent, security deposit and monthly maintenance charge. These are copied into each new lease for the unit, and you can change them there.</li>
+        <li><b>Electricity Meter No.</b> if the unit has its own meter. New leases for it then default to metered electricity.</li>
+    </ol>
+    <h3>Unit status: set automatically</h3>
+    <div class="table-wrap"><table>
+        <tr><th>Status</th><th>When</th></tr>
+        <tr><td><span class="tag t-green">Vacant</span></td><td>No confirmed or running lease.</td></tr>
+        <tr><td><span class="tag t-blue">Reserved</span></td><td>A lease is <i>Confirmed</i> but the tenant has not moved in yet.</td></tr>
+        <tr><td><span class="tag t-purple">Occupied</span></td><td>A lease is <i>Active</i> or <i>Expiring</i>.</td></tr>
+        <tr><td><span class="tag t-red">Under Maintenance</span></td><td>You ticked <b>Under Maintenance</b> on the unit. While it is ticked, no lease can be activated on it.</td></tr>
+    </table></div>
+    <p>The unit also shows its <b>Current Lease</b> and <b>Current Tenant</b>, its <b>Lease History</b> and its repair requests.</p>
+
+    <h3 id="qr">Meter QR code</h3>
+    <p>Every unit gets a QR code. Scanning it with a phone opens a page where staff enter the meter reading on
+        the spot (<a href="#electricity">chapter 18</a>).</p>
+    <ul>
+        <li><span class="btn">Print Label</span>: prints the QR label to stick on the meter. To print many at once, select units in the list › <span class="btn">Print</span> › <i>Meter QR Labels</i>.</li>
+        <li><span class="btn">New QR Code</span>: if a label is lost or copied, this issues a new code. <b>Old labels stop working</b>, so print and stick the new one.</li>
+    </ul>
+    <nav class="chapter-nav"></nav>
+</section>
+
+<!-- ================================================================= 8 TENANTS -->
+<section class="chapter" id="tenants" style="--c: var(--g2)"><div class="chapter-head"><div class="ch-icon"><svg class="ic" aria-hidden="true"><use href="#i-user"/></svg></div><div><div class="eyebrow">Chapter 08 · Your portfolio</div><h2>Tenants and owners</h2></div></div>
+    <p class="lead">Tenants and owners are ordinary Odoo contacts with a few extra fields on the <b>Rent</b> tab.</p>
+    <h3>Add a tenant</h3>
+    <ol class="steps">
+        <li><span class="path"><span>Tenants</span><i>›</i><span>Tenants</span></span> › <span class="btn primary">New</span>. The <i>Tenant</i> box is already ticked.</li>
+        <li>Name, <b>email</b> (needed for invoices, reminders and portal access), mobile and address.</li>
+        <li><b>Rent</b> tab: emergency contact; <b>KYC</b>: ID type (Aadhaar, PAN, Passport, Other), ID number, <i>KYC Verified</i>, and scans of the ID documents.</li>
+    </ol>
+    <p>The tenant's screen shows a <b>Leases</b> button and <b>Rent Due</b>, which is everything still unpaid on their lease invoices.</p>
+    <div class="callout note"><svg class="ic callout-ic" aria-hidden="true"><use href="#i-info"/></svg><div>KYC data is only visible to Rent Management staff, never to the tenant or other users.</div></div>
+
+    <h3 id="portal-access">Give a tenant access to the portal</h3>
+    <ol class="steps">
+        <li>Open the tenant and check the <b>email</b> address.</li>
+        <li>Click <span class="btn">⚙ Action</span> › <b>Grant portal access</b>, tick the contact and confirm.</li>
+        <li>The tenant receives an invitation email with a link to choose a password.</li>
+        <li>From then on they sign in on your website and land on their rent dashboard (<a href="#portal">chapter 23</a>).
+            They see a lease once it is <i>Confirmed</i>, never while it is a draft.</li>
+    </ol>
+    <h3>Owners</h3>
+    <p><span class="path"><span>Tenants</span><i>›</i><span>Property Owners</span></span>: contacts with <i>Property Owner</i> ticked. Pick them in the <b>Owner</b> field of a property.</p>
+    <nav class="chapter-nav"></nav>
+</section>
+
+<!-- ================================================================= 9 LEASES -->
+<section class="chapter" id="leases" style="--c: var(--g3)"><div class="chapter-head"><div class="ch-icon"><svg class="ic" aria-hidden="true"><use href="#i-file"/></svg></div><div><div class="eyebrow">Chapter 09 · Leases</div><h2>Leases: life cycle</h2></div></div>
+    <p class="lead">Every lease moves through these statuses. Most moves happen when you click a button, and a few happen automatically.</p>
+    <div class="states">
+        <span class="tag t-grey">Draft</span><span class="arr">→</span>
+        <span class="tag t-blue">Confirmed</span><span class="arr">→</span>
+        <span class="tag t-green">Active</span><span class="arr">→</span>
+        <span class="tag t-orange">Expiring</span><span class="arr">→</span>
+        <span class="tag t-grey">Expired</span> / <span class="tag t-purple">Renewed</span> / <span class="tag t-red">Terminated</span>
+        &nbsp;&nbsp; (or <span class="tag t-red">Cancelled</span> before move-in)
+    </div>
+    <div class="table-wrap"><table>
+        <tr><th>Status</th><th>Meaning</th><th>How it gets there</th><th>Buttons you see</th></tr>
+        <tr><td><span class="tag t-grey">Draft</span></td><td>Being prepared. Tenant does not see it. Everything can be edited.</td><td>When you create the lease.</td>
+            <td><span class="btn primary">Confirm</span> <span class="btn">Cancel</span></td></tr>
+        <tr><td><span class="tag t-blue">Confirmed</span></td><td>Agreed and signed. The unit is <i>Reserved</i>, and the tenant sees it on the portal.</td><td><span class="btn primary">Confirm</span>, which emails the tenant the agreement.</td>
+            <td><span class="btn primary">Activate (Move-in)</span> <span class="btn">Invoice Deposit</span> <span class="btn">Request Signature</span> <span class="btn">Cancel</span></td></tr>
+        <tr><td><span class="tag t-green">Active</span></td><td>The tenant lives there. Rent is billed automatically.</td><td><span class="btn primary">Activate (Move-in)</span></td>
+            <td><span class="btn">Generate Invoice Now</span> <span class="btn">Invoice Deposit</span> <span class="btn">Renew</span> <span class="btn">Terminate / Move-out</span></td></tr>
+        <tr><td><span class="tag t-orange">Expiring</span></td><td>Ends soon (within 30 days by default). Billing continues as normal.</td><td><b>Automatic</b> (Lease Expiry Alerts job).</td>
+            <td>Same as Active</td></tr>
+        <tr><td><span class="tag t-grey">Expired</span></td><td>End date passed without renewal or move-out.</td><td><b>Automatic</b> (Expire Ended Leases job).</td>
+            <td><span class="btn">Renew</span> <span class="btn">Terminate / Move-out</span></td></tr>
+        <tr><td><span class="tag t-purple">Renewed</span></td><td>Replaced by a new lease for the next term.</td><td>When the renewal is activated, or automatically once the old end date passes.</td><td>–</td></tr>
+        <tr><td><span class="tag t-red">Terminated</span></td><td>Tenant moved out and the settlement is done.</td><td><span class="btn">Terminate / Move-out</span></td><td>–</td></tr>
+        <tr><td><span class="tag t-red">Cancelled</span></td><td>Called off before move-in.</td><td><span class="btn">Cancel</span></td><td><span class="btn">Reset to Draft</span></td></tr>
+    </table></div>
+
+    <h3>Finding leases</h3>
+    <p>In <span class="path"><span>Leases</span></span>, use the filters: <i>Running</i>, <i>Draft</i>, <i>Confirmed</i>, <i>Expiring</i>, <i>Ended</i>,
+        <i>Ending in 30 Days</i>, <i>Not Signed</i>, <i>Deposit Pending</i>, <i>My Properties</i>. You can group by property, tenant, status
+        or end month. The <b>calendar</b> view shows all lease end dates by month.</p>
+    <div class="callout warn"><svg class="ic callout-ic" aria-hidden="true"><use href="#i-alert"/></svg><div>
+        <ul>
+            <li>A unit cannot have two leases that overlap in time (Confirmed, Active or Expiring).</li>
+            <li>Only <i>Draft</i> or <i>Cancelled</i> leases can be deleted. All others stay for your records.</li>
+        </ul>
+    </div></div>
+    <nav class="chapter-nav"></nav>
+</section>
+
+<!-- ================================================================= 10 LEASE FORM -->
+<section class="chapter" id="lease-form" style="--c: var(--g3)"><div class="chapter-head"><div class="ch-icon"><svg class="ic" aria-hidden="true"><use href="#i-edit"/></svg></div><div><div class="eyebrow">Chapter 10 · Leases</div><h2>Filling in a lease</h2></div></div>
+    <p class="lead"><span class="path"><span>Leases</span></span> › <span class="btn primary">New</span>. The system fills in a lot for you as you go.</p>
+
+    <h3>Top of the form</h3>
+    <div class="table-wrap"><table>
+        <tr><th>Field</th><th>What to enter / what happens</th></tr>
+        <tr><td><b>Tenant</b></td><td>Pick a tenant, or type a new name to create one.</td></tr>
+        <tr><td><b>Unit</b></td><td>Pick the unit. This <b>copies the unit's rent, deposit and maintenance charge</b> into the lease, and sets electricity to <i>Metered</i> if the unit has a meter number. The <b>Property</b> and <b>Property Manager</b> follow from the unit.</td></tr>
+        <tr><td><b>Start Date</b></td><td>Move-in date. It also sets the <b>billing day</b> to the same day of the month (maximum 28) and, if empty, the <b>End Date</b> to one year later minus a day.</td></tr>
+        <tr><td><b>End Date</b></td><td>Last day of the lease. <b>Duration (months)</b> is calculated for you.</td></tr>
+    </table></div>
+
+    <h3>Terms tab</h3>
+    <ul>
+        <li><b>Rent Amount</b>: rent per <b>month</b>, even for quarterly or yearly billing (a quarterly invoice bills 3 × this amount).</li>
+        <li><b>Maintenance Charge</b>: monthly society or maintenance charge, added to each rent invoice.</li>
+        <li><b>Notice Period</b>: in days (default 30).</li>
+        <li><b>Escalation (%)</b>, <b>Escalate Every (months)</b>: automatic rent increase (<a href="#escalation">chapter 17</a>).</li>
+        <li><b>Notes</b>: extra terms and conditions. They are printed on the lease agreement.</li>
+    </ul>
+
+    <h3>Billing tab</h3>
+    <ul>
+        <li><b>Billing Frequency</b>: Monthly, Quarterly or Yearly.</li>
+        <li><b>Billing Day</b>: day of the month the rent is due (1–28).</li>
+        <li><b>Next Invoice Date</b>: due date of the next invoice the system will create. It is filled in at move-in and moves forward after each invoice.</li>
+        <li><b>Late fees</b>: type (Fixed Amount or Percentage of Due), value, and <b>Grace Days</b> (default 5) (<a href="#latefees">chapter 16</a>).</li>
+        <li><b>Electricity</b>: Not charged, Fixed monthly amount, or Metered, with the rate, fixed charge and opening meter reading (<a href="#electricity">chapter 18</a>).</li>
+    </ul>
+
+    <h3>Other tabs and buttons</h3>
+    <ul>
+        <li><b>Deposit</b>: deposit amount and status; after move-out, the settlement figures (<a href="#deposit">chapter 11</a>).</li>
+        <li><b>Invoices</b> (accountants): every invoice of the lease with amount due and payment status.</li>
+        <li><b>Electricity</b>: the meter readings (only for metered leases).</li>
+        <li><b>Maintenance</b>: repair requests linked to this lease.</li>
+        <li><b>Documents</b>: the <b>Signed</b> tick box and the <b>Signed Agreement</b> file. Attach the scanned signed copy with the paperclip in the chatter, then select it here. The tenant can then download it from the portal.</li>
+        <li>Smart buttons at the top: <b>Invoices</b>, <b>Meter Readings</b>, <b>Maintenance</b>.</li>
+        <li>The <b>chatter</b> on the right keeps the full history: status changes, emails sent, late fees, escalations, and your notes.</li>
+    </ul>
+
+    <h3>From draft to move-in</h3>
+    <ol class="steps">
+        <li>Fill in the lease and click <span class="btn primary">Confirm</span>. The tenant receives the confirmation email with the <b>Lease Agreement PDF</b>.</li>
+        <li>Optional: <span class="btn">Request Signature</span> notes in the history that a signature was requested. Get the agreement signed, attach the scan, and tick <b>Signed</b> in <i>Documents</i>.</li>
+        <li>Accountant: <span class="btn">Invoice Deposit</span> (<a href="#deposit">chapter 11</a>).</li>
+        <li>On move-in day: <span class="btn primary">Activate (Move-in)</span>. Billing starts from here.</li>
+    </ol>
+    <div class="callout warn"><svg class="ic callout-ic" aria-hidden="true"><use href="#i-alert"/></svg><div>
+        After confirmation, the <b>unit</b> and <b>start date</b> are locked. After move-in, the <b>tenant</b>, <b>end date</b> and <b>rent</b> are locked too.
+        Check them carefully before confirming. To change the rent later, use escalation or a renewal.
+    </div></div>
+    <nav class="chapter-nav"></nav>
+</section>
+
+<!-- ================================================================= 11 DEPOSIT -->
+<section class="chapter" id="deposit" style="--c: var(--g3)"><div class="chapter-head"><div class="ch-icon"><svg class="ic" aria-hidden="true"><use href="#i-shield"/></svg></div><div><div class="eyebrow">Chapter 11 · Leases</div><h2>Security deposit</h2></div></div>
+    <p class="lead">The deposit is invoiced once, held on a liability account (it is not income), and settled at move-out.</p>
+    <ol class="steps">
+        <li>On a Confirmed or Active lease, an accountant clicks <span class="btn">Invoice Deposit</span>. An invoice for the deposit amount is created and posted. It is <b>not emailed automatically</b>; use <span class="btn">Send</span> on the invoice if you want to email it.</li>
+        <li>When the tenant pays, register the payment on that invoice (<a href="#payments">chapter 15</a>).</li>
+        <li>At move-out, the deposit is returned through a credit note, after deducting what the tenant owes (<a href="#moveout">chapter 13</a>).</li>
+    </ol>
+    <div class="table-wrap"><table>
+        <tr><th>Deposit status</th><th>Meaning</th></tr>
+        <tr><td><span class="tag t-orange">Pending</span></td><td>Not invoiced yet, or invoiced but not paid.</td></tr>
+        <tr><td><span class="tag t-green">Received</span></td><td>The deposit invoice is paid.</td></tr>
+        <tr><td><span class="tag t-blue">Partially Refunded</span></td><td>Settled at move-out, with deductions.</td></tr>
+        <tr><td><span class="tag t-grey">Refunded</span></td><td>Settled at move-out, refunded in full.</td></tr>
+    </table></div>
+    <div class="callout note"><svg class="ic callout-ic" aria-hidden="true"><use href="#i-info"/></svg><div>The deposit amount is locked once the deposit invoice exists. The <i>Deposit Pending</i> filter on Leases lists every lease still waiting for its deposit.</div></div>
+    <nav class="chapter-nav"></nav>
+</section>
+
+<!-- ================================================================= 12 RENEWAL -->
+<section class="chapter" id="renewal" style="--c: var(--g3)"><div class="chapter-head"><div class="ch-icon"><svg class="ic" aria-hidden="true"><use href="#i-refresh"/></svg></div><div><div class="eyebrow">Chapter 12 · Leases</div><h2>Renewing a lease</h2></div></div>
+    <ol class="steps">
+        <li>On an Active, Expiring or Expired lease, click <span class="btn">Renew</span>.</li>
+        <li>A <b>new draft lease</b> opens. It is a copy of the old one, starting the day after the old end date, for the same number of months. A link to the original is shown in <i>Renewal Of</i>.</li>
+        <li>Adjust it if needed, for example the new <b>rent</b> or the end date, then <span class="btn primary">Confirm</span>. The tenant gets the new agreement.</li>
+        <li>When the new term starts, click <span class="btn primary">Activate (Move-in)</span> on the renewal. The old lease becomes <span class="tag t-purple">Renewed</span>. If you forget, the night job marks it Renewed anyway once its end date passes, as long as the renewal is Confirmed.</li>
+    </ol>
+    <div class="callout warn"><svg class="ic callout-ic" aria-hidden="true"><use href="#i-alert"/></svg><div>The renewal does <b>not</b> ask for a new deposit (its deposit amount is 0). The deposit the tenant paid stays recorded on the <b>original</b> lease. Keep this in mind at the final move-out (<a href="#limits">chapter 30</a>).</div></div>
+    <nav class="chapter-nav"></nav>
+</section>
+
+<!-- ================================================================= 13 MOVEOUT -->
+<section class="chapter" id="moveout" style="--c: var(--g3)"><div class="chapter-head"><div class="ch-icon"><svg class="ic" aria-hidden="true"><use href="#i-logout"/></svg></div><div><div class="eyebrow">Chapter 13 · Leases</div><h2>Move-out and settlement</h2></div></div>
+    <p class="lead">One screen closes the lease, bills the final electricity and damages, and settles the deposit.</p>
+    <ol class="steps">
+        <li>Open the lease (Active, Expiring or Expired) and click <span class="btn">Terminate / Move-out</span>.</li>
+        <li>In the window, check or enter:
+            <ul>
+                <li><b>Move-out Date</b></li>
+                <li><b>Damage Charges</b> and a <b>note</b> explaining the deductions</li>
+                <li><b>Final Meter Reading</b> (metered leases only; the last reading is shown for reference)</li>
+            </ul>
+            The window calculates <b>Unpaid Dues</b> (all open invoices of the lease), <b>Electricity Charges</b>
+            (readings not billed yet plus usage since the last reading) and the <b>Refund Amount</b>.</li>
+        <li>Click <span class="btn primary">Confirm Move-out</span>.</li>
+    </ol>
+    <h3>What the system then does</h3>
+    <ul>
+        <li>Cancels any meter reading still "To Enter", records the final reading, and invoices all unbilled electricity.</li>
+        <li>Creates and posts a <b>Damage Charges</b> invoice, if you entered damages.</li>
+        <li>Creates a <b>credit note</b> for the full deposit and uses it to pay off the tenant's open invoices, oldest first.</li>
+        <li>Sets the lease to <span class="tag t-red">Terminated</span>, frees the unit (it becomes <i>Vacant</i>), and records the settlement on the <i>Deposit</i> tab.</li>
+        <li>Emails the tenant the <b>Move-out Settlement</b> PDF and opens the credit note.</li>
+    </ul>
+    <h3>Worked example</h3>
+    <div class="calc">
+Deposit held ............................................  30,000.00<br>
+– Damage charges (broken window) .........................  –2,000.00<br>
+– Unpaid dues (March rent still open) ...................  –15,000.00<br>
+– Electricity (4,700 – 4,520 = 180 kWh × 8.00) ...........  –1,440.00<br>
+────────────────────────────────────────────────────────────────────<br>
+<b>Refund to the tenant .....................................  11,560.00</b>
+    </div>
+    <p>The credit note of 30,000 pays the March invoice, the electricity invoice and the damage invoice. The 11,560
+        left on it is what you owe the tenant. <b>To pay it out:</b> open the credit note › <span class="btn primary">Register Payment</span>
+        and record the bank transfer or cash you give back.</p>
+    <div class="callout note"><svg class="ic callout-ic" aria-hidden="true"><use href="#i-info"/></svg><div>If the deductions are more than the deposit, the refund is 0, and the remaining dues stay open on the tenant's invoices for you to collect.</div></div>
+    <nav class="chapter-nav"></nav>
+</section>
+
+<!-- ================================================================= 14 BILLING -->
+<section class="chapter" id="billing" style="--c: var(--g4)"><div class="chapter-head"><div class="ch-icon"><svg class="ic" aria-hidden="true"><use href="#i-receipt"/></svg></div><div><div class="eyebrow">Chapter 14 · Money</div><h2>Rent invoices</h2></div></div>
+    <p class="lead">You don't create rent invoices by hand. The system creates them from the lease, before each due date.</p>
+    <h3>When</h3>
+    <p>Every night, the system looks for active leases whose <b>Next Invoice Date</b> (the due date) is within the
+        next <b>5 days</b> (the <i>Invoice Days in Advance</i> setting). For each one, it creates the invoice, posts it,
+        emails it to the tenant with the PDF, and moves the next invoice date one period forward. If it missed some
+        days (for example because the server was off), it catches up on every missed period, but it never bills
+        beyond the lease end date.</p>
+    <h3>What a rent invoice contains</h3>
+    <div class="table-wrap"><table>
+        <tr><th>Line</th><th>Amount</th><th>When</th></tr>
+        <tr><td>Rent <i>unit – period</i></td><td>Monthly rent × months in the period</td><td>Always</td></tr>
+        <tr><td>Electricity (fixed)</td><td>Fixed amount × months</td><td>Leases with <i>Fixed Monthly Amount</i> electricity</td></tr>
+        <tr><td>Maintenance charge</td><td>Monthly charge × months</td><td>If the lease has a maintenance charge</td></tr>
+        <tr><td>Electricity <i>(reading details)</i></td><td>kWh × rate, plus the fixed meter charge</td><td>Confirmed meter readings not billed yet</td></tr>
+    </table></div>
+    <p>Invoice date = today (or the due date if earlier). Due date = the billing date. The invoice is linked to the lease and the property.</p>
+
+    <h3>Kinds of lease invoices</h3>
+    <p>In <span class="path"><span>Billing</span><i>›</i><span>Rent Invoices</span></span>, each invoice has a type:
+        <span class="tag t-purple">Rent</span> <span class="tag t-purple">Security Deposit</span> <span class="tag t-purple">Deposit Refund</span>
+        <span class="tag t-purple">Late Fee</span> <span class="tag t-purple">Maintenance</span> <span class="tag t-purple">Damage Charges</span>
+        <span class="tag t-purple">Electricity</span>. Use the filters <i>Rent</i>, <i>Deposits</i>, <i>Late Fees</i>, and group by
+        Property, Lease or Rent Invoice Type. You can't create invoices from this menu; they always come from a lease, reading or repair.</p>
+
+    <h3>Bill now instead of waiting</h3>
+    <p>On an Active lease, an accountant can click <span class="btn">Generate Invoice Now</span>. It creates the <b>next</b>
+        period's invoice immediately and moves the next invoice date forward, exactly as the night job would.</p>
+
+    <h3>Fixing a wrong invoice</h3>
+    <ol class="steps">
+        <li>Open the invoice › <span class="btn">Reset to Draft</span> › <span class="btn">Cancel</span>.</li>
+        <li>The system rolls back what the invoice did: its meter readings become billable again, and, if it was the
+            latest rent invoice, the lease's next invoice date moves back to that period.</li>
+        <li>Correct the lease if needed, then click <span class="btn">Generate Invoice Now</span> (or let the night job create it again).</li>
+    </ol>
+    <div class="callout warn"><svg class="ic callout-ic" aria-hidden="true"><use href="#i-alert"/></svg><div>A <b>cancelled</b> rent or electricity invoice cannot be brought back to draft, because that could bill the same period twice. Always generate a new one.</div></div>
+    <nav class="chapter-nav"></nav>
+</section>
+
+<!-- ================================================================= 15 PAYMENTS -->
+<section class="chapter" id="payments" style="--c: var(--g4)"><div class="chapter-head"><div class="ch-icon"><svg class="ic" aria-hidden="true"><use href="#i-card"/></svg></div><div><div class="eyebrow">Chapter 15 · Money</div><h2>Recording payments</h2></div></div>
+    <div class="grid2">
+        <div class="panel"><h4>Tenant pays you (cash, cheque, bank transfer, UPI)</h4>
+            <ol class="steps" style="margin-bottom:0">
+                <li>Open the invoice (from the lease's <i>Invoices</i> button or <span class="path"><span>Billing</span><i>›</i><span>Rent Invoices</span></span>).</li>
+                <li><span class="btn primary">Register Payment</span>: choose the journal (Bank / Cash), amount and date.</li>
+                <li>The invoice shows <span class="tag t-green">Paid</span> (or <i>Partially Paid</i>). Reminders and late fees stop for it.</li>
+            </ol></div>
+        <div class="panel"><h4>Tenant pays online</h4>
+            <ul><li>If a payment provider is enabled (<a href="#setup">chapter 4</a>, step 10), tenants click <b>Pay now</b> on the portal, or pay all overdue invoices at once.</li>
+                <li>The payment is recorded automatically and the invoice is marked paid.</li>
+                <li>Every invoice PDF also carries a <b>QR code</b> that opens the invoice online so the tenant can pay.</li></ul></div>
+    </div>
+    <p><b>Receipt:</b> on a paid invoice › <span class="btn">Print</span> › <i>Rent Receipt</i>.
+       <b>Full account history:</b> on the tenant › <span class="btn">Print</span> › <i>Tenant Statement</i> (<a href="#reports">chapter 26</a>).</p>
+    <nav class="chapter-nav"></nav>
+</section>
+
+<!-- ================================================================= 16 LATE FEES -->
+<section class="chapter" id="latefees" style="--c: var(--g4)"><div class="chapter-head"><div class="ch-icon"><svg class="ic" aria-hidden="true"><use href="#i-clock"/></svg></div><div><div class="eyebrow">Chapter 16 · Money</div><h2>Late fees</h2></div></div>
+    <p>Set on the lease, <i>Billing</i> tab: <b>Late Fee Type</b>, <b>Late Fee Value</b> and <b>Grace Days</b>.</p>
+    <ul>
+        <li>Each night, every <b>rent</b> invoice still unpaid <b>more than</b> <i>Grace Days</i> after its due date gets <b>one</b> late fee.</li>
+        <li><i>Fixed Amount</i>: the value as-is (e.g. 500). <i>Percentage of Due</i>: that % of the amount still unpaid on the invoice.</li>
+        <li>The fee is a <b>separate invoice</b> of type <i>Late Fee</i>, posted (not emailed automatically) and noted in the lease history with links.</li>
+        <li>Only rent invoices attract late fees. Deposits, electricity-only invoices and repair invoices do not.</li>
+    </ul>
+    <div class="calc">Due 1 May · grace 5 days → no fee on 2–6 May → fee created on the night of 7 May (if still unpaid).</div>
+    <div class="callout tip"><svg class="ic callout-ic" aria-hidden="true"><use href="#i-check"/></svg><div><b>No late fees for a tenant:</b> set the Late Fee Value to 0. <b>Waive a fee already charged:</b> reset that late-fee invoice to draft and cancel it, or issue a credit note.</div></div>
+    <nav class="chapter-nav"></nav>
+</section>
+
+<!-- ================================================================= 17 ESCALATION -->
+<section class="chapter" id="escalation" style="--c: var(--g4)"><div class="chapter-head"><div class="ch-icon"><svg class="ic" aria-hidden="true"><use href="#i-trending"/></svg></div><div><div class="eyebrow">Chapter 17 · Money</div><h2>Rent escalation</h2></div></div>
+    <p>On the lease, <i>Terms</i> tab: <b>Escalation (%)</b> and <b>Escalate Every (months)</b> (default 12).</p>
+    <ul>
+        <li>At move-in, the <b>next escalation date</b> is set to start date + the number of months.</li>
+        <li>On that date, the night job raises the rent by the percentage (rounded to the currency), moves the next date forward by the same number of months, and writes in the history: <i>"Rent escalated by 5% from 15,000 to 15,750."</i></li>
+        <li>Invoices created after that date use the new rent.</li>
+    </ul>
+    <div class="calc">3-year shop lease from 1 Jan 2026, rent 40,000, +5% every 12 months<br>
+→ 1 Jan 2027: 42,000 &nbsp;→ 1 Jan 2028: 44,100</div>
+    <p>The tenant sees the next increase on their portal, and the lease agreement PDF prints the escalation schedule.</p>
+    <nav class="chapter-nav"></nav>
+</section>
+
+<!-- ================================================================= 18 ELECTRICITY -->
+<section class="chapter" id="electricity" style="--c: var(--g4)"><div class="chapter-head"><div class="ch-icon"><svg class="ic" aria-hidden="true"><use href="#i-zap"/></svg></div><div><div class="eyebrow">Chapter 18 · Money</div><h2>Electricity billing</h2></div></div>
+    <h3>Three ways to charge electricity (lease › Billing tab)</h3>
+    <div class="table-wrap"><table>
+        <tr><th>Mode</th><th>What happens</th></tr>
+        <tr><td><b>Not Charged / Included in Rent</b></td><td>Nothing is billed for electricity.</td></tr>
+        <tr><td><b>Fixed Monthly Amount</b></td><td>A fixed amount is added to every rent invoice.</td></tr>
+        <tr><td><b>Metered (Monthly Reading)</b></td><td>The meter is read every month and billed by the unit (kWh × rate), plus an optional fixed meter charge. Enter the <b>Opening Meter Reading</b> at move-in.</td></tr>
+    </table></div>
+
+    <h3>The monthly reading cycle (metered leases)</h3>
+    <div class="flow">
+        <div class="box"><b>1st of month</b>Reading for last month created, status <i>To Enter</i>, and a to-do for the manager</div>
+        <div class="arrow">→</div>
+        <div class="box"><b>You</b>Enter the current meter reading (on the phone or the computer)</div>
+        <div class="arrow">→</div>
+        <div class="box"><b>Confirmed</b>kWh and amount calculated</div>
+        <div class="arrow">→</div>
+        <div class="box"><b>Invoiced</b>With the next rent invoice, or straight away with <i>Invoice Now</i></div>
+    </div>
+    <ul>
+        <li><b>Previous reading</b> is filled in automatically: the last confirmed reading of that meter, or the lease's opening reading.</li>
+        <li>A missed month is never skipped. The next reading simply covers the whole gap, because the meter keeps counting.</li>
+        <li>The current reading can't be lower than the previous one, and two readings of the same lease can't overlap in time.</li>
+    </ul>
+
+    <h3>Option A: on the phone, at the meter (recommended)</h3>
+    <ol class="steps">
+        <li>Scan the QR label on the meter with the phone camera. Sign in to Odoo if asked; a Rent Management login is required.</li>
+        <li>The page shows the unit, tenant, period, previous reading and rate.</li>
+        <li>Type the current reading. Optionally take a photo of the meter, change the rate, and tick "apply this rate to the lease".</li>
+        <li>Save. The reading is <b>confirmed immediately</b>. If no reading was waiting, one is created from the day after the last reading up to today.</li>
+    </ol>
+    <h3>Option B: on the computer</h3>
+    <ol class="steps">
+        <li><span class="path"><span>Billing</span><i>›</i><span>Electricity Readings</span></span>. The list opens on <i>To Enter or Invoice</i>.</li>
+        <li>Type the <b>Current Reading</b> on each line and click the ✓ (or select several and click <span class="btn">Confirm</span>).</li>
+        <li>To bill now instead of with the next rent: select confirmed readings › <span class="btn">Invoice Now</span> (accountants). This creates one electricity invoice per lease. It is not emailed automatically.</li>
+    </ol>
+    <p>A reading can also be created by hand with <span class="btn primary">New</span> (choose the lease and the period). Readings can be <b>reset to draft</b> or <b>cancelled</b> until they are invoiced.</p>
+    <nav class="chapter-nav"></nav>
+</section>
+
+<!-- ================================================================= 19 MAINTENANCE -->
+<section class="chapter" id="maintenance" style="--c: var(--g5)"><div class="chapter-head"><div class="ch-icon"><svg class="ic" aria-hidden="true"><use href="#i-tool"/></svg></div><div><div class="eyebrow">Chapter 19 · Operations</div><h2>Maintenance requests</h2></div></div>
+    <div class="states"><span class="tag t-grey">New</span><span class="arr">→</span><span class="tag t-blue">In Progress</span><span class="arr">→</span><span class="tag t-green">Done</span> &nbsp;(or <span class="tag t-red">Cancelled</span> → <span class="btn">Reopen</span>)</div>
+    <h3>Where requests come from</h3>
+    <ul>
+        <li><b>Tenants</b> report them on the portal (category, priority, description, up to 5 photos). The request appears on your board straight away and the tenant follows it online.</li>
+        <li><b>Staff</b> create them in <span class="path"><span>Maintenance</span></span> › <span class="btn primary">New</span>. Choose the unit, and the current lease and tenant fill in by themselves.</li>
+    </ul>
+    <h3>Handling a request</h3>
+    <ol class="steps">
+        <li>Set <b>Assigned To</b> (a staff user, who gets a to-do), the outside <b>Vendor</b> if any, and the <b>priority</b> (Low, Normal, High, Urgent).</li>
+        <li><span class="btn primary">Start</span> when work begins. The tenant sees "In progress".</li>
+        <li>Enter the <b>Cost</b> and choose <b>Charge To</b>: <i>Owner</i> (you pay) or <i>Tenant</i>.</li>
+        <li><span class="btn primary">Mark as Done</span>. If it is charged to the tenant and has a cost, an invoice of type <i>Maintenance</i> is <b>created and posted automatically</b>.</li>
+    </ol>
+    <p>Use the chatter to talk with the tenant: messages appear on their request page. Filters: <i>Open</i>, <i>Done</i>, <i>Assigned to Me</i>, <i>High Priority</i>, <i>Charged to Tenant</i>.</p>
+    <div class="callout tip"><svg class="ic callout-ic" aria-hidden="true"><use href="#i-check"/></svg><div>If the unit can't be rented during a big repair, tick <b>Under Maintenance</b> on the unit (<a href="#units">chapter 7</a>).</div></div>
+    <nav class="chapter-nav"></nav>
+</section>
+
+<!-- ================================================================= 20 AUTOMATION -->
+<section class="chapter" id="automation" style="--c: var(--g5)"><div class="chapter-head"><div class="ch-icon"><svg class="ic" aria-hidden="true"><use href="#i-cpu"/></svg></div><div><div class="eyebrow">Chapter 20 · Operations</div><h2>Automatic jobs (schedulers)</h2></div></div>
+    <p class="lead">Seven jobs run every night, one after another. Each is safe to run more than once: it only does what
+        is still due, so running a job twice never bills or emails twice.</p>
+    <p>Default times are shown in the server clock (UTC) and in India time (IST). You can change them (see below).</p>
+    <div class="table-wrap"><table>
+        <tr><th>#</th><th>Job name</th><th class="nowrap">Runs at</th><th>What it does</th><th>What you see afterwards</th></tr>
+        <tr><td>1</td><td><b>Rent: Prepare Monthly Electricity Readings</b></td><td class="nowrap">00:15 UTC<br>05:45 IST</td>
+            <td>For every running metered lease without a reading for last month, creates a reading <i>To Enter</i> from the day after its last reading to the last day of last month. In practice this happens on the 1st of each month.</td>
+            <td>New readings in <i>Electricity Readings</i>; a to-do for the property manager due in 3 days.</td></tr>
+        <tr><td>2</td><td><b>Rent: Expire Ended Leases</b></td><td class="nowrap">00:30 UTC<br>06:00 IST</td>
+            <td>Active or Expiring leases whose end date has passed become <i>Renewed</i> (if a renewal is confirmed or running) or <i>Expired</i>.</td>
+            <td>Status changes on leases; units of expired leases become Vacant.</td></tr>
+        <tr><td>3</td><td><b>Rent: Apply Rent Escalation</b></td><td class="nowrap">00:45 UTC<br>06:15 IST</td>
+            <td>Raises the rent of leases whose next escalation date has arrived, and sets the next date.</td>
+            <td>New rent on the lease, and a note in its history.</td></tr>
+        <tr><td>4</td><td><b>Rent: Generate Rent Invoices</b></td><td class="nowrap">01:00 UTC<br>06:30 IST</td>
+            <td>Creates, posts and emails the rent invoices due within the "Invoice Days in Advance" window (with fixed electricity, maintenance charge and confirmed meter readings), and catches up any missed periods.</td>
+            <td>New invoices in <i>Rent Invoices</i>; "Rent Invoice" emails sent; Next Invoice Date moved forward.</td></tr>
+        <tr><td>5</td><td><b>Rent: Apply Late Fees</b></td><td class="nowrap">02:00 UTC<br>07:30 IST</td>
+            <td>Charges one late fee on each rent invoice unpaid beyond its grace days.</td>
+            <td>New <i>Late Fee</i> invoices and a note on the lease.</td></tr>
+        <tr><td>6</td><td><b>Rent: Lease Expiry Alerts</b></td><td class="nowrap">03:00 UTC<br>08:30 IST</td>
+            <td>Active leases ending within the "Lease Expiry Notice" days become <i>Expiring</i>.</td>
+            <td>"Lease Expiry Notice" email to the tenant; to-do <i>"Lease ending: renew or plan move-out"</i> for the manager.</td></tr>
+        <tr><td>7</td><td><b>Rent: Payment Reminders and Overdue Notices</b></td><td class="nowrap">06:00 UTC<br>11:30 IST</td>
+            <td>Emails a reminder for unpaid lease invoices due within the "Reminder Days Before Due" window, and an overdue notice for unpaid invoices past their due date (if enabled). Each email is sent <b>once per invoice</b>.</td>
+            <td>Emails in the invoice history.</td></tr>
+    </table></div>
+    <div class="callout note"><svg class="ic callout-ic" aria-hidden="true"><use href="#i-info"/></svg><div>The order is deliberate: leases are closed and rents escalated <i>before</i> invoices are created, so the invoices use the right status and amount.</div></div>
+
+    <h3 id="run-manually">Run a job now, pause it, or change its time</h3>
+    <ol class="steps">
+        <li>Turn on developer mode (<span class="path"><span>Settings</span></span>, bottom of the page, <i>Activate the developer mode</i>).</li>
+        <li><span class="path"><span>Settings</span><i>›</i><span>Technical</span><i>›</i><span>Automation</span><i>›</i><span>Scheduled Actions</span></span>, and search <b>Rent:</b>.</li>
+        <li>Open the job and:
+            <ul>
+                <li><span class="btn primary">Run Manually</span> to run it right now;</li>
+                <li>switch <b>Active</b> off to pause it (switch it back on to resume);</li>
+                <li>change <b>Next Execution Date</b> to move the time it runs.</li>
+            </ul></li>
+    </ol>
+    <div class="callout warn"><svg class="ic callout-ic" aria-hidden="true"><use href="#i-alert"/></svg><div>Emails are put in Odoo's outgoing queue and leave within a few minutes (Odoo's own "Mail: Email Queue Manager" job). If tenants receive nothing, check the outgoing mail server and that the tenant has an email address.</div></div>
+    <nav class="chapter-nav"></nav>
+</section>
+
+<!-- ================================================================= 21 MANUAL -->
+<section class="chapter" id="manual" style="--c: var(--g5)"><div class="chapter-head"><div class="ch-icon"><svg class="ic" aria-hidden="true"><use href="#i-pointer"/></svg></div><div><div class="eyebrow">Chapter 21 · Operations</div><h2>Doing it by hand</h2></div></div>
+    <p class="lead">Each automatic job, and how to do the same thing yourself.</p>
+    <div class="table-wrap"><table>
+        <tr><th>Automatic job</th><th>Do it yourself for one record</th><th>Do it for everything at once</th></tr>
+        <tr><td>Prepare electricity readings</td>
+            <td>Scan the meter QR (creates and confirms the reading), or <span class="path"><span>Electricity Readings</span></span> › <span class="btn primary">New</span>.</td>
+            <td>Run "Rent: Prepare Monthly Electricity Readings".</td></tr>
+        <tr><td>Expire ended leases</td>
+            <td>No button. Use <span class="btn">Renew</span> or <span class="btn">Terminate / Move-out</span>, which close the lease properly.</td>
+            <td>Run "Rent: Expire Ended Leases".</td></tr>
+        <tr><td>Rent escalation</td>
+            <td>Before confirming, simply type the new rent. On a running lease the rent is locked, so renew with the new rent.</td>
+            <td>Run "Rent: Apply Rent Escalation".</td></tr>
+        <tr><td>Generate rent invoices</td>
+            <td>Lease › <span class="btn">Generate Invoice Now</span> (accountants). Each click bills the next period.</td>
+            <td>Run "Rent: Generate Rent Invoices".</td></tr>
+        <tr><td>Late fees</td>
+            <td>No per-lease button. You can create an ordinary invoice in Accounting, but it won't be linked to the lease.</td>
+            <td>Run "Rent: Apply Late Fees".</td></tr>
+        <tr><td>Lease expiry alerts</td>
+            <td>Filter Leases by <i>Ending in 30 Days</i>; on each lease use <b>Send message</b> with the template "Rent: Lease Expiry Notice" and plan an activity.</td>
+            <td>Run "Rent: Lease Expiry Alerts".</td></tr>
+        <tr><td>Reminders / overdue notices</td>
+            <td>Open the invoice › <span class="btn">Send</span> and pick "Rent: Payment Reminder" or "Rent: Overdue Notice". Or use Odoo's standard follow-up / <i>Send</i> on the invoice.</td>
+            <td>Run "Rent: Payment Reminders and Overdue Notices".</td></tr>
+    </table></div>
+    <p>How to run a job: <a href="#run-manually">chapter 20, "Run a job now"</a>.</p>
+    <nav class="chapter-nav"></nav>
+</section>
+
+<!-- ================================================================= 22 EMAILS -->
+<section class="chapter" id="emails" style="--c: var(--g5)"><div class="chapter-head"><div class="ch-icon"><svg class="ic" aria-hidden="true"><use href="#i-mail"/></svg></div><div><div class="eyebrow">Chapter 22 · Operations</div><h2>Emails to tenants</h2></div></div>
+    <div class="table-wrap"><table>
+        <tr><th>Email</th><th>Sent when</th><th>Attachment</th></tr>
+        <tr><td><b>Rent: Lease Confirmation</b></td><td>You click <span class="btn primary">Confirm</span> on a lease.</td><td>Lease Agreement PDF</td></tr>
+        <tr><td><b>Rent: Rent Invoice</b></td><td>A rent invoice is created (night job or <i>Generate Invoice Now</i>).</td><td>Invoice PDF</td></tr>
+        <tr><td><b>Rent: Payment Reminder</b></td><td>3 days (setting) before an unpaid lease invoice is due. Once per invoice.</td><td>–</td></tr>
+        <tr><td><b>Rent: Overdue Notice</b></td><td>The day after an unpaid lease invoice's due date. Once per invoice (can be switched off in Settings).</td><td>–</td></tr>
+        <tr><td><b>Rent: Lease Expiry Notice</b></td><td>The lease becomes <i>Expiring</i>.</td><td>–</td></tr>
+        <tr><td><b>Rent: Move-out Settlement</b></td><td>You confirm a move-out.</td><td>Move-out Settlement PDF</td></tr>
+    </table></div>
+    <ul>
+        <li>Emails go only to tenants who have an <b>email address</b>. A copy of each is kept in the record's history.</li>
+        <li><b>Not emailed automatically:</b> deposit invoices, late-fee invoices, repair invoices, and "Invoice Now" electricity invoices. Send them with <span class="btn">Send</span> on the invoice if needed.</li>
+        <li>To change the wording: <span class="path"><span>Settings</span><i>›</i><span>Technical</span><i>›</i><span>Email</span><i>›</i><span>Templates</span></span>, search "Rent:" (developer mode).</li>
+        <li>WhatsApp / SMS messages are prepared in the system but <b>not connected</b> to any provider yet, so nothing is sent through them today.</li>
+    </ul>
+    <nav class="chapter-nav"></nav>
+</section>
+
+<!-- ================================================================= 23 PORTAL -->
+<section class="chapter" id="portal" style="--c: var(--g6)"><div class="chapter-head"><div class="ch-icon"><svg class="ic" aria-hidden="true"><use href="#i-globe"/></svg></div><div><div class="eyebrow">Chapter 23 · Tenants online</div><h2>The tenant portal</h2></div></div>
+    <p class="lead">Once a tenant has portal access (<a href="#portal-access">chapter 8</a>), they sign in on your website and land on their own rent dashboard. Here is what they get, page by page, so you can guide them on the phone.</p>
+    <div class="table-wrap"><table>
+        <tr><th>Page</th><th>What the tenant sees and can do</th></tr>
+        <tr><td><b>Dashboard</b><br><code>/my/rent</code></td><td>Welcome, amount due and next payment, days left on the lease, notifications, quick actions, payment trend for 6 months, invoice status chart, their home (unit details, meter, amenities), their lease terms, documents, and their property manager's contact. Tenants with several leases can switch between them.</td></tr>
+        <tr><td><b>My lease</b><br><code>/my/leases</code></td><td>Lease terms, dates, rent, next increase, deposit status, notice period. Download the <b>Lease Agreement PDF</b> and the <b>signed copy</b> (if uploaded).</td></tr>
+        <tr><td><b>Invoices</b><br><code>/my/rent-invoices</code></td><td>All invoices and credit notes grouped by month, with tabs <i>All / To pay / Overdue / Paid / Credit notes</i>, search, totals (outstanding, overdue, paid this year), and a "pay all overdue" option.</td></tr>
+        <tr><td><b>An invoice</b></td><td>Lines, amounts, payments made, bank details for transfers, <b>Pay now</b> (if online payment is enabled), and the PDF download.</td></tr>
+        <tr><td><b>Maintenance</b><br><code>/my/maintenance</code></td><td>Their requests with status. <b>New Request</b>: choose the lease, category, priority, describe the problem and add up to 5 photos (10 MB each). They can follow progress and chat with you.</td></tr>
+        <tr><td><b>Electricity</b><br><small>(on the dashboard, metered leases)</small></td><td>Their confirmed and billed meter readings and consumption.</td></tr>
+        <tr><td><b>Account</b></td><td>Personal details, billing and delivery addresses.</td></tr>
+        <tr><td><b>Sign-in and security</b></td><td>Change password (with a strength indicator), two-factor authentication, passkeys, trusted devices, sign out everywhere, and close the account.</td></tr>
+    </table></div>
+    <div class="callout note"><svg class="ic callout-ic" aria-hidden="true"><use href="#i-info"/></svg><div>Tenants only ever see their own data, and never a lease that is still a draft. Staff who open <code>/my</code> see Odoo's standard portal home.</div></div>
+    <nav class="chapter-nav"></nav>
+</section>
+
+<!-- ================================================================= 24 LOGIN -->
+<section class="chapter" id="login" style="--c: var(--g6)"><div class="chapter-head"><div class="ch-icon"><svg class="ic" aria-hidden="true"><use href="#i-lock"/></svg></div><div><div class="eyebrow">Chapter 24 · Tenants online</div><h2>The login page</h2></div></div>
+    <p>Staff and tenants use the same login page: your website address followed by <code>/web/login</code>
+        (or the <b>Sign in</b> button on the website).</p>
+    <ul>
+        <li>On the left, a panel with your company name and what the portal offers (pay rent online, lease and statements, maintenance requests). On a phone it shrinks to a banner at the top.</li>
+        <li>On the right: <b>Email</b>, <b>Password</b> (the eye icon shows it), <b>Log in</b>, and <b>Reset Password</b> for forgotten passwords.</li>
+        <li><b>Use a Passkey</b>: sign in with the phone's fingerprint or face unlock, once a passkey has been added under Sign-in and security.</li>
+        <li><b>Choose a user</b>: on a shared computer, switch between accounts used before.</li>
+    </ul>
+    <p>After signing in, <b>staff</b> go to the Odoo back office and <b>tenants</b> go to their rent dashboard.</p>
+    <nav class="chapter-nav"></nav>
+</section>
+
+<!-- ================================================================= 25 DASHBOARD -->
+<section class="chapter" id="dashboard" style="--c: var(--g7)"><div class="chapter-head"><div class="ch-icon"><svg class="ic" aria-hidden="true"><use href="#i-grid"/></svg></div><div><div class="eyebrow">Chapter 25 · Insight</div><h2>Dashboard</h2></div></div>
+    <p class="lead"><span class="path"><span>Rent Management</span><i>›</i><span>Dashboard</span></span>: your business on one screen. Choose the <b>period</b> (This month, Last month, This quarter, This year, Last 12 months) and optionally <b>one property</b>.</p>
+    <div class="grid2">
+        <div class="panel"><h4>Portfolio</h4><ul><li>Properties, units</li><li>Occupancy %, vacant units</li><li>Monthly rent roll (running leases)</li><li>Deposits held</li></ul></div>
+        <div class="panel"><h4>Money <small>(accountants)</small></h4><ul><li>Billed (deposits excluded), collected</li><li>Collection rate</li><li>Outstanding, overdue</li><li>Electricity billed</li><li>Comparison with the previous period</li></ul></div>
+        <div class="panel"><h4>Operations</h4><ul><li>Leases ending in 60 days</li><li>Leases to confirm (drafts)</li><li>Open maintenance</li><li>Meter readings to enter / to invoice</li></ul></div>
+    </div>
+    <p>Below the figures: <b>billed vs. collected</b> for the last 12 months, the <b>income mix</b>, a table <b>per property</b>,
+        <b>overdue tenants</b>, <b>leases ending</b> (and whether a renewal exists), <b>recent payments</b>, <b>open repairs</b> and
+        <b>readings to enter</b>. Click any figure or line to open the matching records.</p>
+    <nav class="chapter-nav"></nav>
+</section>
+
+<!-- ================================================================= 26 REPORTS -->
+<section class="chapter" id="reports" style="--c: var(--g7)"><div class="chapter-head"><div class="ch-icon"><svg class="ic" aria-hidden="true"><use href="#i-bars"/></svg></div><div><div class="eyebrow">Chapter 26 · Insight</div><h2>Reports and printouts</h2></div></div>
+    <h3>Analysis screens (Reports menu)</h3>
+    <div class="table-wrap"><table>
+        <tr><th>Report</th><th>Shows</th></tr>
+        <tr><td><b>Rent Collection</b> (accountants)</td><td>Posted lease invoices: <i>Billed</i> and <i>Outstanding</i> by property (rows) and month (columns); also as a chart or list.</td></tr>
+        <tr><td><b>Occupancy</b></td><td>Units by status and property, as a chart or table.</td></tr>
+        <tr><td><b>Electricity Consumption</b></td><td>Confirmed and billed readings: kWh and amounts by unit and month.</td></tr>
+    </table></div>
+    <p>All of them can be filtered, grouped and exported to Excel (⚙ › Export, or the download icon on the table).</p>
+
+    <h3>PDF documents (the <span class="btn">Print</span> button)</h3>
+    <div class="table-wrap"><table>
+        <tr><th>Document</th><th>Where to print it</th><th>Contents</th></tr>
+        <tr><td><b>Lease Agreement</b></td><td>Lease › Print</td><td>Parties, unit, term, rent, deposit, billing, escalation schedule, key dates, terms. Also attached to the confirmation email.</td></tr>
+        <tr><td><b>Move-out Settlement</b></td><td>Lease › Print (after move-out)</td><td>Deposit, deductions, refund. Also attached to the settlement email.</td></tr>
+        <tr><td><b>Invoice (Modern)</b></td><td>Invoice › Print</td><td>Branded invoice with paid / due / overdue status, payments, and a QR code to pay online. Attached to rent invoice emails.</td></tr>
+        <tr><td><b>Rent Receipt</b></td><td>Invoice › Print (accountants)</td><td>Receipt for a payment.</td></tr>
+        <tr><td><b>Tenant Statement</b></td><td>Tenant contact › Print (accountants)</td><td>Every invoice and payment of the tenant in date order, with a running balance.</td></tr>
+        <tr><td><b>Meter QR Labels</b></td><td>Unit › Print Label, or select units › Print</td><td>QR stickers for the electricity meters.</td></tr>
+    </table></div>
+    <nav class="chapter-nav"></nav>
+</section>
+
+<!-- ================================================================= 27 ROUTINE -->
+<section class="chapter" id="routine" style="--c: var(--g8)"><div class="chapter-head"><div class="ch-icon"><svg class="ic" aria-hidden="true"><use href="#i-checklist"/></svg></div><div><div class="eyebrow">Chapter 27 · Reference</div><h2>Daily / monthly routine</h2></div></div>
+    <div class="grid2">
+        <div class="panel"><h4>Every day (10 minutes)</h4><ul>
+            <li>Open the <b>Dashboard</b>: overdue tenants, open repairs.</li>
+            <li>Check your <b>activities</b> (clock icon): readings, leases ending, repairs.</li>
+            <li><b>Register payments</b> received (accountant).</li>
+            <li>Answer new <b>maintenance requests</b>.</li></ul></div>
+        <div class="panel"><h4>1st – 3rd of the month</h4><ul>
+            <li><b>Enter meter readings</b> (filter <i>To Enter</i>), ideally by scanning the meters.</li>
+            <li>Check that this month's <b>rent invoices</b> were created (<i>Rent Invoices</i>, filter <i>Rent</i>).</li></ul></div>
+        <div class="panel"><h4>Around the 10th</h4><ul>
+            <li>Review <b>overdue</b> invoices and <b>late fees</b>; call tenants who are late.</li>
+            <li>Waive late fees where you agreed to.</li></ul></div>
+        <div class="panel"><h4>Month end</h4><ul>
+            <li><b>Rent Collection</b> and <b>Occupancy</b> reports.</li>
+            <li>Leases filter <b>Ending in 30 Days</b>: decide renew or move-out.</li>
+            <li>Filters <b>Not Signed</b> and <b>Deposit Pending</b>: chase the paperwork.</li></ul></div>
+    </div>
+    <nav class="chapter-nav"></nav>
+</section>
+
+<!-- ================================================================= 28 HOW TO -->
+<section class="chapter faq" id="howto" style="--c: var(--g8)"><div class="chapter-head"><div class="ch-icon"><svg class="ic" aria-hidden="true"><use href="#i-help"/></svg></div><div><div class="eyebrow">Chapter 28 · Reference</div><h2>"How do I…?"</h2></div></div>
+    <details><summary>…rent out a vacant unit?</summary><div>Units › filter <i>Vacant</i> › open it › <i>Leases</i> button › New (the unit is pre-filled). Fill in the tenant and dates, then Confirm, invoice the deposit, and Activate on move-in. See <a href="#lease-form">chapter 10</a>.</div></details>
+    <details><summary>…record a payment a tenant made in cash or by bank?</summary><div>Open the invoice › <b>Register Payment</b>. See <a href="#payments">chapter 15</a>.</div></details>
+    <details><summary>…send an invoice to the tenant again?</summary><div>Open the invoice › <b>Send</b> (or Print and share the PDF).</div></details>
+    <details><summary>…give a tenant a receipt or a statement?</summary><div>Receipt: invoice › Print › <i>Rent Receipt</i>. Statement: tenant › Print › <i>Tenant Statement</i>.</div></details>
+    <details><summary>…bill this month's rent today instead of waiting?</summary><div>Lease › <b>Generate Invoice Now</b> (accountants).</div></details>
+    <details><summary>…correct an invoice with a wrong amount?</summary><div>Fix the lease first (if it is still editable), then invoice › Reset to Draft › Cancel, then Lease › Generate Invoice Now. See <a href="#billing">chapter 14</a>.</div></details>
+    <details><summary>…change the rent of a running lease?</summary><div>The rent is locked after move-in. It changes through <a href="#escalation">escalation</a>, or by renewing the lease with the new rent (<a href="#renewal">chapter 12</a>).</div></details>
+    <details><summary>…handle a tenant leaving early?</summary><div>Lease › <b>Terminate / Move-out</b> with the actual move-out date. See <a href="#moveout">chapter 13</a>.</div></details>
+    <details><summary>…stop late fees for one tenant?</summary><div>Lease › Billing tab › Late Fee Value = 0. To cancel a fee already charged, reset that late-fee invoice to draft and cancel it.</div></details>
+    <details><summary>…charge a tenant for a repair?</summary><div>On the maintenance request set <b>Cost</b> and <b>Charge To = Tenant</b>, then Mark as Done. The invoice is created automatically.</div></details>
+    <details><summary>…take a unit off the market during repairs?</summary><div>Unit › tick <b>Under Maintenance</b>. Untick it when it is ready.</div></details>
+    <details><summary>…replace a lost meter QR label?</summary><div>Unit › <b>New QR Code</b> › <b>Print Label</b>. The old label stops working.</div></details>
+    <details><summary>…enter a meter reading without the phone?</summary><div>Billing › Electricity Readings › type the current reading › ✓ Confirm.</div></details>
+    <details><summary>…let a new staff member see only their buildings?</summary><div>Give them the <i>Property Manager</i> role and set them as Property Manager on those properties. See <a href="#roles">chapter 3</a>.</div></details>
+    <details><summary>…give a tenant online access?</summary><div>Tenant › ⚙ Action › Grant portal access. See <a href="#portal-access">chapter 8</a>.</div></details>
+    <details><summary>…change when invoices or reminders go out?</summary><div>Configuration › Settings: <i>Invoice Days in Advance</i>, <i>Reminder Days Before Due</i>, <i>Lease Expiry Notice</i>. See <a href="#settings">chapter 4</a>.</div></details>
+    <details><summary>…make something happen now that normally happens overnight?</summary><div>Run the scheduled job by hand. See <a href="#run-manually">chapter 20</a> and <a href="#manual">chapter 21</a>.</div></details>
+    <details><summary>…upload the signed lease agreement?</summary><div>Attach the scan in the lease chatter (paperclip), then on the Documents tab tick <b>Signed</b> and select the file in <b>Signed Agreement</b>.</div></details>
+    <details><summary>…see who has not paid?</summary><div>Dashboard › Overdue tenants, or Rent Invoices › filter by payment status / overdue, or the tenant's <b>Rent Due</b> field.</div></details>
+    <nav class="chapter-nav"></nav>
+</section>
+
+<!-- ================================================================= 29 ERRORS -->
+<section class="chapter" id="errors" style="--c: var(--g8)"><div class="chapter-head"><div class="ch-icon"><svg class="ic" aria-hidden="true"><use href="#i-alert"/></svg></div><div><div class="eyebrow">Chapter 29 · Reference</div><h2>Messages and what they mean</h2></div></div>
+    <div class="table-wrap"><table>
+        <tr><th>Message</th><th>Why</th><th>What to do</th></tr>
+        <tr><td>"Configure the Security Deposit Account in Rent Management › Configuration › Settings."</td><td>No deposit account set.</td><td>Set it in Settings (<a href="#settings">ch. 4</a>).</td></tr>
+        <tr><td>"Unit … is already leased from … to … (LEASE/…)."</td><td>Another confirmed/running lease overlaps those dates.</td><td>Change the dates, or end/cancel the other lease.</td></tr>
+        <tr><td>"Unit … is under maintenance."</td><td>You are activating a lease on a unit marked Under Maintenance.</td><td>Untick <i>Under Maintenance</i> on the unit.</td></tr>
+        <tr><td>"Lease … is fully invoiced."</td><td>All periods up to the end date are already billed.</td><td>Nothing to bill. Renew the lease to continue.</td></tr>
+        <tr><td>"The billing day must be between 1 and 28."</td><td>Day 29–31 does not exist every month.</td><td>Use 1–28.</td></tr>
+        <tr><td>"The end date of lease … must be after its start date."</td><td>Dates reversed.</td><td>Correct the dates.</td></tr>
+        <tr><td>"Only draft or cancelled leases can be deleted."</td><td>The lease has history.</td><td>Cancel it (if not yet active) or terminate it.</td></tr>
+        <tr><td>"A deposit invoice already exists for this lease."</td><td>Deposit already invoiced.</td><td>Use the existing invoice (Deposit tab).</td></tr>
+        <tr><td>"Set a deposit amount first."</td><td>Deposit amount is 0.</td><td>Enter the amount on the Deposit tab.</td></tr>
+        <tr><td>"No sales journal found for company …"</td><td>Accounting not set up.</td><td>Ask your accountant to create a sales journal or set the Rent Journal.</td></tr>
+        <tr><td>"A cancelled lease invoice cannot be reset to draft…"</td><td>It could bill a period twice.</td><td>Use Generate Invoice Now on the lease.</td></tr>
+        <tr><td>"Enter the current meter reading of …"</td><td>Confirming a reading with no value.</td><td>Type the reading first.</td></tr>
+        <tr><td>"The current reading … is lower than the previous one …"</td><td>Typing mistake, or the meter was replaced.</td><td>Check the meter. For a new meter, ask your administrator to adjust the previous reading.</td></tr>
+        <tr><td>"Lease … already has a meter reading overlapping …"</td><td>Two readings for the same days.</td><td>Use the existing reading, or cancel one.</td></tr>
+        <tr><td>"Invoiced meter readings cannot be deleted / reset / cancelled."</td><td>Already billed.</td><td>Cancel the invoice first (<a href="#billing">ch. 14</a>).</td></tr>
+        <tr><td>"Set the tenant to charge on request …"</td><td>Charge To = Tenant but no tenant.</td><td>Fill in the tenant, or charge the owner.</td></tr>
+        <tr><td>"Only … leases can be confirmed / activated / renewed / terminated."</td><td>The button doesn't apply to the current status.</td><td>See the life cycle table (<a href="#leases">ch. 9</a>).</td></tr>
+    </table></div>
+    <nav class="chapter-nav"></nav>
+</section>
+
+<!-- ================================================================= 30 LIMITS -->
+<section class="chapter" id="limits" style="--c: var(--g8)"><div class="chapter-head"><div class="ch-icon"><svg class="ic" aria-hidden="true"><use href="#i-bulb"/></svg></div><div><div class="eyebrow">Chapter 30 · Reference</div><h2>Good to know</h2></div></div>
+    <ul>
+        <li><b>Rent is always per month</b>, whatever the billing frequency.</li>
+        <li><b>Electricity from meters is billed one month behind</b>, on the next rent invoice (or straight away with <i>Invoice Now</i>).</li>
+        <li><b>Every automatic email is sent once</b> per invoice or lease. Running a job again never sends duplicates.</li>
+        <li><b>Cancelling a rent invoice</b> puts its period and meter readings back in the queue to be billed again.</li>
+        <li><b>Request Signature</b> only records the request in the lease history. No e-signature service is connected; signing is done on paper (or any tool you use) and the signed copy is uploaded.</li>
+        <li><b>WhatsApp / SMS</b> are prepared but not connected; all notifications go by email today.</li>
+        <li><b>Deposit after a renewal:</b> the deposit stays on the original lease, which becomes <i>Renewed</i>. Move-out on the renewal therefore settles no deposit. When a tenant who has renewed finally leaves, ask your accountant to refund the original deposit with a credit note on the original deposit invoice.</li>
+        <li><b>Multi-company:</b> each company has its own settings, and staff only see the companies they have access to.</li>
+        <li><b>History is never lost:</b> archive properties and units instead of deleting them; leases with activity can't be deleted.</li>
+    </ul>
+    <nav class="chapter-nav"></nav>
+</section>
+
+<!-- ================================================================= 31 GLOSSARY -->
+<section class="chapter" id="glossary" style="--c: var(--g8)"><div class="chapter-head"><div class="ch-icon"><svg class="ic" aria-hidden="true"><use href="#i-book"/></svg></div><div><div class="eyebrow">Chapter 31 · Reference</div><h2>Glossary</h2></div></div>
+    <div class="table-wrap"><table>
+        <tr><th>Word</th><th>Meaning</th></tr>
+        <tr><td><b>Billing day</b></td><td>Day of the month rent is due (1–28).</td></tr>
+        <tr><td><b>Chatter</b></td><td>The history and messages panel on the right of each record.</td></tr>
+        <tr><td><b>Credit note</b></td><td>A negative invoice: money owed back to the tenant (e.g. the deposit refund).</td></tr>
+        <tr><td><b>Escalation</b></td><td>Planned rent increase by a percentage, every N months.</td></tr>
+        <tr><td><b>Grace days</b></td><td>Days after the due date before a late fee is charged.</td></tr>
+        <tr><td><b>Activity / to-do</b></td><td>A task assigned to a user with a deadline, shown under the clock icon.</td></tr>
+        <tr><td><b>Portal</b></td><td>The tenants' private website area.</td></tr>
+        <tr><td><b>Posted</b></td><td>An invoice that is final and counts in the accounts (as opposed to draft).</td></tr>
+        <tr><td><b>Rent roll</b></td><td>Total monthly rent of all running leases.</td></tr>
+        <tr><td><b>Scheduled action / job</b></td><td>A task Odoo runs automatically at a set time.</td></tr>
+        <tr><td><b>Settlement</b></td><td>The final calculation at move-out: deposit minus what the tenant owes.</td></tr>
+        <tr><td><b>Developer mode</b></td><td>An Odoo setting that shows technical menus (scheduled actions, email templates).</td></tr>
+    </table></div>
+    <nav class="chapter-nav"></nav>
+</section>
+
+<footer class="footer"><span class="brand-mark sm"><svg class="ic" aria-hidden="true"><use href="#i-home"/></svg></span>Rent Management · User Handbook · MOHD SOHAIL</footer>
+</main>
+</div>
+
+<script>
+(function () {
+    const root = document.documentElement;
+
+    // Theme: remembered between visits, follows the system the first time.
+    const saved = localStorage.getItem('rent-handbook-theme');
+    root.dataset.theme = saved || (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+    document.getElementById('themeToggle').addEventListener('click', () => {
+        root.dataset.theme = root.dataset.theme === 'dark' ? 'light' : 'dark';
+        localStorage.setItem('rent-handbook-theme', root.dataset.theme);
+    });
+
+    const links = [...document.querySelectorAll('nav.toc a[href^="#"]')];
+    const byId = Object.fromEntries(links.map(a => [a.getAttribute('href').slice(1), a]));
+    const chapters = [...document.querySelectorAll('section.chapter')];
+    const title = s => s.querySelector('.chapter-head h2').textContent;
+    const eyebrow = s => s.querySelector('.eyebrow').textContent;
+
+    // Previous / next chapter at the bottom of each chapter.
+    const arrow = name => `<svg class="ic" aria-hidden="true"><use href="#i-${name}"/></svg>`;
+    chapters.forEach((section, i) => {
+        const nav = section.querySelector('.chapter-nav');
+        if (!nav) return;
+        const prev = chapters[i - 1], next = chapters[i + 1];
+        nav.innerHTML =
+            (prev ? `<a class="prev" href="#${prev.id}"><small>${arrow('left')} Previous</small><b>${title(prev)}</b></a>`
+                  : `<a class="prev" href="#index"><small>${arrow('left')} Back to</small><b>Index</b></a>`) +
+            (next ? `<a class="next" href="#${next.id}"><small>Next ${arrow('right')}</small><b>${title(next)}</b></a>`
+                  : `<a class="next" href="#index"><small>Back to ${arrow('up')}</small><b>Index</b></a>`);
+    });
+
+    // Highlight the chapter in view and show it in the top bar.
+    const nowReading = document.getElementById('nowReading');
+    const observer = new IntersectionObserver(entries => {
+        entries.forEach(entry => {
+            if (!entry.isIntersecting) return;
+            links.forEach(a => a.classList.remove('active'));
+            byId[entry.target.id]?.classList.add('active');
+            byId[entry.target.id]?.scrollIntoView({ block: 'nearest' });
+            if (entry.target.matches('section.chapter')) {
+                nowReading.innerHTML = `${eyebrow(entry.target).split('·')[0]}· <b>${title(entry.target)}</b>`;
+                nowReading.classList.add('show');
+            } else {
+                nowReading.classList.remove('show');
+            }
+        });
+    }, { rootMargin: '-90px 0px -65% 0px' });
+    [document.getElementById('index'), ...chapters].forEach(s => observer.observe(s));
+
+    // Reading progress and back-to-top button.
+    const progress = document.getElementById('progress');
+    const toTop = document.createElement('button');
+    toTop.className = 'to-top';
+    toTop.setAttribute('aria-label', 'Back to top');
+    toTop.innerHTML = arrow('up');
+    toTop.addEventListener('click', () => scrollTo({ top: 0, behavior: 'smooth' }));
+    document.body.appendChild(toTop);
+    const onScroll = () => {
+        const max = document.documentElement.scrollHeight - innerHeight;
+        progress.style.width = (max > 0 ? (scrollY / max) * 100 : 0) + '%';
+        toTop.classList.toggle('show', scrollY > 900);
+    };
+    addEventListener('scroll', onScroll, { passive: true });
+    onScroll();
+
+    // Search: filters the contents by chapter title and text; "/" focuses it.
+    const search = document.getElementById('tocSearch');
+    search.addEventListener('input', () => {
+        const q = search.value.trim().toLowerCase();
+        links.forEach(a => {
+            const section = document.getElementById(a.getAttribute('href').slice(1));
+            const text = (a.textContent + ' ' + (q && section ? section.textContent : '')).toLowerCase();
+            a.style.display = !q || text.includes(q) ? '' : 'none';
+        });
+        document.querySelectorAll('nav.toc .group').forEach(group => {
+            let el = group.nextElementSibling, visible = false;
+            while (el && !el.classList.contains('group') && el.tagName === 'A') {
+                visible = visible || el.style.display !== 'none';
+                el = el.nextElementSibling;
+            }
+            group.style.display = visible ? '' : 'none';
+        });
+    });
+    addEventListener('keydown', e => {
+        if (e.key === '/' && document.activeElement !== search) {
+            e.preventDefault();
+            if (innerWidth <= 1000) document.querySelector('nav.toc').classList.add('open');
+            search.focus();
+        }
+        if (e.key === 'Escape') {
+            search.blur();
+            document.querySelector('nav.toc').classList.remove('open');
+        }
+    });
+    links.forEach(a => a.addEventListener('click', () => document.querySelector('nav.toc').classList.remove('open')));
+})();
+
+</script>
+</body>
+</html>

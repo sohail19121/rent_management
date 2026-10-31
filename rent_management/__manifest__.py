@@ -4,17 +4,17 @@
     'category': 'Services/Rent Management',
     'summary': 'Properties, units, tenants, leases, rent billing, deposits and maintenance',
     'description': """
-Rent Management
-===============
-* Properties and units with occupancy tracking
-* Tenants with KYC information
-* Lease agreements with automatic rent invoicing, reminders, late fees and escalation
-* Security deposits posted on a liability account and refunded at move-out
-* Maintenance requests, optionally recharged to the tenant
-* Tenant portal: leases, rent invoices (online payment) and maintenance requests
-* Dashboard, analysis views and PDF reports
-""",
-    'author': 'Cloud Science Labs',
+        Rent Management
+        ===============
+        * Properties and units with occupancy tracking
+        * Tenants with KYC information
+        * Lease agreements with automatic rent invoicing, reminders, late fees and escalation
+        * Security deposits posted on a liability account and refunded at move-out
+        * Maintenance requests, optionally recharged to the tenant
+        * Tenant portal: leases, rent invoices (online payment) and maintenance requests
+        * Dashboard, analysis views and PDF reports
+        """,
+    'author': 'MOHD SOHAIL',
     'depends': ['mail', 'portal', 'account', 'product', 'contacts'],
     'data': [
         'security/rent_security.xml',
@@ -27,6 +27,7 @@ Rent Management
         'report/report_tenant_statement.xml',
         'report/report_moveout_settlement.xml',
         'report/report_meter_qr_label.xml',
+        'report/report_rent_invoice.xml',
         'data/mail_template_data.xml',
         'data/ir_cron_data.xml',
         'data/portal_entry_data.xml',
@@ -44,6 +45,10 @@ Rent Management
         'views/rent_dashboard_views.xml',
         'views/rent_menus.xml',
         'views/rent_portal_templates.xml',
+        'views/rent_portal_dashboard.xml',
+        'views/rent_portal_invoice.xml',
+        'views/rent_portal_account.xml',
+        'views/rent_login_templates.xml',
         'views/rent_meter_templates.xml',
     ],
     'demo': [
@@ -53,6 +58,12 @@ Rent Management
         'web.assets_backend': [
             'rent_management/static/src/dashboard/**/*',
             ('remove', 'rent_management/static/src/**/*.dark.scss'),
+        ],
+        'web.report_assets_common': [
+            'rent_management/static/src/report/**/*',
+        ],
+        'web.assets_frontend': [
+            'rent_management/static/src/portal/**/*',
         ],
         'web.assets_web_dark': [
             'rent_management/static/src/**/*.dark.scss',

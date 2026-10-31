@@ -1,0 +1,267 @@
+// Sign-in page: brand panel on the left, the standard form on the right. The container is the
+// website login wrapper when website is installed, the core login card body otherwise; both are
+// recognized by the panel they hold so other pages using the same layout are left alone.
+@mixin o-rl-container {
+    --o-rl-brand: #{$primary};
+    --o-rl-text: #1f1d24;
+    --o-rl-muted: #6b6875;
+    --o-rl-border: #{rgba($black, 0.1)};
+    --o-rl-aside-width: 440px;
+    --bs-border-radius: 10px;
+
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    max-width: 980px;
+    min-height: 600px;
+    margin: 48px auto;
+    padding: 48px 64px 32px calc(var(--o-rl-aside-width) + 64px);
+    overflow: hidden;
+    border: 1px solid var(--o-rl-border);
+    border-radius: 24px;
+    background: $white;
+    box-shadow: 0 1px 2px #{rgba($black, 0.04)}, 0 24px 60px -16px #{rgba($black, 0.18)};
+    color: var(--o-rl-text);
+
+    @include media-breakpoint-down(lg) {
+        max-width: 460px;
+        min-height: 0;
+        margin: 24px auto;
+        padding: 0 24px 24px;
+    }
+
+    @include media-breakpoint-down(sm) {
+        margin: 0 auto;
+        border: 0;
+        border-radius: 0;
+        box-shadow: none;
+    }
+
+    .oe_login_form {
+        max-width: none;
+        margin: 0;
+    }
+
+    .form-label {
+        margin-bottom: 6px;
+        font-weight: $font-weight-bold;
+        font-size: 0.875rem;
+    }
+
+    .form-control {
+        min-height: 46px;
+        border-color: var(--o-rl-border);
+        background: #fafafb;
+
+        &:focus {
+            border-color: var(--o-rl-brand);
+            background: $white;
+            box-shadow: 0 0 0 4px color-mix(in srgb, var(--o-rl-brand) 15%, transparent);
+        }
+    }
+
+    .o_show_password {
+        min-width: 46px;
+        border-color: var(--o-rl-border) !important;
+        background: #fafafb;
+    }
+
+    .oe_login_buttons .btn-primary {
+        min-height: 46px;
+        font-weight: $font-weight-bold;
+        box-shadow: 0 6px 16px -6px color-mix(in srgb, var(--o-rl-brand) 70%, transparent);
+    }
+
+    // "or" separator and alternative sign-in methods (passkey, OAuth providers).
+    .o_login_auth > em {
+        display: flex !important; // core markup sets d-block
+        align-items: center;
+        gap: 12px;
+        font-style: normal;
+
+        &::before,
+        &::after {
+            content: "";
+            flex: 1;
+            border-top: 1px solid var(--o-rl-border);
+        }
+    }
+
+    .o_login_auth .list-group-item {
+        min-height: 46px;
+        margin-bottom: 8px;
+        border: 1px solid var(--o-rl-border);
+        border-radius: var(--bs-border-radius);
+        font-weight: $font-weight-bold;
+    }
+
+    .o_user_switch .list-group-item {
+        border-color: var(--o-rl-border);
+    }
+}
+
+.oe_website_login_container:has(> .o_rl_aside),
+.o_database_list > .card-body:has(> .o_rl_aside) {
+    @include o-rl-container;
+}
+
+// Without website the card itself is narrow and padded; the body becomes the card.
+.o_database_list:has(> .card-body > .o_rl_aside) {
+    max-width: none !important;
+    background: transparent !important;
+}
+
+#wrapwrap main:has(.o_rl_aside) {
+    background:
+        radial-gradient(circle at 10% 0%, color-mix(in srgb, #{$primary} 8%, transparent), transparent 40%),
+        radial-gradient(circle at 90% 100%, color-mix(in srgb, #{$primary} 6%, transparent), transparent 40%),
+        #f6f5f8;
+    padding: 1px 12px;
+}
+
+// Brand panel -----------------------------------------------------------------------
+
+.o_rl_aside {
+    position: absolute;
+    inset: 0 auto 0 0;
+    display: flex;
+    flex-direction: column;
+    gap: 32px;
+    width: var(--o-rl-aside-width);
+    padding: 48px 44px;
+    background:
+        radial-gradient(circle at 100% 0%, #{rgba($white, 0.16)} 0 120px, transparent 121px),
+        radial-gradient(circle at 0% 100%, #{rgba($white, 0.1)} 0 160px, transparent 161px),
+        radial-gradient(#{rgba($white, 0.22)} 1px, transparent 1.5px) 0 0 / 14px 14px,
+        linear-gradient(150deg, var(--o-rl-brand), color-mix(in srgb, var(--o-rl-brand) 70%, black));
+    color: $white;
+
+    @include media-breakpoint-down(lg) {
+        position: static;
+        width: auto;
+        margin: 0 -24px 28px;
+        padding: 28px 24px;
+        gap: 16px;
+    }
+}
+
+.o_rl_brand {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-weight: $font-weight-bold;
+    font-size: 1.05rem;
+}
+
+.o_rl_brand_mark {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border-radius: 12px;
+    background: rgba($white, 0.18);
+    box-shadow: inset 0 0 0 1px rgba($white, 0.25);
+    font-size: 1.3rem;
+}
+
+.o_rl_pitch {
+    margin-top: auto;
+
+    @include media-breakpoint-down(lg) {
+        margin-top: 0;
+    }
+}
+
+.o_rl_pitch_title {
+    margin-bottom: 12px;
+    color: $white;
+    font-size: 1.75rem;
+    font-weight: $font-weight-bold;
+    line-height: 1.25;
+
+    @include media-breakpoint-down(lg) {
+        font-size: 1.25rem;
+    }
+}
+
+.o_rl_pitch_text {
+    margin: 0;
+    color: rgba($white, 0.82);
+    line-height: 1.55;
+
+    @include media-breakpoint-down(lg) {
+        display: none;
+    }
+}
+
+.o_rl_features {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+    margin: 0 0 auto;
+    padding: 20px 0 0;
+    border-top: 1px solid rgba($white, 0.2);
+    list-style: none;
+
+    li {
+        display: flex;
+        align-items: flex-start;
+        gap: 14px;
+    }
+
+    strong,
+    small {
+        display: block;
+    }
+
+    small {
+        color: rgba($white, 0.75);
+        font-size: 0.8rem;
+    }
+
+    @include media-breakpoint-down(lg) {
+        display: none;
+    }
+}
+
+.o_rl_feature_icon {
+    display: inline-flex;
+    flex: none;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    background: rgba($white, 0.14);
+    font-size: 1.1rem;
+}
+
+// Form column ------------------------------------------------------------------------
+
+.o_rl_head {
+    margin-bottom: 24px;
+}
+
+.o_rl_title {
+    margin-bottom: 4px;
+    color: var(--o-rl-text);
+    font-size: 1.75rem;
+    font-weight: $font-weight-bold;
+}
+
+.o_rl_subtitle {
+    margin: 0;
+    color: var(--o-rl-muted);
+}
+
+.o_rl_secure {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    margin: 20px 0 0;
+    color: var(--o-rl-muted);
+    font-size: 0.8rem;
+}

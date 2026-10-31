@@ -1,0 +1,602 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!--
+        Account details, addresses and the address form, with the tenant design.
+        The standard portal fields, form names and JS hooks (.o_customer_address_fill,
+        .o_portal_addresses, .o_portal_profile_card, #save_address...) are kept so that the portal
+        scripts (validation, country/state, removal, profile photo) keep working.
+    -->
+
+    <!-- Save / discard bar at the bottom of the address forms. -->
+    <template id="tenant_form_bar" name="Tenant Form Bar">
+        <div class="o_rp_form_bar">
+            <span class="o_rp_form_bar_note">
+                <i class="oi" data-icon="lock"/> Only you and your property manager can see these details.
+            </span>
+            <div class="o_rp_form_bar_actions">
+                <a t-att-href="discard_url or '/my/rent'" class="o_rp_outline_btn">Discard</a>
+                <button id="save_address" type="button" class="o_rp_primary_btn">
+                    <i class="oi" data-icon="check"/> <t t-out="save_label"/>
+                </button>
+            </div>
+        </div>
+    </template>
+
+    <!-- Fields of the standard address form, inside a tenant card. -->
+    <template id="tenant_address_fields_card" name="Tenant Address Fields Card">
+        <section class="o_rp_card">
+            <h2 class="o_rp_step_title">
+                <span class="o_rp_step_num"><i class="oi" t-att-data-icon="card_icon"/></span>
+                <span class="d-flex flex-column">
+                    <t t-out="card_title"/>
+                    <small class="o_rp_step_caption" t-out="card_caption"/>
+                </span>
+            </h2>
+            <div name="address_details" class="row o_rp_fields">
+                <t t-call="portal.address_form_fields"/>
+                <t t-out="0"/>
+            </div>
+        </section>
+    </template>
+
+    <!-- /my/account -->
+    <template id="portal_tenant_account" name="Tenant Account Details">
+        <t t-call="rent_management.tenant_shell" page_title.translate="Account details"
+           page_subtitle.translate="Your contact details appear on your invoices and lease agreement. Keep them up to date.">
+            <div class="o_customer_address_fill o_rp_account">
+                <!-- Identity -->
+                <section class="o_rp_account_hero">
+                    <div class="o_rp_account_cover"/>
+                    <div class="o_rp_account_identity">
+                        <div class="o_portal_profile_card o_rp_avatar_edit">
+                            <span class="o_profile_picture"
+                                  t-att-data-user-id="request.env.user.id"
+                                  t-field="request.env.user.avatar_512"
+                                  t-options="{'widget': 'image', 'class': 'o_rp_avatar_img'}"/>
+                            <input type="file" class="o_file_upload d-none" accept="image/*"/>
+                            <button type="button" class="o_portal_edit o_rp_avatar_btn" title="Change photo" aria-label="Change photo">
+                                <i class="oi" data-icon="photo_camera"/>
+                            </button>
+                            <button type="button" class="o_portal_clear o_rp_avatar_btn o_rp_avatar_clear" title="Remove photo" aria-label="Remove photo">
+                                <i class="oi" data-icon="delete"/>
+                            </button>
+                        </div>
+                        <div class="o_rp_account_who min-w-0">
+                            <h2 class="o_rp_account_name" t-out="current_partner.name"/>
+                            <p class="o_rp_account_mail">
+                                <i class="oi" data-icon="mail"/> <span t-out="current_partner.email or 'No email yet'"/>
+                            </p>
+                            <div class="o_rp_chips">
+                                <span t-if="rent_profile['tenant_since']" class="o_rp_chip_static">
+                                    <i class="oi" data-icon="calendar_today"/> Tenant since
+                                    <t t-out="rent_profile['tenant_since']" t-options="{'widget': 'date', 'format': 'MMM yyyy'}"/>
+                                </span>
+                                <span t-if="unit" class="o_rp_chip_static"><i class="oi" data-icon="home"/> <t t-out="unit.display_name"/></span>
+                                <span t-if="rent_profile['kyc_verified']" class="o_rp_chip_static o_rp_chip_good">
+                                    <i class="oi" data-icon="verified"/> <t t-out="rent_profile['kyc_type'] or 'ID'"/> verified
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <div class="o_rp_report">
+                    <div class="o_rp_report_form">
+                        <div id="errors"/> <!-- for js -->
+                        <form action="/my/address/submit" method="post" name="address_form"
+                              class="address_autoformat o_rp_report_form"
+                              t-att-data-company-country-code="res_company.country_id.code"
+                              t-att-data-default-required-fields="','.join(required_fields)"
+                              t-att-data-submit-url="'/my/address/submit'">
+                            <t t-call="rent_management.tenant_address_fields_card"
+                               card_icon="'person'" card_title.translate="Personal details and address"
+                               card_caption.translate="Used on your invoices, receipts and lease agreement.">
+                                <t t-if="invoice_sending_methods and len(invoice_sending_methods) > 1">
+                                    <div class="w-100 mt-4"/>
+                                    <div class="col-lg-6 mb-2">
+                                        <label class="col-form-label label-optional" for="invoice_sending_method">Receive invoices</label>
+                                        <select id="invoice_sending_method" name="invoice_sending_method" class="form-select">
+                                            <option t-foreach="invoice_sending_methods" t-as="method" t-att-value="method"
+                                                    t-att-selected="partner_sudo.invoice_sending_method == method" t-out="method_value"/>
+                                        </select>
+                                    </div>
+                                    <div t-if="invoice_edi_formats" class="col-lg-6 mb-2">
+                                        <label class="col-form-label label-optional" for="invoice_edi_format">Electronic format</label>
+                                        <select id="invoice_edi_format" name="invoice_edi_format" class="form-select">
+                                            <option value=""/>
+                                            <option t-foreach="invoice_edi_formats" t-as="format" t-att-value="format"
+                                                    t-att-selected="partner_sudo.invoice_edi_format == format" t-out="format_value"/>
+                                        </select>
+                                    </div>
+                                </t>
+                            </t>
+                            <t t-call="rent_management.tenant_form_bar" save_label.translate="Save changes"/>
+                        </form>
+                    </div>
+
+                    <aside class="o_rp_report_side">
+                        <!-- Profile completeness -->
+                        <section class="o_rp_card">
+                            <div class="o_rp_card_head mb-2">
+                                <h2 class="o_rp_card_heading"><i class="oi" data-icon="checklist"/> Profile</h2>
+                                <span t-attf-class="o_rp_status_pill {{ rent_profile['pct'] == 100 and 'o_rp_status_good' or 'o_rp_status_info' }}">
+                                    <t t-out="rent_profile['pct']"/>% complete
+                                </span>
+                            </div>
+                            <div class="o_rp_meter" role="progressbar" aria-label="Profile completeness"
+                                 t-att-aria-valuenow="rent_profile['pct']" aria-valuemin="0" aria-valuemax="100">
+                                <span class="o_rp_meter_fill" t-attf-style="width: {{ rent_profile['pct'] }}%"/>
+                            </div>
+                            <ul class="o_rp_checklist">
+                                <li t-foreach="rent_profile['checks']" t-as="check" t-attf-class="{{ check['done'] and 'o_rp_done' or '' }}">
+                                    <span class="o_rp_check_icon">
+                                        <i class="oi" t-att-data-icon="check['done'] and 'check' or check['icon']"/>
+                                    </span>
+                                    <span class="d-flex flex-column min-w-0">
+                                        <span t-out="check['label']"/>
+                                        <small t-if="not check['done'] and check.get('hint')" t-out="check['hint']"/>
+                                    </span>
+                                    <span class="visually-hidden" t-out="check['done'] and 'Done' or 'To do'"/>
+                                </li>
+                            </ul>
+                        </section>
+
+                        <!-- Emergency contact (managed by the landlord) -->
+                        <section class="o_rp_card">
+                            <h2 class="o_rp_card_heading mb-3"><i class="oi" data-icon="emergency"/> Emergency contact</h2>
+                            <t t-if="rent_profile['emergency_phone']">
+                                <div class="o_rp_contact_line">
+                                    <span class="o_rp_initials" t-out="(rent_profile['emergency_name'] or '?')[:1].upper()"/>
+                                    <span class="d-flex flex-column min-w-0">
+                                        <strong t-out="rent_profile['emergency_name'] or 'Contact'"/>
+                                        <a t-attf-href="tel:{{ rent_profile['emergency_phone'] }}" class="o_rp_link" t-out="rent_profile['emergency_phone']"/>
+                                    </span>
+                                </div>
+                            </t>
+                            <p t-else="" class="o_rp_muted_text mb-0">No emergency contact yet. Your property manager can add one for you.</p>
+                        </section>
+
+                        <!-- Shortcuts -->
+                        <section class="o_rp_card p-0">
+                            <ul class="o_rp_rows">
+                                <li>
+                                    <a href="/my/addresses" class="o_rp_row_link">
+                                        <span class="o_rp_row_icon"><i class="oi" data-icon="map"/></span>
+                                        <span class="o_rp_row_main"><strong>Addresses</strong><small>Billing and delivery addresses</small></span>
+                                        <i class="oi o_rp_muted_icon" data-icon="chevron_right"/>
+                                    </a>
+                                </li>
+                                <li>
+                                    <a href="/my/security" class="o_rp_row_link">
+                                        <span class="o_rp_row_icon"><i class="oi" data-icon="lock"/></span>
+                                        <span class="o_rp_row_main"><strong>Sign-in and security</strong><small>Password and devices</small></span>
+                                        <i class="oi o_rp_muted_icon" data-icon="chevron_right"/>
+                                    </a>
+                                </li>
+                            </ul>
+                        </section>
+                    </aside>
+                </div>
+            </div>
+        </t>
+    </template>
+
+    <!-- One address in the address grids. -->
+    <template id="tenant_address_card" name="Tenant Address Card">
+        <t t-set="can_be_edited" t-value="contact._can_be_edited_by_current_customer()"/>
+        <article class="o_rp_address" t-att-data-address-type="address_type" t-att-data-partner-id="contact.id">
+            <div class="o_rp_address_top">
+                <span class="o_rp_row_icon"><i class="oi" t-att-data-icon="address_type == 'billing' and 'receipt_long' or 'local_shipping'"/></span>
+                <span t-if="contact.type == 'invoice'" class="o_rp_label">Billing</span>
+                <span t-elif="contact.type == 'delivery'" class="o_rp_label">Delivery</span>
+                <span t-elif="contact == commercial_partner" class="o_rp_label">Company</span>
+            </div>
+            <strong class="o_rp_address_name" t-out="contact.name"/>
+            <div class="o_rp_address_lines"
+                 t-out="contact" t-options="{'widget': 'contact', 'fields': ['address'], 'no_marker': True, 'no_tag_br': True}"/>
+            <div t-if="contact.vat"
+                 t-attf-class="o_address_card_vat o_rp_address_vat {{ '' if (use_delivery_as_billing or address_type == 'billing') and contact.type in ['contact', 'invoice'] else 'd-none' }}">
+                <span t-out="contact.vat"/>
+            </div>
+            <div t-if="can_be_edited" class="o_rp_address_actions">
+                <a t-att-href="new_address_url + '&amp;partner_id=' + str(contact.id)" class="js_edit_address o_rp_pill_btn">
+                    <i class="oi" data-icon="edit"/> Edit
+                </a>
+                <a role="button" href="#" class="o_remove_address o_rp_icon_btn" t-att-data-partner-id="contact.id"
+                   title="Remove this address" aria-label="Remove this address">
+                    <i class="oi" data-icon="delete"/>
+                </a>
+            </div>
+        </article>
+    </template>
+
+    <!-- /my/addresses -->
+    <template id="portal_tenant_addresses" name="Tenant Addresses">
+        <t t-call="rent_management.tenant_shell" page_title.translate="Addresses"
+           page_subtitle.translate="Where we can reach you, and the name and address printed on your invoices.">
+            <section class="o_portal_addresses o_rp_addresses">
+                <!-- Main address -->
+                <article class="o_rp_main_address">
+                    <div class="o_rp_main_address_art" aria-hidden="true">
+                        <span class="o_rp_main_address_pin"><i class="oi" data-icon="location_on"/></span>
+                    </div>
+                    <div class="o_rp_main_address_body min-w-0">
+                        <span class="o_rp_label">Main address</span>
+                        <h2 class="o_rp_main_address_name" t-out="partner_sudo.name"/>
+                        <div class="o_rp_address_lines"
+                             t-out="partner_sudo" t-options="{'widget': 'contact', 'fields': ['address'], 'no_marker': True, 'no_tag_br': True}"/>
+                        <ul class="o_rp_inline_facts">
+                            <li t-if="partner_sudo.phone"><i class="oi" data-icon="phone"/> <t t-out="partner_sudo.phone"/></li>
+                            <li t-if="partner_sudo.email"><i class="oi" data-icon="mail"/> <t t-out="partner_sudo.email"/></li>
+                            <li t-if="partner_sudo.vat"><i class="oi" data-icon="badge"/> <t t-out="partner_sudo.vat"/></li>
+                        </ul>
+                    </div>
+                    <a href="/my/account?redirect=/my/addresses" class="o_rp_primary_btn o_rp_main_address_edit">
+                        <i class="oi" data-icon="edit"/> Edit
+                    </a>
+                </article>
+
+                <!-- Delivery addresses -->
+                <t t-set="address_type" t-valuef="delivery"/>
+                <t t-set="new_address_url"
+                   t-valuef="{{address_url}}?address_type={{address_type}}&amp;use_delivery_as_billing={{use_delivery_as_billing}}"/>
+                <section class="o_rp_card">
+                    <div class="o_rp_card_head">
+                        <h2 class="o_rp_card_heading"><i class="oi" data-icon="local_shipping"/> Delivery addresses
+                            <small>Where letters and parcels can reach you</small></h2>
+                    </div>
+                    <div class="o_rp_address_grid">
+                        <t t-foreach="delivery_addresses - partner_sudo" t-as="contact">
+                            <t t-call="rent_management.tenant_address_card"/>
+                        </t>
+                        <a t-att-href="new_address_url" data-address-type="delivery"
+                           class="o_address_card_add_new o_rp_address_add" role="button">
+                            <span class="o_rp_address_add_icon"><i class="oi" data-icon="add"/></span>
+                            Add a delivery address
+                        </a>
+                    </div>
+                </section>
+
+                <!-- Billing addresses -->
+                <t t-set="address_type" t-valuef="billing"/>
+                <t t-set="new_address_url" t-valuef="{{address_url}}?address_type={{address_type}}"/>
+                <section class="o_rp_card">
+                    <div class="o_rp_card_head">
+                        <h2 class="o_rp_card_heading"><i class="oi" data-icon="receipt_long"/> Billing addresses
+                            <small>Printed on your invoices</small></h2>
+                        <label class="o_rp_switch" for="use_delivery_as_billing">
+                            <input type="checkbox" id="use_delivery_as_billing" class="form-check-input"
+                                   role="switch" t-att-checked="use_delivery_as_billing"/>
+                            <span>Same as delivery address</span>
+                        </label>
+                    </div>
+                    <div id="billing_container" t-attf-class="o_rp_address_grid {{ 'd-none' if use_delivery_as_billing else '' }}">
+                        <t t-foreach="billing_addresses - partner_sudo" t-as="contact">
+                            <t t-call="rent_management.tenant_address_card"/>
+                        </t>
+                        <a t-att-href="new_address_url" data-address-type="billing" role="button"
+                           t-attf-class="o_address_card_add_new o_add_billing_address_btn o_rp_address_add {{ 'd-none' if use_delivery_as_billing else '' }}">
+                            <span class="o_rp_address_add_icon"><i class="oi" data-icon="add"/></span>
+                            Add a billing address
+                        </a>
+                    </div>
+                    <p class="o_rp_hint">
+                        <i class="oi" data-icon="info"/>
+                        Without a separate billing address, invoices use your main address.
+                    </p>
+                </section>
+            </section>
+        </t>
+    </template>
+
+    <!-- /my/address: create or edit one address -->
+    <template id="portal_tenant_address_form" name="Tenant Address Form">
+        <t t-set="is_billing" t-value="address_type == 'billing'"/>
+        <t t-call="rent_management.tenant_shell"
+           page_title="(partner_sudo and 'Edit address' or 'New address')"
+           page_subtitle="is_billing and 'This address is printed on your invoices.' or 'Where letters and parcels can reach you.'">
+            <a href="/my/addresses" class="o_rp_back"><i class="oi" data-icon="arrow_back"/> All addresses</a>
+            <div class="o_customer_address_fill o_rp_address_form">
+                <div id="errors"/> <!-- for js -->
+                <form action="/my/address/submit" method="post" name="address_form"
+                      class="address_autoformat o_rp_report_form"
+                      t-att-data-company-country-code="res_company.country_id.code"
+                      t-att-data-default-required-fields="','.join(required_fields)"
+                      t-att-data-submit-url="'/my/address/submit'">
+                    <t t-call="rent_management.tenant_address_fields_card"
+                       card_icon="is_billing and 'receipt_long' or 'local_shipping'"
+                       card_title="is_billing and 'Billing address' or 'Delivery address'"
+                       card_caption="'Fields marked with * are required.'"/>
+                    <t t-call="rent_management.tenant_form_bar" discard_url="discard_url or '/my/addresses'"
+                       save_label.translate="Save address"/>
+                </form>
+            </div>
+        </t>
+    </template>
+
+    <!-- One password input with its show/hide button (web's show_password interaction). -->
+    <template id="tenant_password_input" name="Tenant Password Input">
+        <div class="o_rp_pw_field o_caps_lock_warning">
+            <label t-att-for="input_id" t-out="label"/>
+            <div class="input-group">
+                <span class="o_rp_pw_icon" aria-hidden="true"><i class="oi" t-att-data-icon="icon"/></span>
+                <input type="password" t-att-id="input_id" t-att-name="input_name" required="required"
+                       t-att-autocomplete="autocomplete" t-att-minlength="minlength"
+                       t-attf-class="form-control {{ 'is-invalid' if get_error(errors, 'password.' + input_name) else '' }}"/>
+                <button type="button" class="btn o_show_password" title="Show password" aria-label="Show password">
+                    <i class="oi" data-icon="visibility"/>
+                </button>
+                <div class="invalid-feedback" t-out="get_error(errors, 'password.' + input_name)"/>
+            </div>
+            <t t-out="0"/>
+        </div>
+    </template>
+
+    <!-- /my/security -->
+    <template id="portal_tenant_security" name="Tenant Sign-in and Security">
+        <t t-set="sec" t-value="rent_security"/>
+        <t t-call="rent_management.tenant_shell" page_title.translate="Sign-in and security"
+           page_subtitle.translate="Protect your tenant account: password, two-factor authentication and devices.">
+            <div class="o_portal_security_body o_rp_security">
+                <div t-if="get_error(errors) and not get_error(errors, 'password') and not get_error(errors, 'deactivate')"
+                     class="o_rp_banner o_rp_banner_danger" role="alert">
+                    <i class="oi" data-icon="error"/> <span t-out="errors"/>
+                </div>
+
+                <!-- Overview -->
+                <section t-attf-class="o_rp_sec_hero o_rp_sec_{{ sec['level'] }}">
+                    <div class="o_rp_sec_shield" aria-hidden="true">
+                        <i class="oi" t-att-data-icon="sec['level'] == 'basic' and 'warning' or 'security'"/>
+                    </div>
+                    <div class="o_rp_sec_summary min-w-0">
+                        <span class="o_rp_label">Account protection</span>
+                        <h2 class="o_rp_sec_level">
+                            <t t-if="sec['level'] == 'strong'">Strong</t>
+                            <t t-elif="sec['level'] == 'good'">Good</t>
+                            <t t-else="">Basic</t>
+                        </h2>
+                        <p class="o_rp_muted_text mb-0">
+                            <t t-if="sec['level'] == 'strong'">Every protection is on. Nice work.</t>
+                            <t t-elif="sec['has_totp'] and not sec['totp_on']">Turn on two-factor authentication to protect your account even if your password leaks.</t>
+                            <t t-else="">Add a passkey to sign in faster and more safely.</t>
+                        </p>
+                        <div class="o_rp_meter o_rp_meter_lg mt-3" role="progressbar" aria-label="Account protection"
+                             t-att-aria-valuenow="sec['pct']" aria-valuemin="0" aria-valuemax="100">
+                            <span class="o_rp_meter_fill" t-attf-style="width: {{ sec['pct'] }}%"/>
+                        </div>
+                    </div>
+                    <ul class="o_rp_sec_facts">
+                        <li>
+                            <span class="o_rp_sec_fact_icon o_rp_on"><i class="oi" data-icon="lock"/></span>
+                            <span><strong>Password</strong><small>Set</small></span>
+                        </li>
+                        <li t-if="sec['has_totp']">
+                            <span t-attf-class="o_rp_sec_fact_icon {{ sec['totp_on'] and 'o_rp_on' or 'o_rp_off' }}"><i class="oi" data-icon="smartphone"/></span>
+                            <span><strong>Two-factor</strong><small t-out="sec['totp_on'] and 'On' or 'Off'"/></span>
+                        </li>
+                        <li t-if="sec['has_passkeys']">
+                            <span t-attf-class="o_rp_sec_fact_icon {{ sec['passkeys'] and 'o_rp_on' or 'o_rp_off' }}"><i class="oi" data-icon="key"/></span>
+                            <span><strong>Passkeys</strong><small t-out="len(sec['passkeys']) or 'None'"/></span>
+                        </li>
+                    </ul>
+                </section>
+
+                <div class="o_rp_report">
+                    <div class="o_rp_report_form">
+                        <!-- Password -->
+                        <section name="portal_change_password" class="o_rp_card">
+                            <h2 class="o_rp_step_title">
+                                <span class="o_rp_step_num"><i class="oi" data-icon="lock"/></span>
+                                <span class="d-flex flex-column">Change password
+                                    <small class="o_rp_step_caption">Use at least 8 characters, mixing letters, numbers and symbols.</small></span>
+                            </h2>
+                            <div t-if="success and success.get('password')" class="o_rp_banner o_rp_banner_good" role="status">
+                                <i class="oi" data-icon="check_circle"/> Your password was updated.
+                            </div>
+                            <div t-if="get_error(errors, 'password') and isinstance(errors['password'], str)" class="o_rp_banner o_rp_banner_danger" role="alert">
+                                <i class="oi" data-icon="error"/> <span t-out="errors['password']"/>
+                            </div>
+                            <form action="/my/security" method="post" class="oe_reset_password_form o_rp_password_form">
+                                <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+                                <input type="hidden" name="op" value="password"/>
+                                <t t-call="rent_management.tenant_password_input" input_id="'current'" input_name="'old'"
+                                   label.translate="Current password" icon="'lock'" autocomplete="'current-password'"/>
+                                <div class="o_rp_pw_grid">
+                                    <t t-call="rent_management.tenant_password_input" input_id="'new'" input_name="'new1'"
+                                       label.translate="New password" icon="'lock_open'" autocomplete="'new-password'"
+                                       minlength="password_minimum_length">
+                                        <div class="o_rp_pw_strength" aria-live="polite">
+                                            <span class="o_rp_pw_bars"><i/><i/><i/><i/></span>
+                                            <small class="o_rp_pw_strength_label">Enter a new password</small>
+                                        </div>
+                                    </t>
+                                    <t t-call="rent_management.tenant_password_input" input_id="'new2'" input_name="'new2'"
+                                       label.translate="Confirm new password" icon="'lock_open'" autocomplete="'new-password'">
+                                        <small class="o_rp_pw_match" aria-live="polite"/>
+                                    </t>
+                                </div>
+                                <div class="o_rp_form_actions">
+                                    <button type="submit" class="o_rp_primary_btn"><i class="oi" data-icon="check"/> Update password</button>
+                                </div>
+                            </form>
+                        </section>
+
+                        <!-- Two-factor authentication (auth_totp_portal) -->
+                        <t t-if="sec['has_totp']">
+                            <!-- Data island read by the 2FA wizard; the next element holds the device rows. -->
+                            <div class="d-none" id="totp_wizard_view">
+                                <t t-out="env.ref('auth_totp.view_totp_wizard').sudo().get_combined_arch()"/>
+                            </div>
+                            <section class="o_rp_card">
+                                <div class="o_rp_card_head">
+                                    <h2 class="o_rp_step_title mb-0">
+                                        <span class="o_rp_step_num"><i class="oi" data-icon="smartphone"/></span>
+                                        <span class="d-flex flex-column">Two-factor authentication
+                                            <small class="o_rp_step_caption">A code from an authenticator app is asked at each sign-in.</small></span>
+                                    </h2>
+                                    <span t-if="sec['totp_on']" class="o_rp_status_pill o_rp_status_good"><i class="oi" data-icon="check_circle"/> On</span>
+                                    <span t-else="" class="o_rp_status_pill o_rp_status_warning"><i class="oi" data-icon="warning"/> Off</span>
+                                </div>
+                                <t t-if="not sec['totp_on']">
+                                    <div class="o_rp_totp_promo">
+                                        <ol class="o_rp_next_steps">
+                                            <li>Install an authenticator app<span>Google Authenticator, Microsoft Authenticator, Authy…</span></li>
+                                            <li>Scan the QR code we show you<span>Your app then shows a new 6-digit code every 30 seconds.</span></li>
+                                            <li>Enter the code to confirm<span>From now on, sign-ins ask for that code.</span></li>
+                                        </ol>
+                                        <button type="button" class="o_rp_primary_btn" id="auth_totp_portal_enable">
+                                            <i class="oi" data-icon="security"/> Enable two-factor authentication
+                                        </button>
+                                    </div>
+                                </t>
+                                <t t-else="">
+                                    <h3 class="o_rp_sub_title">Trusted devices <small>skip the code on these devices</small></h3>
+                                    <ul t-if="sec['trusted_devices']" class="o_rp_rows">
+                                        <li t-foreach="sec['trusted_devices']" t-as="td">
+                                            <span class="o_rp_row_icon"><i class="oi" data-icon="laptop"/></span>
+                                            <span class="o_rp_row_main"><strong t-field="td.name"/>
+                                                <small>Added <t t-out="td.create_date" t-options="{'widget': 'date'}"/></small></span>
+                                            <i class="oi text-danger o_rp_icon_btn" data-icon="delete" role="button" type="button"
+                                               t-att-id="td.id" title="Revoke this device" aria-label="Revoke this device"/>
+                                        </li>
+                                    </ul>
+                                    <p t-else="" class="o_rp_muted_text">No trusted device.</p>
+                                    <div class="o_rp_form_actions">
+                                        <button type="button" class="o_rp_outline_btn o_rp_btn_auto" id="auth_totp_portal_disable">Disable</button>
+                                        <button t-if="sec['trusted_devices']" type="button" class="o_rp_primary_btn" id="auth_totp_portal_revoke_all_devices">
+                                            Revoke all devices
+                                        </button>
+                                    </div>
+                                </t>
+                            </section>
+                        </t>
+
+                        <!-- Passkeys (auth_passkey_portal) -->
+                        <section t-if="sec['has_passkeys']" name="portal_passkey_management" class="o_rp_card">
+                            <div class="o_rp_card_head">
+                                <h2 class="o_rp_step_title mb-0">
+                                    <span class="o_rp_step_num"><i class="oi" data-icon="key"/></span>
+                                    <span class="d-flex flex-column">Passkeys
+                                        <small class="o_rp_step_caption">Sign in with your fingerprint, face or screen lock instead of a password.</small></span>
+                                </h2>
+                                <button type="button" class="o_rp_pill_btn" id="portal_passkey_add"><i class="oi" data-icon="add"/> Add passkey</button>
+                            </div>
+                            <ul t-if="sec['passkeys']" class="o_rp_rows">
+                                <li t-foreach="sec['passkeys']" t-as="key" class="o_passkey_portal_entry" t-att-id="key.id">
+                                    <span class="o_rp_row_icon"><i class="oi" data-icon="key"/></span>
+                                    <span class="o_rp_row_main"><strong class="o_passkey_name" t-field="key.name"/>
+                                        <small>Created <t t-out="key.create_date" t-options="{'widget': 'date'}"/> ·
+                                            last used <t t-out="key.write_date" t-options="{'widget': 'date'}"/></small></span>
+                                    <button type="button" class="o_passkey_portal_rename o_rp_icon_btn o_rp_icon_btn_muted" title="Rename" aria-label="Rename">
+                                        <i class="oi" data-icon="edit"/>
+                                    </button>
+                                    <button type="button" class="o_passkey_portal_delete o_rp_icon_btn" title="Delete" aria-label="Delete">
+                                        <i class="oi" data-icon="delete"/>
+                                    </button>
+                                </li>
+                            </ul>
+                            <div t-else="" class="o_rp_empty_inline">
+                                <i class="oi" data-icon="key"/> No passkey yet. Add one from this device in a few seconds.
+                            </div>
+                        </section>
+
+                        <!-- API keys: developer mode only, as in the standard page -->
+                        <section t-if="debug and allow_api_keys" class="o_rp_card">
+                            <div class="o_rp_card_head">
+                                <h2 class="o_rp_card_heading"><i class="oi" data-icon="code"/> Developer API keys</h2>
+                                <button type="button" class="o_rp_pill_btn o_portal_new_api_key"><i class="oi" data-icon="add"/> New API key</button>
+                            </div>
+                            <ul class="o_rp_rows">
+                                <li t-foreach="env.user.api_key_ids" t-as="key">
+                                    <span class="o_rp_row_main"><strong t-field="key.name"/><small><span t-field="key.scope"/> · <span t-field="key.create_date"/></small></span>
+                                    <i class="oi text-danger o_rp_icon_btn o_portal_remove_api_key" data-icon="delete" role="button" t-att-id="key.id"/>
+                                </li>
+                            </ul>
+                        </section>
+                    </div>
+
+                    <aside class="o_rp_report_side">
+                        <!-- Account -->
+                        <section class="o_rp_card">
+                            <h2 class="o_rp_card_heading mb-3"><i class="oi" data-icon="account_circle"/> Your sign-in</h2>
+                            <dl class="o_rp_def_list">
+                                <div><dt>Login</dt><dd t-out="sec['user'].login"/></div>
+                                <div t-if="sec['user'].login_date"><dt>Last sign-in</dt>
+                                    <dd><t t-out="sec['user'].login_date" t-options="{'widget': 'datetime', 'format': 'medium'}"/></dd></div>
+                            </dl>
+                        </section>
+
+                        <!-- Sessions -->
+                        <section name="portal_revoke_all_devices_popup" class="o_rp_card">
+                            <h2 class="o_rp_card_heading mb-2"><i class="oi" data-icon="laptop"/> Signed-in devices</h2>
+                            <p class="o_rp_muted_text">Lost a phone or used a shared computer? Sign out everywhere at once.</p>
+                            <button type="button" class="o_rp_outline_btn" id="portal_revoke_all_sessions_popup">
+                                <i class="oi" data-icon="logout"/> Log out from all devices
+                            </button>
+                        </section>
+
+                        <!-- Tips -->
+                        <section class="o_rp_card o_rp_tip_card">
+                            <h2 class="o_rp_card_heading mb-2"><i class="oi" data-icon="lightbulb"/> Stay safe</h2>
+                            <ul class="o_rp_tips">
+                                <li>Never share your password or sign-in codes, even with your property manager.</li>
+                                <li>We will never ask for your password by email or phone.</li>
+                                <li>Use a different password for each website.</li>
+                            </ul>
+                        </section>
+
+                        <!-- Danger zone -->
+                        <section name="portal_deactivate_account" groups="base.group_portal" class="o_rp_card o_rp_danger_zone">
+                            <t t-set="deactivate_error" t-value="get_error(errors, 'deactivate')"/>
+                            <h2 class="o_rp_card_heading mb-2"><i class="oi" data-icon="warning"/> Delete account</h2>
+                            <p class="o_rp_muted_text">Permanently disables your portal access. Your lease and invoices stay with your landlord.</p>
+                            <button type="button" class="o_rp_danger_btn" data-bs-toggle="modal" data-bs-target="#portal_deactivate_account_modal">
+                                Delete my account
+                            </button>
+                            <div t-attf-class="modal #{'show d-block' if open_deactivate_modal else ''}"
+                                 id="portal_deactivate_account_modal" tabindex="-1" role="dialog">
+                                <div class="modal-dialog modal-dialog-centered" role="document">
+                                    <div class="modal-content o_rp_modal">
+                                        <div class="modal-header">
+                                            <h5 class="modal-title"><i class="oi" data-icon="warning"/> Delete your account?</h5>
+                                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"/>
+                                        </div>
+                                        <form action="/my/deactivate_account" method="post" class="modal-body" id="portal_deactivate_account_form">
+                                            <div t-if="get_error(errors, 'deactivate.other')" class="alert alert-danger" t-out="get_error(errors, 'deactivate.other')"/>
+                                            <p class="o_rp_muted_text">
+                                                You won't be able to sign in any more. <strong>This cannot be undone.</strong>
+                                            </p>
+                                            <label class="o_rp_modal_label" for="o_rp_deactivate_password">1. Enter your password</label>
+                                            <input id="o_rp_deactivate_password" name="password" type="password" required="1" placeholder="Password"
+                                                   t-attf-class="form-control #{'is-invalid' if deactivate_error == 'password' else ''}"/>
+                                            <div t-if="deactivate_error == 'password'" class="invalid-feedback">Wrong password.</div>
+                                            <label class="o_rp_modal_label" for="o_rp_deactivate_login">
+                                                2. Type your login (<t t-out="env.user.login"/>) to confirm
+                                            </label>
+                                            <input id="o_rp_deactivate_login" name="validation" type="text" required="1"
+                                                   t-attf-class="form-control #{'is-invalid' if deactivate_error == 'validation' else ''}"/>
+                                            <div t-if="deactivate_error == 'validation'" class="invalid-feedback">
+                                                You should enter "<t t-out="env.user.login"/>" to validate your action.
+                                            </div>
+                                            <div class="form-check mt-3">
+                                                <input type="checkbox" class="form-check-input" name="request_blacklist" id="request_blacklist" checked="1"/>
+                                                <label for="request_blacklist" class="form-check-label">
+                                                    Put my email and phone in a block list so I'm never contacted again
+                                                </label>
+                                            </div>
+                                            <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+                                        </form>
+                                        <div class="modal-footer">
+                                            <button type="button" class="o_rp_outline_btn o_rp_btn_auto" data-bs-dismiss="modal">Cancel</button>
+                                            <input type="submit" class="o_rp_danger_btn o_rp_btn_auto" form="portal_deactivate_account_form" value="Delete account"/>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </section>
+                    </aside>
+                </div>
+            </div>
+        </t>
+    </template>
+</odoo>

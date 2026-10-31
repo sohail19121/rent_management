@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Sign-in page: branded panel next to the standard form. Only adds elements around the core
+         form so auth_signup, auth_passkey, auth_totp and website keep working unchanged. -->
+    <template id="rent_login" inherit_id="web.login" name="Rent Management Login" priority="40">
+        <xpath expr="//h1[hasclass('visually-hidden')]" position="after">
+            <aside class="o_rl_aside">
+                <div class="o_rl_brand">
+                    <span class="o_rl_brand_mark"><i class="oi" data-icon="home" role="presentation"/></span>
+                    <span class="o_rl_brand_name" t-out="res_company.name"/>
+                </div>
+                <div class="o_rl_pitch">
+                    <h2 class="o_rl_pitch_title">Everything about your home, in one place.</h2>
+                    <p class="o_rl_pitch_text">Pay rent, keep your lease documents at hand and follow your maintenance requests, anytime.</p>
+                </div>
+                <ul class="o_rl_features">
+                    <li>
+                        <span class="o_rl_feature_icon"><i class="oi" data-icon="payments" role="presentation"/></span>
+                        <span>
+                            <strong>Pay rent online</strong>
+                            <small>Settle invoices and download receipts in a click.</small>
+                        </span>
+                    </li>
+                    <li>
+                        <span class="o_rl_feature_icon"><i class="oi" data-icon="description" role="presentation"/></span>
+                        <span>
+                            <strong>Lease and statements</strong>
+                            <small>Your agreement and account history, always available.</small>
+                        </span>
+                    </li>
+                    <li>
+                        <span class="o_rl_feature_icon"><i class="oi" data-icon="build" role="presentation"/></span>
+                        <span>
+                            <strong>Maintenance requests</strong>
+                            <small>Report an issue and track it until it is fixed.</small>
+                        </span>
+                    </li>
+                </ul>
+            </aside>
+            <div class="o_rl_head">
+                <h2 class="o_rl_title">Welcome back</h2>
+                <p class="o_rl_subtitle">Sign in to your account to continue.</p>
+            </div>
+        </xpath>
+        <xpath expr="//form[@data-captcha='login']" position="after">
+            <p class="o_rl_secure">
+                <i class="oi" data-icon="lock" role="presentation"/>
+                <span>Secure sign-in. Your password is never shared.</span>
+            </p>
+        </xpath>
+    </template>
+</odoo>

@@ -1,0 +1,335 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!--
+        Invoice page for tenants, rendered with the values of the standard invoice page
+        (account / account_payment): the payment modal and its scripts are the standard ones.
+    -->
+    <template id="portal_tenant_invoice" name="Tenant Invoice">
+        <t t-call="rent_management.tenant_shell" page_title="invoice.name"
+           page_subtitle="invoice.rent_lease_id and '%s · %s' % (invoice.rent_lease_id.unit_id.display_name, invoice.rent_lease_id.name) or invoice.company_id.name">
+            <t t-set="money" t-value="{'widget': 'monetary', 'display_currency': invoice.currency_id}"/>
+            <t t-set="is_refund" t-value="invoice.move_type == 'out_refund'"/>
+            <t t-set="is_paid" t-value="invoice.currency_id.is_zero(invoice.amount_residual)"/>
+            <t t-set="days" t-value="invoice.invoice_date_due and (invoice.invoice_date_due - today).days or 0"/>
+            <t t-set="is_overdue" t-value="not is_refund and not is_paid and days &lt; 0"/>
+            <t t-set="can_pay" t-value="rent_online_payment and invoice._has_to_be_paid()"/>
+
+            <a href="/my/rent-invoices" class="o_rp_back"><i class="oi" data-icon="arrow_back"/> Invoices</a>
+
+            <t t-if="error or warning" t-call="account.portal_invoice_error"/>
+            <t t-if="success and (not error and not warning)" t-call="account.portal_invoice_success"/>
+
+            <!-- Payment transaction status (account_payment) -->
+            <t t-if="rent_online_payment">
+                <t t-set="tx" t-value="invoice.get_portal_last_transaction()"/>
+                <div t-if="tx and invoice.amount_total and not success and not error and (invoice.payment_state != 'not_paid' or tx.state in ('pending', 'authorized'))"
+                     class="o_account_payment_tx_status o_rp_card" t-att-data-invoice-id="invoice.id">
+                    <t t-call="payment.state_header"/>
+                </div>
+            </t>
+
+            <!-- Hero: what to pay -->
+            <section t-attf-class="o_rp_card o_rp_invoice_hero {{ is_overdue and 'o_rp_invoice_hero_overdue' or '' }} {{ is_paid and 'o_rp_invoice_hero_paid' or '' }}">
+                <div class="o_rp_invoice_hero_main">
+                    <div class="o_rp_invoice_hero_tags">
+                        <span class="o_rp_tag">
+                            <t t-if="is_refund">Credit note</t>
+                            <t t-elif="invoice.rent_invoice_type"><span t-field="invoice.rent_invoice_type"/></t>
+                            <t t-else="">Invoice</t>
+                        </span>
+                        <t t-if="is_refund"/>
+                        <span t-elif="is_paid" class="o_rp_status_pill o_rp_status_good"><i class="oi" data-icon="check_circle"/> Paid</span>
+                        <span t-elif="invoice.payment_state == 'in_payment'" class="o_rp_status_pill o_rp_status_info"><i class="oi" data-icon="hourglass_bottom"/> Processing payment</span>
+                        <span t-elif="is_overdue" class="o_rp_status_pill o_rp_status_danger"><i class="oi" data-icon="warning"/> Overdue</span>
+                        <span t-elif="invoice.payment_state == 'partial'" class="o_rp_status_pill o_rp_status_warning"><i class="oi" data-icon="hourglass_bottom"/> Partly paid</span>
+                        <span t-else="" class="o_rp_status_pill o_rp_status_warning"><i class="oi" data-icon="schedule"/> To pay</span>
+                    </div>
+                    <div class="o_rp_label">
+                        <t t-if="is_refund">Credit amount</t>
+                        <t t-elif="is_paid">Paid in full</t>
+                        <t t-else="">Amount due</t>
+                    </div>
+                    <div class="o_rp_invoice_hero_amount" t-out="invoice.amount_total if (is_paid or is_refund) else invoice.amount_residual" t-options="money"/>
+                    <div class="o_rp_invoice_hero_due" t-if="invoice.invoice_date_due and not is_refund">
+                        <i class="oi" data-icon="calendar_today"/>
+                        Due <strong t-field="invoice.invoice_date_due"/>
+                        <t t-if="not is_paid">
+                            <span t-if="is_overdue" class="o_rp_text_danger fw-bold">· <t t-out="-days"/> days late</span>
+                            <span t-elif="days == 0" class="fw-bold">· today</span>
+                            <span t-else="">· in <t t-out="days"/> days</span>
+                        </t>
+                    </div>
+                    <div t-if="not is_refund and not is_paid and invoice.amount_residual != invoice.amount_total" class="o_rp_invoice_progress">
+                        <span class="o_rp_meter o_rp_meter_lg" role="meter" aria-label="Paid so far"
+                              t-att-aria-valuenow="round(100 * (invoice.amount_total - invoice.amount_residual) / invoice.amount_total)" aria-valuemin="0" aria-valuemax="100">
+                            <span class="o_rp_meter_fill" t-attf-style="width: {{ round(100 * (invoice.amount_total - invoice.amount_residual) / invoice.amount_total) }}%"/>
+                        </span>
+                        <small><t t-out="invoice.amount_total - invoice.amount_residual" t-options="money"/> paid of <t t-out="invoice.amount_total" t-options="money"/></small>
+                    </div>
+                </div>
+                <div class="o_rp_invoice_hero_actions">
+                    <a t-if="can_pay" href="#" class="o_rp_primary_btn o_rp_pay_big" data-bs-toggle="modal" data-bs-target="#pay_with">
+                        <i class="oi" data-icon="credit_card"/> Pay now
+                    </a>
+                    <a t-attf-href="/my/invoices/{{ invoice.id }}/modern-pdf?download=1&amp;access_token={{ invoice.access_token or '' }}" class="o_rp_outline_btn">
+                        <i class="oi" data-icon="download"/> Download PDF
+                    </a>
+                    <a t-attf-href="/my/invoices/{{ invoice.id }}/modern-pdf?access_token={{ invoice.access_token or '' }}" target="_blank" class="o_rp_outline_btn">
+                        <i class="oi" data-icon="print"/> Print
+                    </a>
+                </div>
+            </section>
+
+            <!-- Standard payment modal (account_payment): kept as is so its scripts work -->
+            <t t-if="rent_online_payment">
+                <div t-if="can_pay" id="portal_pay" t-att-data-payment="payment">
+                    <t t-call="account_payment.portal_invoice_payment"/>
+                </div>
+                <div t-else="" id="portal_pay" t-att-data-payment="payment">
+                    <t t-call="account_payment.portal_invoice_payment_paid"/>
+                </div>
+            </t>
+
+            <div class="o_rp_invoice_layout">
+                <!-- The invoice itself -->
+                <article class="o_rp_card o_rp_paper">
+                    <header class="o_rp_paper_head">
+                        <div class="o_rp_paper_company">
+                            <img t-if="invoice.company_id.logo" t-att-src="image_data_uri(invoice.company_id.logo)" alt="Company logo"/>
+                            <strong t-out="invoice.company_id.name"/>
+                            <span t-out="', '.join(filter(None, [invoice.company_id.street, invoice.company_id.city, invoice.company_id.zip]))"/>
+                            <span t-if="invoice.company_id.vat">Tax ID: <t t-out="invoice.company_id.vat"/></span>
+                        </div>
+                        <div class="o_rp_paper_title">
+                            <span class="o_rp_paper_kind"><t t-if="is_refund">Credit note</t><t t-else="">Invoice</t></span>
+                            <strong t-out="invoice.name"/>
+                        </div>
+                    </header>
+
+                    <div class="o_rp_paper_info">
+                        <div>
+                            <small>Billed to</small>
+                            <strong t-out="invoice.partner_id.name"/>
+                            <span t-out="', '.join(filter(None, [invoice.partner_id.street, invoice.partner_id.city, invoice.partner_id.zip]))"/>
+                        </div>
+                        <div t-if="invoice.rent_lease_id">
+                            <small>Property</small>
+                            <strong t-out="invoice.rent_lease_id.unit_id.name"/>
+                            <span t-out="invoice.rent_lease_id.property_id.name"/>
+                        </div>
+                        <div><small>Issued</small><strong t-field="invoice.invoice_date"/></div>
+                        <div t-if="invoice.invoice_date_due"><small>Due</small><strong t-field="invoice.invoice_date_due"/></div>
+                        <div t-if="invoice.invoice_origin"><small>Source</small><strong t-out="invoice.invoice_origin"/></div>
+                    </div>
+
+                    <div class="table-responsive">
+                        <table class="o_rp_lines">
+                            <thead>
+                                <tr><th>Description</th><th class="text-end">Qty</th><th class="text-end">Unit price</th><th class="text-end">Amount</th></tr>
+                            </thead>
+                            <tbody>
+                                <t t-foreach="invoice.invoice_line_ids" t-as="line">
+                                    <tr t-if="line.display_type == 'line_section'" class="o_rp_lines_section"><td colspan="4" t-out="line.name"/></tr>
+                                    <tr t-elif="line.display_type == 'line_note'" class="o_rp_lines_note"><td colspan="4" t-out="line.name"/></tr>
+                                    <tr t-elif="line.display_type == 'product'">
+                                        <td>
+                                            <strong t-out="line.product_id.name or line.name"/>
+                                            <small t-if="line.product_id and line.name != line.product_id.name" t-out="line.name"/>
+                                        </td>
+                                        <td class="text-end" t-out="'%g' % line.quantity"/>
+                                        <td class="text-end" t-out="line.price_unit" t-options="money"/>
+                                        <td class="text-end fw-bold" t-out="line.price_subtotal" t-options="money"/>
+                                    </tr>
+                                </t>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="o_rp_totals">
+                        <div t-if="invoice.amount_tax"><span>Subtotal</span><span t-out="invoice.amount_untaxed" t-options="money"/></div>
+                        <div t-if="invoice.amount_tax"><span>Taxes</span><span t-out="invoice.amount_tax" t-options="money"/></div>
+                        <div class="o_rp_totals_total"><span>Total</span><span t-out="invoice.amount_total" t-options="money"/></div>
+                        <div t-foreach="invoice_payments" t-as="payment_line" class="o_rp_totals_paid">
+                            <span>Paid on <t t-out="payment_line['date']" t-options="{'widget': 'date'}"/></span>
+                            <span>- <t t-out="payment_line['amount']" t-options="money"/></span>
+                        </div>
+                        <div t-if="not is_refund" class="o_rp_totals_due"><span>Amount due</span><span t-out="invoice.amount_residual" t-options="money"/></div>
+                    </div>
+
+                    <footer class="o_rp_paper_foot">
+                        <div t-if="invoice.payment_reference and not is_refund">
+                            <small>Payment reference</small><strong t-out="invoice.payment_reference"/>
+                        </div>
+                        <div t-if="invoice.narration" class="o_rp_paper_notes" t-field="invoice.narration"/>
+                    </footer>
+                </article>
+
+                <aside class="o_rp_invoice_side">
+                    <!-- Payments -->
+                    <section class="o_rp_card o_rp_detail">
+                        <div class="o_rp_card_head"><h3 class="o_rp_card_heading"><i class="oi" data-icon="payments"/> Payments</h3></div>
+                        <ol t-if="invoice_payments" class="o_rp_timeline">
+                            <li t-foreach="invoice_payments" t-as="payment_line">
+                                <span class="o_rp_timeline_dot"><i class="oi" data-icon="check"/></span>
+                                <div>
+                                    <strong t-out="payment_line['amount']" t-options="money"/>
+                                    <small><t t-out="payment_line['date']" t-options="{'widget': 'date'}"/> · <t t-out="payment_line.get('journal_name') or ''"/></small>
+                                </div>
+                            </li>
+                        </ol>
+                        <div t-else="" class="o_rp_empty">No payment yet</div>
+                        <a t-if="can_pay" href="#" class="o_rp_primary_btn w-100 mt-3" data-bs-toggle="modal" data-bs-target="#pay_with">
+                            <i class="oi" data-icon="credit_card"/> Pay <t t-out="invoice.amount_residual" t-options="money"/>
+                        </a>
+                    </section>
+
+                    <!-- Help -->
+                    <section t-if="manager" class="o_rp_card o_rp_detail">
+                        <div class="o_rp_card_head"><h3 class="o_rp_card_heading"><i class="oi" data-icon="support"/> Question about this invoice?</h3></div>
+                        <div class="d-flex align-items-center gap-3">
+                            <span class="o_rp_initials" t-out="''.join(part[0] for part in (manager.name or '?').split()[:2]).upper()"/>
+                            <div><strong t-out="manager.name"/><div class="text-muted small">Your property manager</div></div>
+                        </div>
+                        <div class="d-flex gap-2 mt-3">
+                            <a t-if="manager.phone" t-attf-href="tel:{{ manager.phone }}" class="o_rp_outline_btn flex-fill"><i class="oi" data-icon="phone"/> Call</a>
+                            <a href="#invoice_messages" class="o_rp_outline_btn flex-fill"><i class="oi" data-icon="forum"/> Message</a>
+                        </div>
+                    </section>
+                </aside>
+            </div>
+
+            <section id="invoice_messages" class="o_rp_card o_rp_detail">
+                <div class="o_rp_card_head"><h3 class="o_rp_card_heading"><i class="oi" data-icon="forum"/> Messages</h3></div>
+                <t t-call="portal.message_thread" hide_header="True"/>
+            </section>
+        </t>
+    </template>
+
+    <!--
+        Overdue invoices of a tenant, paid in one go: values of account_payment's overdue page plus
+        overdue_invoices, overdue_residual, overdue_oldest_days, overdue_bank, rent_can_pay_online.
+    -->
+    <template id="portal_tenant_overdue" name="Tenant Overdue Invoices">
+        <t t-call="rent_management.tenant_shell" page_title.translate="Pay overdue rent"
+           page_subtitle.translate="Settle every late invoice in one payment.">
+            <t t-set="money" t-value="{'widget': 'monetary', 'display_currency': currency}"/>
+            <a href="/my/rent-invoices" class="o_rp_back"><i class="oi" data-icon="arrow_back"/> Invoices</a>
+
+            <!-- Hero -->
+            <section class="o_rp_card o_rp_invoice_hero o_rp_invoice_hero_overdue o_rp_overdue_hero">
+                <div class="o_rp_invoice_hero_main">
+                    <div class="o_rp_invoice_hero_tags">
+                        <span class="o_rp_status_pill o_rp_status_danger"><i class="oi" data-icon="warning"/> Overdue</span>
+                        <span class="o_rp_tag"><t t-out="len(overdue_invoices)"/> <t t-if="len(overdue_invoices) == 1">invoice</t><t t-else="">invoices</t></span>
+                    </div>
+                    <div class="o_rp_label">Overdue balance</div>
+                    <div class="o_rp_invoice_hero_amount" t-out="overdue_residual" t-options="money"/>
+                    <div class="o_rp_invoice_hero_due">
+                        <i class="oi" data-icon="schedule"/>
+                        Oldest invoice <strong class="o_rp_text_danger"><t t-out="overdue_oldest_days"/> days late</strong>
+                    </div>
+                    <a t-if="rent_can_pay_online and not company_mismatch" href="#o_rp_pay_online" class="o_rp_primary_btn o_rp_overdue_pay">
+                        <i class="oi" data-icon="credit_card"/> Pay <t t-out="overdue_residual" t-options="money"/> now
+                    </a>
+                </div>
+                <div class="o_rp_overdue_ref">
+                    <small>Payment reference</small>
+                    <div class="o_rp_copy_field">
+                        <code id="o_rp_overdue_ref" t-out="payment['reference']"/>
+                        <button type="button" class="o_rp_icon_btn o_rp_icon_btn_muted" data-rp-copy="#o_rp_overdue_ref"
+                                title="Copy reference" aria-label="Copy reference">
+                            <i class="oi" data-icon="content_copy"/>
+                        </button>
+                    </div>
+                    <small>Quote it with any bank transfer.</small>
+                </div>
+            </section>
+
+            <div class="o_rp_report">
+                <div class="o_rp_report_form">
+                <!-- Invoices included -->
+                <section class="o_rp_card">
+                    <div class="o_rp_card_head">
+                        <h2 class="o_rp_card_heading"><i class="oi" data-icon="receipt_long"/> Included in this payment</h2>
+                    </div>
+                    <ul class="o_rp_rows">
+                        <li t-foreach="overdue_invoices" t-as="inv">
+                            <t t-set="late" t-value="(today - inv.invoice_date_due).days"/>
+                            <a t-att-href="inv.get_portal_url()" class="o_rp_row_link">
+                                <span class="o_rp_row_icon o_rp_tint_danger">
+                                    <i class="oi" t-att-data-icon="inv.rent_invoice_type == 'electricity' and 'flash_on' or 'home'"/>
+                                </span>
+                                <span class="o_rp_row_main">
+                                    <strong t-out="inv.name"/>
+                                    <small>
+                                        <t t-if="inv.rent_invoice_type"><span t-field="inv.rent_invoice_type"/> · </t>
+                                        Due <t t-out="inv.invoice_date_due" t-options="{'widget': 'date'}"/>
+                                    </small>
+                                </span>
+                                <span class="o_rp_row_end">
+                                    <strong t-out="inv.amount_residual" t-options="money"/>
+                                    <span class="o_rp_status_pill o_rp_status_danger"><t t-out="late"/> days late</span>
+                                </span>
+                            </a>
+                        </li>
+                    </ul>
+                    <div class="o_rp_total_row">
+                        <span>Total to pay</span>
+                        <strong t-out="overdue_residual" t-options="money"/>
+                    </div>
+                </section>
+
+                <!-- Pay online -->
+                <section class="o_rp_card o_rp_pay_card" id="o_rp_pay_online">
+                    <h2 class="o_rp_card_heading mb-3"><i class="oi" data-icon="credit_card"/> Pay online</h2>
+                    <t t-if="company_mismatch">
+                        <t t-call="payment.company_mismatch_warning"/>
+                    </t>
+                    <t t-elif="rent_can_pay_online">
+                        <div class="o_rp_payment_form">
+                            <t t-call="payment.form"/>
+                        </div>
+                    </t>
+                    <t t-else="">
+                        <div class="o_rp_empty_inline o_rp_offline_note">
+                            <i class="oi" data-icon="info"/>
+                            <span>Online payment isn't available yet. Pay by bank transfer or contact your property manager.</span>
+                        </div>
+                    </t>
+                </section>
+                </div>
+
+                <aside class="o_rp_report_side">
+                    <!-- Bank transfer -->
+                    <section t-if="overdue_bank" class="o_rp_card">
+                        <h2 class="o_rp_card_heading mb-3"><i class="oi" data-icon="account_balance"/> Bank transfer</h2>
+                        <dl class="o_rp_def_list">
+                            <div><dt>Account holder</dt><dd t-out="overdue_bank.holder_name or overdue_bank.partner_id.name"/></div>
+                            <div><dt>Account</dt><dd t-out="overdue_bank.account_number"/></div>
+                            <div t-if="overdue_bank.bank_name"><dt>Bank</dt><dd t-out="overdue_bank.bank_name"/></div>
+                            <div t-if="overdue_bank.bank_bic"><dt>BIC / IFSC</dt><dd t-out="overdue_bank.bank_bic"/></div>
+                            <div><dt>Amount</dt><dd t-out="overdue_residual" t-options="money"/></div>
+                            <div><dt>Reference</dt><dd t-out="payment['reference']"/></div>
+                        </dl>
+                    </section>
+
+                    <!-- Property manager -->
+                    <section t-if="manager" class="o_rp_card">
+                        <h2 class="o_rp_card_heading mb-3"><i class="oi" data-icon="support"/> Need more time?</h2>
+                        <div class="o_rp_contact_line mb-3">
+                            <span class="o_rp_initials" t-out="''.join(part[0] for part in (manager.name or '?').split()[:2]).upper()"/>
+                            <span class="d-flex flex-column min-w-0">
+                                <strong t-out="manager.name"/>
+                                <small class="o_rp_muted_text">Your property manager</small>
+                            </span>
+                        </div>
+                        <div class="d-flex gap-2">
+                            <a t-if="manager.phone" t-attf-href="tel:{{ manager.phone }}" class="o_rp_outline_btn flex-fill"><i class="oi" data-icon="phone"/> Call</a>
+                            <a t-if="manager.email" t-attf-href="mailto:{{ manager.email }}?subject={{ payment['reference'] }}" class="o_rp_outline_btn flex-fill"><i class="oi" data-icon="mail"/> Email</a>
+                        </div>
+                    </section>
+                </aside>
+            </div>
+        </t>
+    </template>
+</odoo>

@@ -9,3 +9,4 @@ from . import rent_maintenance_request
 from . import rent_electricity_reading
 from . import account_move
 from . import rent_dashboard
+from . import rent_portal
